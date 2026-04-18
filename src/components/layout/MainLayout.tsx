@@ -1,13 +1,14 @@
 import { Link, Outlet } from 'react-router-dom'
+import './MainLayout.css'
 
 export const MainLayout = () => {
     return (
-        <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <div className='layout'>
 
             {/* Sidebar */}
-            <aside style={{ width: '220px', padding: '20px', background: '#020617' }}>
-                <h2>Basket Stats</h2>
-                <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <aside className='sidebar'>
+                <h2 className='sedebar-title'>Basket Stats</h2>
+                <nav className='nav'>
                     <Link to='/dashboard'>Dashboard</Link>
                     <Link to='/teams'>Teams</Link>
                     <Link to='/games'>Games</Link>
@@ -18,7 +19,7 @@ export const MainLayout = () => {
             </aside>
 
             {/* Content */}
-            <main style={{ flex: 1, padding: '20px' }}>
+            <main className='content'>
                 <Outlet />
             </main>
         </div>

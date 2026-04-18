@@ -1,0 +1,40 @@
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background: #020617;
+    padding: 20px;
+}
+
+.sidebar-title {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.nav a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.nav a:hover {
+    color: #ffffff;
+}
+
+/* Content */
+.content {
+    flex: 1;
+    padding: 20px;
+    background: #020617;
+}
