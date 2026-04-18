@@ -1,0 +1,42 @@
+.section-card {
+    padding: 20px;
+    border-radius: 20px;
+    background: var(--panel-strong);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+}
+
+.section-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.section-card__title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--title);
+}
+
+.section-card__action {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    background: var(--accent-soft);
+    color: var(--title);
+    cursor: pointer;
+}
+
+.section-card__action:hover {
+    opacity: 0.85;
+}
+
+.section-card__content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
