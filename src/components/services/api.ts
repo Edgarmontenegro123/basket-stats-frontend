@@ -73,6 +73,33 @@ export const getTeams = async () => {
     return res.json();
 }
 
+export const createSeason = async (
+    teamId: string,
+    name: string,
+)=> {
+    const res = await fetch('http://localhost:8080/seasons', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            team_id: teamId,
+            name,
+            year: new Date().getFullYear(),
+            start_date: '2026-01-01',
+            end_date: '2026-12-31',
+            is_active: true,
+        }),
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+}
+
 export const getSeasons = async () => {
     const res = await fetch('http://localhost:8080/seasons');
 
