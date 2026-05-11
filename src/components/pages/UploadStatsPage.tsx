@@ -12,6 +12,9 @@ import {
 } from '../services/api.ts';
 
 const UploadStatsPage = () => {
+    const [seasonId, setSeasonId] = useState('');
+    const [homeTeamId, setHomeTeamId] = useState('');
+    const [awayTeamId, setAwayTeamId] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const [players, setPlayers] = useState<PlayerStats[]>([]);
 
@@ -23,7 +26,11 @@ const UploadStatsPage = () => {
 
         try {
             // 1. Crear game
-            const game = await createGame();
+            if (!seasonId || !homeTeamId || !awayTeamId) {
+                alert('Complete all IDs');
+                return;
+            }
+            const game = await createGame(seasonId, homeTeamId, awayTeamId);
 
             // 2. Subir pdf
             const upload = await uploadStats(game.id, file);
@@ -49,6 +56,32 @@ const UploadStatsPage = () => {
             />
 
             <SectionCard title='Upload File'>
+                <div>
+                    <input
+                        placeholder='Season ID'
+                        value={seasonId}
+                        onChange={(e) => setSeasonId(e.target.value)}
+                        />
+
+                    <br/><br/>
+
+                    <input
+                        placeholder='Home Team ID'
+                        value={homeTeamId}
+                        onChange={(e) => setHomeTeamId(e.target.value)}
+                        />
+
+                    <br/><br/>
+
+                    <input
+                        placeholder='Away Team ID'
+                        value={awayTeamId}
+                        onChange={(e) => setAwayTeamId(e.target.value)}
+                    />
+                </div>
+
+                <br/>
+
                 <input
                     type='file'
                     accept='.pdf'

@@ -1,13 +1,17 @@
-export const createGame = async () => {
+export const createGame = async (
+    seasonId: string,
+    homeTeamId: string,
+    awayTeamId: string,
+) => {
     const res = await fetch("http://localhost:8080/games", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            season_id: "20260511014809.743188",
-            home_team_id: "20260511014613.823856",
-            away_team_id: "20260511014645.590632",
+            season_id: seasonId,
+            home_team_id: homeTeamId,
+            away_team_id: awayTeamId,
             game_date: new Date().toISOString(),
             status: "scheduled",
         }),
