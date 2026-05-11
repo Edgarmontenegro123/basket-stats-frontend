@@ -28,7 +28,6 @@ const UploadStatsPage = () => {
             try {
                 const data = await getTeams();
                 setTeams(data);
-                console.log('Teams: ', teams);
             } catch (error) {
                 console.error(error);
             }
@@ -36,10 +35,6 @@ const UploadStatsPage = () => {
 
         void fetchTeams();
     }, []);
-
-    useEffect(() => {
-        console.log('TEAMS UPDATED: ', teams);
-    }, [teams]);
 
     useEffect(() => {
         const fetchSeasons = async () => {
@@ -53,10 +48,6 @@ const UploadStatsPage = () => {
 
         void fetchSeasons();
     }, []);
-
-    useEffect(() => {
-        console.log('SEASONS: ', seasons);
-    }, [seasons]);
 
     const handleUpload = async () => {
         if (!file) {
@@ -98,13 +89,18 @@ const UploadStatsPage = () => {
 
             <SectionCard title='Upload File'>
                 <div>
-                    <input
-                        placeholder='Season ID'
+                    <select
                         value={seasonId}
                         onChange={(e) => setSeasonId(e.target.value)}
-                        />
+                    >
+                        <option value=''>Select Season</option>
 
-                    <br/><br/>
+                        {seasons.map(season => (
+                            <option key={season.id} value={season.id}>
+                                {season.name}
+                            </option>
+                        ))}
+                    </select>
 
                     <select
                         value={homeTeamId}
