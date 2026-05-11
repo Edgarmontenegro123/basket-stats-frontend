@@ -27,7 +27,16 @@ const TeamsPage = () => {
     }, []);
 
     const handleCreateTeam = async () => {
-        if (!newTeamName) return
+        if (!newTeamName.trim()) return;
+
+        const exists = teams.some(
+            (team) => team.name.toLowerCase() === newTeamName.toLowerCase(),
+        );
+
+        if (exists) {
+            alert ('Team already exists!');
+            return;
+        }
 
         try {
             const newTeam = await createTeam(newTeamName)
