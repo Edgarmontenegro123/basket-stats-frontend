@@ -72,3 +72,14 @@ export const getTeams = async () => {
 
     return res.json();
 }
+
+export const getSeasons = async () => {
+    const res = await fetch('http://localhost:8080/seasons');
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+}

@@ -10,6 +10,7 @@ import {
     processStats,
     getPlayerStats,
     getTeams,
+    getSeasons,
 } from '../services/api.ts';
 
 const UploadStatsPage = () => {
@@ -20,13 +21,14 @@ const UploadStatsPage = () => {
     const [homeTeamId, setHomeTeamId] = useState('');
     const [awayTeamId, setAwayTeamId] = useState('');
     const [teams, setTeams] = useState<{id: string; name: string} []>([]);
+    const [seasons, setSeasons] = useState<{id: string; name: string} []>([]);
 
     useEffect(() => {
         const fetchTeams = async () => {
             try {
                 const data = await getTeams();
                 setTeams(data);
-                console.log("Teams: ", teams);
+                console.log('Teams: ', teams);
             } catch (error) {
                 console.error(error);
             }
@@ -36,8 +38,25 @@ const UploadStatsPage = () => {
     }, []);
 
     useEffect(() => {
-        console.log("TEAMS UPDATED:", teams);
+        console.log('TEAMS UPDATED: ', teams);
     }, [teams]);
+
+    useEffect(() => {
+        const fetchSeasons = async () => {
+            try {
+                const data = await getSeasons();
+                setSeasons(data);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        void fetchSeasons();
+    }, []);
+
+    useEffect(() => {
+        console.log('SEASONS: ', seasons);
+    }, [seasons]);
 
     const handleUpload = async () => {
         if (!file) {
