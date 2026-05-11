@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import '../common/PageLayout.css'
@@ -9,14 +9,35 @@ import {
     uploadStats,
     processStats,
     getPlayerStats,
+    getTeams,
 } from '../services/api.ts';
 
 const UploadStatsPage = () => {
+    const [file, setFile] = useState<File | null>(null);
+    const [players, setPlayers] = useState<PlayerStats[]>([]);
+
     const [seasonId, setSeasonId] = useState('');
     const [homeTeamId, setHomeTeamId] = useState('');
     const [awayTeamId, setAwayTeamId] = useState('');
-    const [file, setFile] = useState<File | null>(null);
-    const [players, setPlayers] = useState<PlayerStats[]>([]);
+    const [teams, setTeams] = useState<{id: string; name: string} []>([]);
+
+    useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                const data = await getTeams();
+                setTeams(data);
+                console.log("Teams: ", teams);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        void fetchTeams();
+    }, []);
+
+    useEffect(() => {
+        console.log("TEAMS UPDATED:", teams);
+    }, [teams]);
 
     const handleUpload = async () => {
         if (!file) {
@@ -24,12 +45,13 @@ const UploadStatsPage = () => {
             return;
         }
 
+        if (!seasonId || !homeTeamId || !awayTeamId) {
+            alert('Complete all IDs');
+            return;
+        }
+
         try {
             // 1. Crear game
-            if (!seasonId || !homeTeamId || !awayTeamId) {
-                alert('Complete all IDs');
-                return;
-            }
             const game = await createGame(seasonId, homeTeamId, awayTeamId);
 
             // 2. Subir pdf
@@ -65,19 +87,33 @@ const UploadStatsPage = () => {
 
                     <br/><br/>
 
-                    <input
-                        placeholder='Home Team ID'
+                    <select
                         value={homeTeamId}
                         onChange={(e) => setHomeTeamId(e.target.value)}
-                        />
+                    >
+                        <option value=''>Select Home Team</option>
 
-                    <br/><br/>
-
-                    <input
-                        placeholder='Away Team ID'
+                        {teams.map((team) => (
+                            <option key={team.id} value={team.id}>
+                                {team.name}
+                            </option>
+                        ))}
+                    </select>
+                    <select
                         value={awayTeamId}
                         onChange={(e) => setAwayTeamId(e.target.value)}
-                    />
+                    >
+                        <option value=''>Select Away Team</option>
+
+                        {teams
+                            .filter((team) => team.id !== homeTeamId)
+                            .map((team) => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))
+                        }
+                    </select>
                 </div>
 
                 <br/>

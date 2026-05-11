@@ -61,3 +61,14 @@ export const getPlayerStats = async (gameId: string) => {
 
     return res.json();
 }
+
+export const getTeams = async () => {
+    const res = await fetch('http://localhost:8080/teams');
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+}
