@@ -83,3 +83,31 @@ export const getSeasons = async () => {
 
     return res.json();
 }
+
+export const createTeam = async (name: string) => {
+    const shortName = name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 3);
+
+    const res = await fetch('http://localhost:8080/teams', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+            name,
+            short_name: shortName,
+        }),
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+}
