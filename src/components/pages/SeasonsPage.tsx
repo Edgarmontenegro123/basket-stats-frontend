@@ -69,43 +69,50 @@ const SeasonsPage = () => {
             />
 
             <SectionCard title='Create Season'>
-                <select
-                    value={selectedTeamId}
-                    onChange={(e) => setSelectedTeamId(e.target.value)}
-                >
-                    <option value=''>Select Team</option>
+                <div className='form-row'>
+                    <select
+                        className='form-select'
+                        value={selectedTeamId}
+                        onChange={(e) => setSelectedTeamId(e.target.value)}
+                    >
+                        <option value=''>Select Team</option>
 
-                    {
-                        teams.map((team) => (
-                            <option key={team.id} value={team.id}>
-                                {team.name}
-                            </option>
-                        ))
-                    }
-                </select>
-                <br/><br/>
+                        {
+                            teams.map((team) => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))
+                        }
+                    </select>
 
-                <input
-                    placeholder='Season name'
-                    value={newSeasonName}
-                    onChange={(e) => setNewSeasonName(e.target.value)}
-                    />
+                    <input
+                        className='form-input'
+                        placeholder='Season name'
+                        value={newSeasonName}
+                        onChange={(e) => setNewSeasonName(e.target.value)}
+                        />
 
-                <br/><br/>
-
-                <button onClick={handleCreateSeason}>Create Season</button>
+                    <button
+                        onClick={handleCreateSeason}
+                        className='primary-button'
+                    >Create Season</button>
+                </div>
             </SectionCard>
 
             <SectionCard title='Seasons List'>
                 {seasons.length === 0 ? (
                     <p>No seasons available yet.</p>
                 ) : (
-                    <ul>
+                    <ul className='data-list'>
                         {seasons.map((season) => {
                             const team = teams.find(t => t.id === season.team_id)
 
                             return (
-                                <li key={season.id}>
+                                <li
+                                    key={season.id}
+                                    className='data-list__item'
+                                >
                                     {season.name} - {team ? team.name : 'Unknown Team'}
                                 </li>
                             )
