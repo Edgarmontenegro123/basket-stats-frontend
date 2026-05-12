@@ -3,3 +3,65 @@
     flex-direction: column;
     gap: 24px;
 }
+
+/*
+======================= Form Layout =======================
+*/
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/*
+======================= Inputs / Selects =======================
+*/
+
+.form-input,
+.form-select {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(15,23, 42, 0.85);
+    color: var(--title);
+    font-size: 0.95rem;
+    min-width: 220px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+    border-color: rgba(59, 130, 246, 0.7);
+}
+
+/*
+======================= Buttons =======================
+*/
+
+.primary-button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--title);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.primary-button:hover {
+    opacity: 0.9;
+}
+
+.primary-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

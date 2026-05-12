@@ -1,7 +1,8 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import '../common/PageLayout.css'
+import './TeamsPage.css'
 
 import {getTeams, createTeam} from '../services/api'
 import type {Team} from '../types/team'
@@ -56,22 +57,28 @@ const TeamsPage = () => {
             />
 
             <SectionCard title='Teams' actionLabel='New team'>
-                <div style={{marginBottom: '16px'}}>
+                <div className='form-row'>
                     <input
+                        className='form-input'
                         placeholder='Team name'
                         value={newTeamName}
                         onChange={(e) => setNewTeamName(e.target.value)}
                     />
-                    <button onClick={handleCreateTeam}>
+                    <button
+                        className='primary-button'
+                        onClick={handleCreateTeam}>
                         Create
                     </button>
                 </div>
                 {teams.length === 0 ? (
                     <p>No teams available yet.</p>
                 ) : (
-                    <ul>
+                    <ul className='data-list'>
                         {teams.map((team) => (
-                            <li key={team.id}>{team.name}</li>
+                            <li
+                                key={team.id}
+                                className='data-list__item'
+                            >{team.name}</li>
                         ))}
                     </ul>
                 )}

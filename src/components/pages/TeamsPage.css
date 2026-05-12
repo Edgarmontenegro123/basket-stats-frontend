@@ -1,0 +1,20 @@
+/*
+======================= Lists =======================
+*/
+
+.data-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.data-list__item {
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, 0.45);
+    color: var(--title);
+}
