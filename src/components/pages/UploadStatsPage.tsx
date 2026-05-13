@@ -154,7 +154,7 @@ const UploadStatsPage = () => {
 
             {players.length > 0 && (
                 <SectionCard title='Player Stats'>
-                    <table>
+                    <table className='data-table'>
                         <thead>
                             <tr>
                                 <th>Player</th>
