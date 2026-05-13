@@ -88,61 +88,68 @@ const UploadStatsPage = () => {
             />
 
             <SectionCard title='Upload File'>
-                <div>
-                    <select
-                        value={seasonId}
-                        onChange={(e) => setSeasonId(e.target.value)}
-                    >
-                        <option value=''>Select Season</option>
+                <div className='form-group'>
+                    <div className='form-row'>
+                        <select
+                            className='form-select'
+                            value={seasonId}
+                            onChange={(e) => setSeasonId(e.target.value)}
+                        >
+                            <option value=''>Select Season</option>
 
-                        {seasons.map(season => (
-                            <option key={season.id} value={season.id}>
-                                {season.name}
-                            </option>
-                        ))}
-                    </select>
+                            {seasons.map(season => (
+                                <option key={season.id} value={season.id}>
+                                    {season.name}
+                                </option>
+                            ))}
+                        </select>
 
-                    <select
-                        value={homeTeamId}
-                        onChange={(e) => setHomeTeamId(e.target.value)}
-                    >
-                        <option value=''>Select Home Team</option>
+                        <select
+                            className='form-select'
+                            value={homeTeamId}
+                            onChange={(e) => setHomeTeamId(e.target.value)}
+                        >
+                            <option value=''>Select Home Team</option>
 
-                        {teams.map((team) => (
-                            <option key={team.id} value={team.id}>
-                                {team.name}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        value={awayTeamId}
-                        onChange={(e) => setAwayTeamId(e.target.value)}
-                    >
-                        <option value=''>Select Away Team</option>
-
-                        {teams
-                            .filter((team) => team.id !== homeTeamId)
-                            .map((team) => (
+                            {teams.map((team) => (
                                 <option key={team.id} value={team.id}>
                                     {team.name}
                                 </option>
-                            ))
-                        }
-                    </select>
+                            ))}
+                        </select>
+                        <select
+                            className='form-select'
+                            value={awayTeamId}
+                            onChange={(e) => setAwayTeamId(e.target.value)}
+                        >
+                            <option value=''>Select Away Team</option>
+
+                            {teams
+                                .filter((team) => team.id !== homeTeamId)
+                                .map((team) => (
+                                    <option key={team.id} value={team.id}>
+                                        {team.name}
+                                    </option>
+                                ))
+                            }
+                        </select>
+                    </div>
+                    <div className='file-upload'>
+                        <input
+                            type='file'
+                            accept='.pdf'
+                            onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+                            />
+                    </div>
+
+                    <button
+                        className='primary-button'
+                        onClick={handleUpload}
+                        disabled={!file || !seasonId || !homeTeamId || !awayTeamId}
+
+                    >Upload & Process</button>
                 </div>
 
-                <br/>
-
-                <input
-                    type='file'
-                    accept='.pdf'
-                    onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-                    />
-
-                <br />
-                <br />
-
-                <button onClick={handleUpload}>Upload & Process</button>
             </SectionCard>
 
             {players.length > 0 && (

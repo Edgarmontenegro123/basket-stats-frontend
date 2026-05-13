@@ -55,6 +55,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: opacity 0.2s ease;
+    width: fit-content;
 }
 
 .primary-button:hover {
@@ -64,4 +65,34 @@
 .primary-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/*
+======================= File Input =======================
+*/
+.file-upload {
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.file-upload input[type="file"] {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+.file-upload input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 12px;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--title);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.file-upload input[type="file"]::file-selector-button:hover {
+    opacity: 0.9;
 }
