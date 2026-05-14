@@ -154,28 +154,30 @@ const UploadStatsPage = () => {
 
             {players.length > 0 && (
                 <SectionCard title='Player Stats'>
-                    <table className='data-table'>
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th>Team</th>
-                                <th>PTS</th>
-                                <th>REB</th>
-                                <th>AST</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {players.map((player, index) => (
-                            <tr key={index}>
-                                <td>{player.player_name}</td>
-                                <td>{player.team_name}</td>
-                                <td>{player.points}</td>
-                                <td>{player.rebounds}</td>
-                                <td>{player.assists}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                    <div className='table-wrapper'>
+                        <table className='data-table'>
+                            <thead>
+                                <tr>
+                                    <th>Player</th>
+                                    <th>Team</th>
+                                    <th>PTS</th>
+                                    <th>REB</th>
+                                    <th>AST</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {players.map((player, index) => (
+                                <tr key={index}>
+                                    <td>{player.player_name}</td>
+                                    <td>{player.team_name}</td>
+                                    <td>{player.points}</td>
+                                    <td>{player.rebounds}</td>
+                                    <td>{player.assists}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </SectionCard>
             )}
         </div>

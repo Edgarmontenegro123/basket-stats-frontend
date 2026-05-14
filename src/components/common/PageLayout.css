@@ -103,7 +103,7 @@
 .data-table {
     width: 100%;
     border-collapse: collapse;
-    overflow: hidden;
+    table-layout: auto;
 }
 
 .data-table th,
@@ -127,4 +127,11 @@
 
 .data-table tbody tr:hover {
     background: rgba(59, 130, 246, 0.08);
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 14px;
+    border: 1px solid var(--border);
 }
