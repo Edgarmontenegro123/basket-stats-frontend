@@ -22,6 +22,7 @@ const UploadStatsPage = () => {
     const [awayTeamId, setAwayTeamId] = useState('');
     const [teams, setTeams] = useState<{id: string; name: string} []>([]);
     const [seasons, setSeasons] = useState<{id: string; name: string} []>([]);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -61,6 +62,11 @@ const UploadStatsPage = () => {
         }
 
         try {
+            setIsProcessing(true);
+            setPlayers([]);
+
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+
             // 1. Crear game
             const game = await createGame(seasonId, homeTeamId, awayTeamId);
 
@@ -77,11 +83,21 @@ const UploadStatsPage = () => {
         } catch (error) {
             console.error(error);
             alert('Error processing file')
+        } finally {
+            setIsProcessing(false);
         }
     }
 
     return (
         <div>
+            {isProcessing && (
+                <div className='loading-overlay'>
+                    <div className='loading-box'>
+                        <div className='loading-spinner' />
+                        <p>Processing...</p>
+                    </div>
+                </div>
+            )}
             <PageHeader
                 title='Upload Stats'
                 subtitle='Upload match statistics files'
@@ -145,7 +161,7 @@ const UploadStatsPage = () => {
                     <button
                         className='primary-button'
                         onClick={handleUpload}
-                        disabled={!file || !seasonId || !homeTeamId || !awayTeamId}
+                        disabled={isProcessing || !file || !seasonId || !homeTeamId || !awayTeamId}
 
                     >Upload & Process</button>
                 </div>

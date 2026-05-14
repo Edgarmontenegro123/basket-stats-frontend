@@ -25,6 +25,17 @@ export const createGame = async (
     return res.json();
 };
 
+export const getGames = async () => {
+    const res = await fetch('http://localhost:8080/games');
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+}
+
 export const uploadStats = async (gameId: string, file: File) => {
     const formData = new FormData();
     formData.append("game_id", gameId);
