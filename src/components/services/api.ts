@@ -3,17 +3,21 @@ export const createGame = async (
     homeTeamId: string,
     awayTeamId: string,
 ) => {
-    const res = await fetch("http://localhost:8080/games", {
-        method: "POST",
+    // Go backend connection
+    // const res = await fetch('http://localhost:8080/games', {
+
+    // Node backend connection
+    const res = await fetch('http://localhost:3001/games', {
+        method: 'POST',
         headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({
             season_id: seasonId,
             home_team_id: homeTeamId,
             away_team_id: awayTeamId,
             game_date: new Date().toISOString(),
-            status: "scheduled",
+            status: 'scheduled',
         }),
     });
 
@@ -26,7 +30,10 @@ export const createGame = async (
 };
 
 export const getGames = async () => {
-    const res = await fetch('http://localhost:8080/games');
+    // Go backend connection
+    // const res = await fetch('http://localhost:8080/games');
+    // Node backend connection
+    const res = await fetch('http://localhost:3001/games');
 
     if (!res.ok) {
         const text = await res.text();
@@ -38,12 +45,12 @@ export const getGames = async () => {
 
 export const uploadStats = async (gameId: string, file: File) => {
     const formData = new FormData();
-    formData.append("game_id", gameId);
-    console.log("GAME ID:", gameId)
-    formData.append("file", file);
+    formData.append('game_id', gameId);
+    console.log('GAME ID:', gameId)
+    formData.append('file', file);
 
-    const res = await fetch("http://localhost:8081/uploads", {
-        method: "POST",
+    const res = await fetch('http://localhost:8081/uploads', {
+        method: 'POST',
         body: formData,
     });
 
@@ -56,10 +63,10 @@ export const uploadStats = async (gameId: string, file: File) => {
 }
 
 export const processStats = async (uploadId: string) => {
-    const res = await fetch("http://localhost:8081/analytics/process", {
-        method: "POST",
+    const res = await fetch('http://localhost:8081/analytics/process', {
+        method: 'POST',
         headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({upload_id: uploadId}),
     });
@@ -74,7 +81,10 @@ export const getPlayerStats = async (gameId: string) => {
 }
 
 export const getTeams = async () => {
-    const res = await fetch('http://localhost:8080/teams');
+    // Go backend connection
+    // const res = await fetch('http://localhost:8080/teams');
+    // Node backend connection
+    const res = await fetch('http://localhost:3001/teams');
 
     if (!res.ok) {
         const text = await res.text();
@@ -88,7 +98,10 @@ export const createSeason = async (
     teamId: string,
     name: string,
 )=> {
-    const res = await fetch('http://localhost:8080/seasons', {
+    // Go backend connection
+    // const res = await fetch('http://localhost:8080/seasons', {
+    // Node backend connection
+    const res = await fetch('http://localhost:3001/seasons', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -112,7 +125,10 @@ export const createSeason = async (
 }
 
 export const getSeasons = async () => {
-    const res = await fetch('http://localhost:8080/seasons');
+    // Go backend connection
+    // const res = await fetch('http://localhost:8080/seasons');
+    // Node backend connection
+    const res = await fetch('http://localhost:3001/seasons');
 
     if (!res.ok) {
         const text = await res.text();
@@ -130,7 +146,10 @@ export const createTeam = async (name: string) => {
         .toUpperCase()
         .slice(0, 3);
 
-    const res = await fetch('http://localhost:8080/teams', {
+    // Go backend connection
+    // const res = await fetch('http://localhost:8080/teams', {
+    // Node backend connection
+    const res = await fetch('http://localhost:3001/teams', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
