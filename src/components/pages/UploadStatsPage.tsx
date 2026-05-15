@@ -179,6 +179,10 @@ const UploadStatsPage = () => {
                                     <th>PTS</th>
                                     <th>REB</th>
                                     <th>AST</th>
+                                    <th>MIN</th>
+                                    <th>TOV</th>
+                                    <th>STL</th>
+                                    <th>BLK</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -189,6 +193,10 @@ const UploadStatsPage = () => {
                                     <td>{player.points}</td>
                                     <td>{player.rebounds}</td>
                                     <td>{player.assists}</td>
+                                    <td>{player.minutes}</td>
+                                    <td>{player.turnovers}</td>
+                                    <td>{player.steals}</td>
+                                    <td>{player.blocks}</td>
                                 </tr>
                             ))}
                             </tbody>
