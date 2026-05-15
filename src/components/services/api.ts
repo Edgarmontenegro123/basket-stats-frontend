@@ -17,6 +17,10 @@ export const createGame = async (
             home_team_id: homeTeamId,
             away_team_id: awayTeamId,
             game_date: new Date().toISOString(),
+            location: null,
+            is_friendly: false,
+            home_score: null,
+            away_score: null,
             status: 'scheduled',
         }),
     });
