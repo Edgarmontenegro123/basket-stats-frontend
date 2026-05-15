@@ -49,7 +49,10 @@ export const uploadStats = async (gameId: string, file: File) => {
     console.log('GAME ID:', gameId)
     formData.append('file', file);
 
-    const res = await fetch('http://localhost:8081/uploads', {
+    // Go backend connection
+    // const res = await fetch('http://localhost:8081/uploads', {
+    // Node backend connection
+    const res = await fetch('http://localhost:3002/uploads', {
         method: 'POST',
         body: formData,
     });
@@ -63,7 +66,10 @@ export const uploadStats = async (gameId: string, file: File) => {
 }
 
 export const processStats = async (uploadId: string) => {
-    const res = await fetch('http://localhost:8081/analytics/process', {
+    // Go backend connection
+    // const res = await fetch('http://localhost:8081/analytics/process', {
+    // Node backend connection
+    const res = await fetch('http://localhost:3002/analytics/process', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -75,7 +81,10 @@ export const processStats = async (uploadId: string) => {
 }
 
 export const getPlayerStats = async (gameId: string) => {
-    const res = await fetch(`http://localhost:8081/analytics/games/${gameId}/players`);
+    // Go backend connection
+    // const res = await fetch(`http://localhost:8081/analytics/games/${gameId}/players`);
+    // Node backend connection
+    const res = await fetch(`http://localhost:3002/analytics/games/${gameId}/players`);
 
     return res.json();
 }
