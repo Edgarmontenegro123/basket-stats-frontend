@@ -32,6 +32,12 @@ export const MainLayout = () => {
                         Games
                     </NavLink>
                     <NavLink
+                        to='/analytics'
+                        className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                    >
+                        Analytics
+                    </NavLink>
+                    <NavLink
                         to='/seasons'
                         className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >

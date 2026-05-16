@@ -181,3 +181,25 @@ export const createTeam = async (name: string) => {
 
     return res.json();
 }
+
+export const getPlayerStatsByGameId = async (gameId: string) => {
+    const res = await fetch(`http://localhost:3002/analytics/games/${gameId}/players`);
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+};
+
+export const getTeamStatsByGameId = async (gameId: string) => {
+    const res = await fetch(`http://localhost:3002/analytics/games/${gameId}/teams`);
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+};
