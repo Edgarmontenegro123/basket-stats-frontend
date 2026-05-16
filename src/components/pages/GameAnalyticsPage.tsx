@@ -5,6 +5,8 @@ import {
     getTeamStatsByGameId,
 } from '../services/api';
 
+import './GameAnalyticsPage.css';
+
 type Game = {
     id: string;
     season_id: string;
@@ -82,99 +84,101 @@ const GameAnalyticsPage = () => {
     };
 
     return (
-        <main>
-            <h1>Game Analytics</h1>
+        <main className='analytics-page'>
+            <header className='analytics-header'>
+                <h1>Game Analytics</h1>
+                <p>Review process analytics by game.</p>
+            </header>
+            {error && <p className='analytics-error'>{error}</p>}
 
-            {error && <p>{error}</p>}
+            <section className='analytics-controls'>
+                <label htmlFor='game'>Select game</label>
+                <div className='analytics-control-row'>
+                    <select
+                        id='game'
+                        value={selectedGameId}
+                        onChange={(e) => setSelectedGameId(e.target.value)}
+                    >
+                        <option value=''>Select a game</option>
 
-            <section>
-                <label htmlFor="game">Select game</label>
+                        {games.map((game) => (
+                            <option key={game.id} value={game.id}>
+                                {new Date(game.game_date).toLocaleDateString()} - {game.status}
+                            </option>
+                        ))}
+                    </select>
 
-                <select
-                    id="game"
-                    value={selectedGameId}
-                    onChange={(e) => setSelectedGameId(e.target.value)}
-                >
-                    <option value="">Select a game</option>
-
-                    {games.map((game) => (
-                        <option key={game.id} value={game.id}>
-                            {game.game_date} - {game.status}
-                        </option>
-                    ))}
-                </select>
-
-                <button onClick={handleLoadAnalytics}>
-                    Load Analytics
-                </button>
+                    <button onClick={handleLoadAnalytics}>
+                        Load Analytics
+                    </button>
+                </div>
             </section>
 
-            <section>
+            <section className='analytics-card'>
                 <h2>Team Stats</h2>
-
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Team</th>
-                        <th>PTS</th>
-                        <th>REB</th>
-                        <th>AST</th>
-                        <th>TO</th>
-                        <th>STL</th>
-                        <th>BLK</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    {teamStats.map((stat) => (
-                        <tr key={stat.id}>
-                            <td>{stat.team_name}</td>
-                            <td>{stat.points}</td>
-                            <td>{stat.rebounds}</td>
-                            <td>{stat.assists}</td>
-                            <td>{stat.turnovers}</td>
-                            <td>{stat.steals}</td>
-                            <td>{stat.blocks}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
+                    <div className='table-wrapper'>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Team</th>
+                                <th>PTS</th>
+                                <th>REB</th>
+                                <th>AST</th>
+                                <th>TO</th>
+                                <th>STL</th>
+                                <th>BLK</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {teamStats.map((stat) => (
+                                <tr key={stat.id}>
+                                    <td>{stat.team_name}</td>
+                                    <td>{stat.points}</td>
+                                    <td>{stat.rebounds}</td>
+                                    <td>{stat.assists}</td>
+                                    <td>{stat.turnovers}</td>
+                                    <td>{stat.steals}</td>
+                                    <td>{stat.blocks}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
             </section>
-
-            <section>
+            <section className='analytics-card'>
                 <h2>Player Stats</h2>
-
-                <table>
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Player</th>
-                        <th>Team</th>
-                        <th>PTS</th>
-                        <th>REB</th>
-                        <th>AST</th>
-                        <th>TO</th>
-                        <th>STL</th>
-                        <th>BLK</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    {playerStats.map((stat) => (
-                        <tr key={stat.id}>
-                            <td>{stat.player_number}</td>
-                            <td>{stat.player_name}</td>
-                            <td>{stat.team_name}</td>
-                            <td>{stat.points}</td>
-                            <td>{stat.rebounds}</td>
-                            <td>{stat.assists}</td>
-                            <td>{stat.turnovers}</td>
-                            <td>{stat.steals}</td>
-                            <td>{stat.blocks}</td>
+                <div className='table-wrapper'>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Player</th>
+                            <th>Team</th>
+                            <th>PTS</th>
+                            <th>REB</th>
+                            <th>AST</th>
+                            <th>TO</th>
+                            <th>STL</th>
+                            <th>BLK</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {playerStats.map((stat) => (
+                            <tr key={stat.id}>
+                                <td>{stat.player_number}</td>
+                                <td>{stat.player_name}</td>
+                                <td>{stat.team_name}</td>
+                                <td>{stat.points}</td>
+                                <td>{stat.rebounds}</td>
+                                <td>{stat.assists}</td>
+                                <td>{stat.turnovers}</td>
+                                <td>{stat.steals}</td>
+                                <td>{stat.blocks}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
             </section>
         </main>
     );

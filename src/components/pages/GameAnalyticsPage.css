@@ -1,0 +1,110 @@
+.analytics-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.analytics-header h1 {
+    margin: 0;
+    font-size: 40px;
+}
+
+.analytics-header p {
+    margin: 8px 0 0;
+    color: #94a3b8;
+}
+
+.analytics-error {
+    padding: 12px 16px;
+    border: 1px solid #ef4444;
+    border-radius: 12px;
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.analytics-controls,
+.analytics-card {
+    padding: 24px;
+    border: 1px solid #1e293b;
+    border-radius: 20px;
+    background: #0f172a;
+}
+
+.analytics-controls label {
+    display: block;
+    margin-bottom: 8px;
+    color: #cbd5e1;
+}
+
+.analytics-control-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.analytics-control-row select,
+.analytics-control-row button {
+    min-height: 40px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+    padding: 0 12px;
+    font-size: 14px;
+}
+
+.analytics-control-row select {
+    min-width: 320px;
+    background: #020617;
+    color: #f8fafc;
+}
+
+.analytics-control-row button {
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+}
+
+.analytics-card h2 {
+    margin: 0 0 16px;
+    font-size: 24px;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-wrapper th,
+.table-wrapper td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #1e293b;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.table-wrapper th {
+    color: #cbd5e1;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.table-wrapper td {
+    color: #f8fafc;
+}
+
+@media (max-width: 768px) {
+    .analytics-control-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .analytics-control-row select {
+        min-width: 100%;
+    }
+}
