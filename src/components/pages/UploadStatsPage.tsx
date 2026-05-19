@@ -5,49 +5,30 @@ import '../common/PageLayout.css'
 import type {PlayerStats} from '../types/player';
 
 import {
-    createGame,
     uploadStats,
     processStats,
     getPlayerStats,
-    getTeams,
-    getSeasons,
+    getGames,
 } from '../services/api.ts';
 
 const UploadStatsPage = () => {
     const [file, setFile] = useState<File | null>(null);
     const [players, setPlayers] = useState<PlayerStats[]>([]);
-
-    const [seasonId, setSeasonId] = useState('');
-    const [homeTeamId, setHomeTeamId] = useState('');
-    const [awayTeamId, setAwayTeamId] = useState('');
-    const [teams, setTeams] = useState<{id: string; name: string} []>([]);
-    const [seasons, setSeasons] = useState<{id: string; name: string} []>([]);
+    const [games, setGames] = useState<{id: string; game_date: string; status: string} []>([]);
+    const [selectedGameId, setSelectedGameId] = useState('');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
     useEffect(() => {
-        const fetchTeams = async () => {
+        const fetchGames = async () => {
             try {
-                const data = await getTeams();
-                setTeams(data);
+                const data = await getGames();
+                setGames(data);
             } catch (error) {
                 console.error(error);
             }
         };
 
-        void fetchTeams();
-    }, []);
-
-    useEffect(() => {
-        const fetchSeasons = async () => {
-            try {
-                const data = await getSeasons();
-                setSeasons(data);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
-        void fetchSeasons();
+        void fetchGames();
     }, []);
 
     const handleUpload = async () => {
@@ -56,8 +37,8 @@ const UploadStatsPage = () => {
             return;
         }
 
-        if (!seasonId || !homeTeamId || !awayTeamId) {
-            alert('Complete all IDs');
+        if (!selectedGameId) {
+            alert('Select a game first');
             return;
         }
 
@@ -67,17 +48,14 @@ const UploadStatsPage = () => {
 
             await new Promise((resolve) => setTimeout(resolve, 3000));
 
-            // 1. Crear game
-            const game = await createGame(seasonId, homeTeamId, awayTeamId);
+            // 1. Subir pdf
+            const upload = await uploadStats(selectedGameId, file);
 
-            // 2. Subir pdf
-            const upload = await uploadStats(game.id, file);
-
-            // 3. Procesar
+            // 2. Procesar
             await processStats(upload.id);
 
-            // 4. Obtener stats
-            const playersData = await getPlayerStats(game.id);
+            // 3. Obtener stats
+            const playersData = await getPlayerStats(selectedGameId);
 
             setPlayers(playersData);
         } catch (error) {
@@ -108,46 +86,16 @@ const UploadStatsPage = () => {
                     <div className='form-row'>
                         <select
                             className='form-select'
-                            value={seasonId}
-                            onChange={(e) => setSeasonId(e.target.value)}
+                            value={selectedGameId}
+                            onChange={(e) => setSelectedGameId(e.target.value)}
                         >
-                            <option value=''>Select Season</option>
+                            <option value=''>Select Game</option>
 
-                            {seasons.map(season => (
-                                <option key={season.id} value={season.id}>
-                                    {season.name}
+                            {games.map((game) => (
+                                <option key={game.id} value={game.id}>
+                                    {new Date(game.game_date).toLocaleDateString()} - {game.status}
                                 </option>
                             ))}
-                        </select>
-
-                        <select
-                            className='form-select'
-                            value={homeTeamId}
-                            onChange={(e) => setHomeTeamId(e.target.value)}
-                        >
-                            <option value=''>Select Home Team</option>
-
-                            {teams.map((team) => (
-                                <option key={team.id} value={team.id}>
-                                    {team.name}
-                                </option>
-                            ))}
-                        </select>
-                        <select
-                            className='form-select'
-                            value={awayTeamId}
-                            onChange={(e) => setAwayTeamId(e.target.value)}
-                        >
-                            <option value=''>Select Away Team</option>
-
-                            {teams
-                                .filter((team) => team.id !== homeTeamId)
-                                .map((team) => (
-                                    <option key={team.id} value={team.id}>
-                                        {team.name}
-                                    </option>
-                                ))
-                            }
                         </select>
                     </div>
                     <div className='file-upload'>
@@ -161,7 +109,7 @@ const UploadStatsPage = () => {
                     <button
                         className='primary-button'
                         onClick={handleUpload}
-                        disabled={isProcessing || !file || !seasonId || !homeTeamId || !awayTeamId}
+                        disabled={isProcessing || !file || !selectedGameId}
 
                     >Upload & Process</button>
                 </div>

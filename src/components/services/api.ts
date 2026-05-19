@@ -50,7 +50,6 @@ export const getGames = async () => {
 export const uploadStats = async (gameId: string, file: File) => {
     const formData = new FormData();
     formData.append('game_id', gameId);
-    console.log('GAME ID:', gameId)
     formData.append('file', file);
 
     // Go backend connection
