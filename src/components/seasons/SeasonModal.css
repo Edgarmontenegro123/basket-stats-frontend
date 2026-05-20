@@ -1,0 +1,12 @@
+@import '../teams/TeamModal.css';
+
+.season-modal__content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.season-modal__content .form-select,
+.season-modal__content .form-input {
+    width: 100%;
+}

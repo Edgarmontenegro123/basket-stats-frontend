@@ -154,6 +154,45 @@ export const getSeasons = async () => {
     return res.json();
 }
 
+export const updateSeason = async (
+    id: string,
+    teamId: string,
+    name: string,
+) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/seasons/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            team_id: teamId,
+            name,
+            year: new Date().getFullYear(),
+            start_date: '2026-01-01',
+            end_date: '2026-12-31',
+            is_active: true,
+        }),
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const deleteSeason = async (id: string) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/seasons/${id}`, {
+        method: 'DELETE',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+}
+
 export const createTeam = async (name: string) => {
     const shortName = name
         .split(' ')
