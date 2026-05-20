@@ -9,11 +9,10 @@ import './GameAnalyticsPage.css';
 
 type Game = {
     id: string;
-    season_id: string;
-    home_team_id: string;
-    away_team_id: string;
     game_date: string;
     status: string;
+    home_team_name: string;
+    away_team_name: string;
 };
 
 type PlayerStat = {
@@ -103,7 +102,7 @@ const GameAnalyticsPage = () => {
 
                         {games.map((game) => (
                             <option key={game.id} value={game.id}>
-                                {new Date(game.game_date).toLocaleDateString()} - {game.status}
+                                {game.home_team_name} vs {game.away_team_name} - {new Date(game.game_date).toLocaleDateString()}
                             </option>
                         ))}
                     </select>

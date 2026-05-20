@@ -14,7 +14,13 @@ import {
 const UploadStatsPage = () => {
     const [file, setFile] = useState<File | null>(null);
     const [players, setPlayers] = useState<PlayerStats[]>([]);
-    const [games, setGames] = useState<{id: string; game_date: string; status: string} []>([]);
+    const [games, setGames] = useState<{
+        id: string;
+        game_date: string;
+        status: string;
+        home_team_name: string;
+        away_team_name: string;
+    }[]>([]);
     const [selectedGameId, setSelectedGameId] = useState('');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
@@ -93,7 +99,7 @@ const UploadStatsPage = () => {
 
                             {games.map((game) => (
                                 <option key={game.id} value={game.id}>
-                                    {new Date(game.game_date).toLocaleDateString()} - {game.status}
+                                    {game.home_team_name} vs {game.away_team_name} - {new Date(game.game_date).toLocaleDateString()}
                                 </option>
                             ))}
                         </select>
