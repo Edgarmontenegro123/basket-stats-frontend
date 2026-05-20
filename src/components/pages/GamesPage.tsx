@@ -1,42 +1,29 @@
 import { useEffect, useState } from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
+import GameModal from '../games/GameModal'
 import '../common/PageLayout.css'
+import './TeamsPage.css'
+
 import {
     createGame,
+    deleteGame,
     getGames,
     getSeasons,
-    getTeams
+    getTeams,
+    updateGame,
 } from '../services/api'
 
-interface Team {
-    id: string
-    name: string
-}
-
-interface Season {
-    id: string
-    name: string
-}
-
-interface Game {
-    id: string
-    season_id: string
-    home_team_id: string
-    away_team_id: string
-    status: string
-}
+import type { Team } from '../types/team'
+import type { Season } from '../types/season'
+import type { Game } from '../types/game'
 
 const GamesPage = () => {
     const [teams, setTeams] = useState<Team[]>([])
     const [seasons, setSeasons] = useState<Season[]>([])
     const [games, setGames] = useState<Game[]>([])
-
-    const [seasonId, setSeasonId] = useState('')
-    const [homeTeamId, setHomeTeamId] = useState('')
-    const [awayTeamId, setAwayTeamId] = useState('')
-    const [showForm, setShowForm] = useState(false)
-    const [error, setError] = useState('')
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [gameToEdit, setGameToEdit] = useState<Game | null>(null)
 
     const loadData = async () => {
         const [teamsData, seasonsData, gamesData] = await Promise.all([
@@ -54,30 +41,63 @@ const GamesPage = () => {
         const fetchData = async () => {
             await loadData()
         }
+
         void fetchData()
     }, [])
 
-    const handleCreateGame = async () => {
-        setError('')
+    const handleSubmitGame = async (
+        seasonId: string,
+        homeTeamId: string,
+        awayTeamId: string,
+    ) => {
+        try {
+            if (gameToEdit) {
+                await updateGame(
+                    gameToEdit.id,
+                    seasonId,
+                    homeTeamId,
+                    awayTeamId,
+                )
+            } else {
+                await createGame(seasonId, homeTeamId, awayTeamId)
+            }
 
-        if (!seasonId || !homeTeamId || !awayTeamId) {
-            setError('Please select season, home team and away team.')
-            return
+            setGameToEdit(null)
+            setIsModalOpen(false)
+            await loadData()
+        } catch (error) {
+            console.error(error)
         }
+    }
 
-        if (homeTeamId === awayTeamId) {
-            setError('Home team and away team must be different.')
-            return
+    const handleOpenCreateModal = () => {
+        setGameToEdit(null)
+        setIsModalOpen(true)
+    }
+
+    const handleOpenEditModal = (game: Game) => {
+        setGameToEdit(game)
+        setIsModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setGameToEdit(null)
+        setIsModalOpen(false)
+    }
+
+    const handleDeleteGame = async (gameId: string) => {
+        const confirmed = window.confirm(
+            'Are you sure you want to delete this game?',
+        )
+
+        if (!confirmed) return
+
+        try {
+            await deleteGame(gameId)
+            await loadData()
+        } catch (error) {
+            console.error(error)
         }
-
-        await createGame(seasonId, homeTeamId, awayTeamId)
-
-        setSeasonId('')
-        setHomeTeamId('')
-        setAwayTeamId('')
-        setShowForm(false)
-
-        await loadData()
     }
 
     const getTeamName = (teamId: string) => {
@@ -85,7 +105,10 @@ const GamesPage = () => {
     }
 
     const getSeasonName = (selectedSeasonId: string) => {
-        return seasons.find((season) => season.id === selectedSeasonId)?.name || 'Unknown season'
+        return (
+            seasons.find((season) => season.id === selectedSeasonId)?.name ||
+            'Unknown season'
+        )
     }
 
     return (
@@ -98,80 +121,64 @@ const GamesPage = () => {
             <SectionCard
                 title='Games'
                 actionLabel='New game'
-                onAction={() => setShowForm(!showForm)}
+                onAction={handleOpenCreateModal}
             >
-                {showForm && (
-                    <div className='form-row'>
-                        <select
-                            className='form-select'
-                            value={seasonId}
-                            onChange={(event) => setSeasonId(event.target.value)}
-                        >
-                            <option value=''>Select season</option>
-                            {seasons.map((season) => (
-                                <option key={season.id} value={season.id}>
-                                    {season.name}
-                                </option>
-                            ))}
-                        </select>
-
-                        <select
-                            className='form-select'
-                            value={homeTeamId}
-                            onChange={(event) => setHomeTeamId(event.target.value)}
-                        >
-                            <option value=''>Home team</option>
-                            {teams.map((team) => (
-                                <option key={team.id} value={team.id}>
-                                    {team.name}
-                                </option>
-                            ))}
-                        </select>
-
-                        <select
-                            className='form-select'
-                            value={awayTeamId}
-                            onChange={(event) => setAwayTeamId(event.target.value)}
-                        >
-                            <option value=''>Away team</option>
-                            {teams.map((team) => (
-                                <option key={team.id} value={team.id}>
-                                    {team.name}
-                                </option>
-                            ))}
-                        </select>
-
-                        <button
-                            className='primary-button'
-                            onClick={handleCreateGame}
-                        >
-                            Create game
-                        </button>
-                    </div>
-                )}
-
-                {error && <p>{error}</p>}
-
                 {games.length === 0 ? (
                     <p>No games recorded yet.</p>
                 ) : (
-                    <div className='data-list'>
+                    <ul className='data-list'>
                         {games.map((game) => (
-                            <div className='data-list__item' key={game.id}>
-                                <strong>
-                                    {getTeamName(game.home_team_id)} vs {getTeamName(game.away_team_id)}
-                                </strong>
-                                <span>
-                                    Season: {getSeasonName(game.season_id)}
-                                </span>
-                                <span>
-                                    Status: {game.status}
-                                </span>
-                            </div>
+                            <li
+                                className='data-list__item'
+                                key={game.id}
+                            >
+                                <div>
+                                    <strong>
+                                        {getTeamName(game.home_team_id)} vs{' '}
+                                        {getTeamName(game.away_team_id)}
+                                    </strong>
+
+                                    <div>
+                                        Season: {getSeasonName(game.season_id)}
+                                    </div>
+
+                                    <div>Status: {game.status}</div>
+                                </div>
+
+                                <div className='data-list__actions'>
+                                    <button
+                                        type='button'
+                                        className='secondary-button'
+                                        onClick={() => handleOpenEditModal(game)}
+                                    >
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        type='button'
+                                        className='danger-button'
+                                        onClick={() =>
+                                            handleDeleteGame(game.id)
+                                        }
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 )}
             </SectionCard>
+
+            <GameModal
+                key={isModalOpen ? gameToEdit?.id ?? 'new' : 'closed'}
+                isOpen={isModalOpen}
+                teams={teams}
+                seasons={seasons}
+                gameToEdit={gameToEdit}
+                onClose={handleCloseModal}
+                onSubmit={handleSubmitGame}
+            />
         </div>
     )
 }

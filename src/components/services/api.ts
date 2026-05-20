@@ -246,6 +246,49 @@ export const getTeamStatsByGameId = async (gameId: string) => {
     return res.json();
 };
 
+export const updateGame = async (
+    id: string,
+    seasonId: string,
+    homeTeamId: string,
+    awayTeamId: string,
+) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            season_id: seasonId,
+            home_team_id: homeTeamId,
+            away_team_id: awayTeamId,
+            game_date: new Date().toISOString(),
+            location: null,
+            is_friendly: false,
+            home_score: null,
+            away_score: null,
+            status: 'scheduled',
+        }),
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const deleteGame = async (id: string) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
+        method: 'DELETE',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+}
+
 export const updateTeam = async (id: string, name: string) => {
     const shortName = name
         .split(' ')

@@ -1,0 +1,17 @@
+@import '../teams/TeamModal.css';
+
+.game-modal__content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.game-modal__content .form-select {
+    width: 100%;
+}
+
+.modal-error {
+    margin: 0;
+    color: #fecaca;
+    font-size: 0.9rem;
+}
