@@ -73,6 +73,7 @@ export const uploadStats = async (gameId: string, file: File) => {
 }
 
 export const processStats = async (uploadId: string) => {
+    console.log('Processing stats with API:', ANALYTICS_API_URL)
     // Go backend connection
     // const res = await fetch('http://localhost:8081/analytics/process', {
     // Node backend connection
@@ -84,7 +85,13 @@ export const processStats = async (uploadId: string) => {
         body: JSON.stringify({upload_id: uploadId}),
     });
 
-    return res.json();
+    const data = await res.json()
+
+    if (!res.ok) {
+        throw new Error(data.error || 'Error processing stats')
+    }
+
+    return data;
 }
 
 export const getPlayerStats = async (gameId: string) => {

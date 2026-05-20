@@ -66,6 +66,12 @@ const UploadStatsPage = () => {
             setPlayers(playersData);
         } catch (error) {
             console.error(error);
+
+            if (error instanceof Error) {
+                alert (error.message);
+                return;
+            }
+
             alert('Error processing file')
         } finally {
             setIsProcessing(false);
