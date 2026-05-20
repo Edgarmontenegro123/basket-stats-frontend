@@ -206,3 +206,41 @@ export const getTeamStatsByGameId = async (gameId: string) => {
 
     return res.json();
 };
+
+export const updateTeam = async (id: string, name: string) => {
+    const shortName = name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 3);
+
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name,
+            short_name: shortName,
+        }),
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+};
+
+export const deleteTeam = async (id: string) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+};
