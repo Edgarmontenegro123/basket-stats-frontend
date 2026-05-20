@@ -1,3 +1,7 @@
+const MANAGEMENT_API_URL = import.meta.env.VITE_MANAGEMENT_API_URL;
+const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL;
+
+
 export const createGame = async (
     seasonId: string,
     homeTeamId: string,
@@ -7,7 +11,7 @@ export const createGame = async (
     // const res = await fetch('http://localhost:8080/games', {
 
     // Node backend connection
-    const res = await fetch('http://localhost:3001/games', {
+    const res = await fetch(`${MANAGEMENT_API_URL}/games`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -37,7 +41,7 @@ export const getGames = async () => {
     // Go backend connection
     // const res = await fetch('http://localhost:8080/games');
     // Node backend connection
-    const res = await fetch('http://localhost:3001/games');
+    const res = await fetch(`${MANAGEMENT_API_URL}/games`);
 
     if (!res.ok) {
         const text = await res.text();
@@ -55,7 +59,7 @@ export const uploadStats = async (gameId: string, file: File) => {
     // Go backend connection
     // const res = await fetch('http://localhost:8081/uploads', {
     // Node backend connection
-    const res = await fetch('http://localhost:3002/uploads', {
+    const res = await fetch(`${ANALYTICS_API_URL}/uploads`, {
         method: 'POST',
         body: formData,
     });
@@ -72,7 +76,7 @@ export const processStats = async (uploadId: string) => {
     // Go backend connection
     // const res = await fetch('http://localhost:8081/analytics/process', {
     // Node backend connection
-    const res = await fetch('http://localhost:3002/analytics/process', {
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/process`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -87,7 +91,7 @@ export const getPlayerStats = async (gameId: string) => {
     // Go backend connection
     // const res = await fetch(`http://localhost:8081/analytics/games/${gameId}/players`);
     // Node backend connection
-    const res = await fetch(`http://localhost:3002/analytics/games/${gameId}/players`);
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`);
 
     return res.json();
 }
@@ -96,7 +100,7 @@ export const getTeams = async () => {
     // Go backend connection
     // const res = await fetch('http://localhost:8080/teams');
     // Node backend connection
-    const res = await fetch('http://localhost:3001/teams');
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams`);
 
     if (!res.ok) {
         const text = await res.text();
@@ -113,7 +117,7 @@ export const createSeason = async (
     // Go backend connection
     // const res = await fetch('http://localhost:8080/seasons', {
     // Node backend connection
-    const res = await fetch('http://localhost:3001/seasons', {
+    const res = await fetch(`${MANAGEMENT_API_URL}/seasons`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -140,7 +144,7 @@ export const getSeasons = async () => {
     // Go backend connection
     // const res = await fetch('http://localhost:8080/seasons');
     // Node backend connection
-    const res = await fetch('http://localhost:3001/seasons');
+    const res = await fetch(`${MANAGEMENT_API_URL}/seasons`);
 
     if (!res.ok) {
         const text = await res.text();
@@ -161,7 +165,7 @@ export const createTeam = async (name: string) => {
     // Go backend connection
     // const res = await fetch('http://localhost:8080/teams', {
     // Node backend connection
-    const res = await fetch('http://localhost:3001/teams', {
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -182,7 +186,7 @@ export const createTeam = async (name: string) => {
 }
 
 export const getPlayerStatsByGameId = async (gameId: string) => {
-    const res = await fetch(`http://localhost:3002/analytics/games/${gameId}/players`);
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`);
 
     if (!res.ok) {
         const text = await res.text();
@@ -193,7 +197,7 @@ export const getPlayerStatsByGameId = async (gameId: string) => {
 };
 
 export const getTeamStatsByGameId = async (gameId: string) => {
-    const res = await fetch(`http://localhost:3002/analytics/games/${gameId}/teams`);
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/teams`);
 
     if (!res.ok) {
         const text = await res.text();
