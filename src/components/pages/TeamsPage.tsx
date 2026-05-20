@@ -27,6 +27,18 @@ const TeamsPage = () => {
     }, []);
 
     const handleSubmitTeam = async (name: string) => {
+        const trimmedName = name.trim()
+
+        if (trimmedName.length < 2) {
+            alert ('Team name must contain at least 2 characters')
+            return
+        }
+
+        if (trimmedName.length > 30) {
+            alert ('Team name must contain a maximum 30 characters')
+            return
+        }
+
         const exists = teams.some(
             (team) =>
                 team.name.toLowerCase() === name.toLowerCase() &&
@@ -40,7 +52,7 @@ const TeamsPage = () => {
 
         try {
             if (teamToEdit) {
-                const updatedTeam = await updateTeam(teamToEdit.id, name)
+                const updatedTeam = await updateTeam(teamToEdit.id, trimmedName)
 
                 setTeams((prev) =>
                     prev.map((team) =>
@@ -48,7 +60,7 @@ const TeamsPage = () => {
                     ),
                 )
             } else {
-                const newTeam = await createTeam(name)
+                const newTeam = await createTeam(trimmedName)
                 setTeams((prev) => [...prev, newTeam])
             }
 
