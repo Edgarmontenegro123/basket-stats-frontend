@@ -5,7 +5,7 @@
 .data-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     padding: 0;
     margin: 0;
     list-style: none;
@@ -13,11 +13,68 @@
 
 .data-list__item {
     display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    padding: 12px 14px;
-    border-radius: 12px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
     border: 1px solid var(--border);
     background: rgba(15, 23, 42, 0.45);
     color: var(--title);
+}
+
+.data-list__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.secondary-button,
+.danger-button {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease;
+}
+
+.secondary-button {
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--title);
+}
+
+.secondary-button:hover {
+    background: rgba(148, 163, 184, 0.2);
+    transform: translateY(-1px);
+}
+
+.danger-button {
+    background: rgba(239, 68, 68, 0.12);
+    color: #fecaca;
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+.danger-button:hover {
+    background: rgba(239, 68, 68, 0.22);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+    .data-list__item {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .data-list__actions {
+        width: 100%;
+    }
+
+    .data-list__actions button {
+        flex: 1;
+    }
 }

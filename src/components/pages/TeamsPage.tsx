@@ -1,18 +1,17 @@
 import {useEffect, useState} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
+import TeamModal from '../teams/TeamModal.tsx';
 import '../common/PageLayout.css'
 import './TeamsPage.css'
-
-import {getTeams, createTeam} from '../services/api'
+import {getTeams, createTeam, updateTeam, deleteTeam} from '../services/api'
 import type {Team} from '../types/team'
-
-
 
 
 const TeamsPage = () => {
     const [teams, setTeams] = useState<Team[]>([])
-    const [newTeamName, setNewTeamName] = useState('')
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [teamToEdit, setTeamToEdit] = useState<Team | null>(null)
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -27,23 +26,62 @@ const TeamsPage = () => {
         void fetchTeams()
     }, []);
 
-    const handleCreateTeam = async () => {
-        if (!newTeamName.trim()) return;
-
+    const handleSubmitTeam = async (name: string) => {
         const exists = teams.some(
-            (team) => team.name.toLowerCase() === newTeamName.toLowerCase(),
-        );
+            (team) =>
+                team.name.toLowerCase() === name.toLowerCase() &&
+                team.id !== teamToEdit?.id,
+        )
 
         if (exists) {
-            alert ('Team already exists!');
-            return;
+            alert('Team already exists!')
+            return
         }
 
         try {
-            const newTeam = await createTeam(newTeamName)
+            if (teamToEdit) {
+                const updatedTeam = await updateTeam(teamToEdit.id, name)
 
-            setTeams((prev) => [...prev, newTeam])
-            setNewTeamName('')
+                setTeams((prev) =>
+                    prev.map((team) =>
+                        team.id === updatedTeam.id ? updatedTeam : team,
+                    ),
+                )
+            } else {
+                const newTeam = await createTeam(name)
+                setTeams((prev) => [...prev, newTeam])
+            }
+
+            setTeamToEdit(null)
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const handleOpenCreateModal = () => {
+        setTeamToEdit(null)
+        setIsModalOpen(true)
+    }
+
+    const handleOpenEditModal = (team: Team) => {
+        setTeamToEdit(team)
+        setIsModalOpen(true)
+    }
+
+    const handleCloseModal = () => {
+        setTeamToEdit(null)
+        setIsModalOpen(false)
+    }
+
+    const handleDeleteTeam = async (teamId: string) => {
+        const confirmed = window.confirm('Are you sure you want to delete this team?')
+
+        if (!confirmed) return
+
+        try {
+            await deleteTeam(teamId)
+
+            setTeams((prev) => prev.filter((team) => team.id !== teamId))
         } catch (error) {
             console.error(error)
         }
@@ -56,20 +94,11 @@ const TeamsPage = () => {
                 subtitle='Manage your teams and opponents'
             />
 
-            <SectionCard title='Teams' actionLabel='New team'>
-                <div className='form-row'>
-                    <input
-                        className='form-input'
-                        placeholder='Team name'
-                        value={newTeamName}
-                        onChange={(e) => setNewTeamName(e.target.value)}
-                    />
-                    <button
-                        className='primary-button'
-                        onClick={handleCreateTeam}>
-                        Create
-                    </button>
-                </div>
+            <SectionCard
+                title='Teams'
+                actionLabel='New team'
+                onAction={handleOpenCreateModal}
+            >
                 {teams.length === 0 ? (
                     <p>No teams available yet.</p>
                 ) : (
@@ -78,11 +107,35 @@ const TeamsPage = () => {
                             <li
                                 key={team.id}
                                 className='data-list__item'
-                            >{team.name}</li>
+                            >
+                                <span>{team.name}</span>
+                                <div className='data-list__actions'>
+                                    <button
+                                        type='button'
+                                        className='secondary-button'
+                                        onClick={() => handleOpenEditModal(team)}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        type='button'
+                                        className='danger-button'
+                                        onClick={() => handleDeleteTeam(team.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </li>
                         ))}
                     </ul>
                 )}
             </SectionCard>
+            <TeamModal
+                isOpen={isModalOpen}
+                teamToEdit={teamToEdit}
+                onClose={handleCloseModal}
+                onSubmit={handleSubmitTeam}
+                />
         </div>
     )
 }
