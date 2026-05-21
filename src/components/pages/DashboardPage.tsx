@@ -3,6 +3,7 @@ import {useEffect, useState} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import StatCard from '../common/StatCard'
+import type {Game} from '../types/game'
 
 import {
     getTeams,
@@ -16,6 +17,7 @@ const DashboardPage = () => {
     const [teamsCount, setTeamsCount] = useState<number>(0)
     const [seasonsCount, setSeasonsCount] = useState<number>(0)
     const [gamesCount, setGamesCount] = useState<number>(0)
+    const [recentGames, setRecentGames] = useState<Game[]>([])
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -27,6 +29,7 @@ const DashboardPage = () => {
                 setTeamsCount(teams.length)
                 setSeasonsCount(seasons.length)
                 setGamesCount(games.length)
+                setRecentGames(games.slice(0, 5))
             } catch (error) {
                 console.error(error)
             }
@@ -43,16 +46,30 @@ const DashboardPage = () => {
             />
 
             <section className='dashboard-page__stats'>
-                <StatCard label='Teams' value={String(teamsCount)} />
-                <StatCard label='Seasons' value={String(seasonsCount)} />
-                <StatCard label='Games' value={String(gamesCount)} />
-                <StatCard label='Status' value='MVP' />
+                <StatCard label='Teams' value={String(teamsCount)}/>
+                <StatCard label='Seasons' value={String(seasonsCount)}/>
+                <StatCard label='Games' value={String(gamesCount)}/>
+                <StatCard label='Status' value='MVP'/>
             </section>
 
             <section className='dashboard-page__grid'>
                 <SectionCard title='Current State'>
-                    <p>Frontend and Backend connected successfully.</p>
-                    <p>PDF uploads and stats processing are optional.</p>
+                    {recentGames.length === 0 ? (
+                        <p>No games registered yet.</p>
+                    ) : (
+                        <ul className='dashboard-list'>
+                            {recentGames.map((game) => (
+                                <li key={game.id} className='dashboard-list__item'>
+                    <span>
+                        {game.home_team_name} vs {game.away_team_name}
+                    </span>
+                                    <small>
+                                        {new Date(game.game_date).toLocaleDateString()} · {game.status}
+                                    </small>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </SectionCard>
 
                 <SectionCard title='Next Step'>
