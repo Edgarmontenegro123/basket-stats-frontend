@@ -23,6 +23,8 @@ const UploadStatsPage = () => {
     }[]>([]);
     const [selectedGameId, setSelectedGameId] = useState('');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -39,18 +41,19 @@ const UploadStatsPage = () => {
 
     const handleUpload = async () => {
         if (!file) {
-            alert('Please select a file');
+            setErrorMessage('Please select a file');
             return;
         }
 
         if (!selectedGameId) {
-            alert('Select a game first');
+            setErrorMessage('Select a game first');
             return;
         }
 
         try {
             setIsProcessing(true);
             setPlayers([]);
+            setErrorMessage('');
 
             await new Promise((resolve) => setTimeout(resolve, 3000));
 
@@ -68,11 +71,11 @@ const UploadStatsPage = () => {
             console.error(error);
 
             if (error instanceof Error) {
-                alert (error.message);
+                setErrorMessage(error.message);
                 return;
             }
 
-            alert('Error processing file')
+            setErrorMessage('Error processing file');
         } finally {
             setIsProcessing(false);
         }
@@ -124,6 +127,11 @@ const UploadStatsPage = () => {
                         disabled={isProcessing || !file || !selectedGameId}
 
                     >Upload & Process</button>
+                    {errorMessage && (
+                        <p className='error-message'>
+                            {errorMessage}
+                        </p>
+                    )}
                 </div>
 
             </SectionCard>
