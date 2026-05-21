@@ -178,3 +178,18 @@
         transform: rotate(360deg);
     }
 }
+
+/*
+======================= Error Message =======================
+*/
+
+.error-message {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border: 1px solid #ef4444;
+    border-radius: 10px;
+    background-color: rgba(239, 68, 68, 0.12);
+    color: #fecaca;
+    font-size: 14px;
+    font-weight: 500;
+}

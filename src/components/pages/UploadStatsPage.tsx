@@ -128,9 +128,9 @@ const UploadStatsPage = () => {
 
                     >Upload & Process</button>
                     {errorMessage && (
-                        <p className='error-message'>
-                            {errorMessage}
-                        </p>
+                        <div className='error-message'>
+                            <strong>Error: </strong> {errorMessage}
+                        </div>
                     )}
                 </div>
 
