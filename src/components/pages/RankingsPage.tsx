@@ -158,7 +158,11 @@ const RankingsPage = () => {
                                 <th>Team</th>
                                 <th>{selectedStat.toUpperCase()}</th>
                                 {rankingMode === 'aggregated' && (
-                                    <th>AVG</th>
+                                    <>
+                                        <th>AVG</th>
+                                        <th>Games</th>
+                                    </>
+
                                 )}
                             </tr>
                             </thead>
@@ -180,6 +184,7 @@ const RankingsPage = () => {
                                         <td>{player.team_name}</td>
                                         <td>{player.total}</td>
                                         <td>{player.average}</td>
+                                        <td>{player.games_played}</td>
                                     </tr>
                                 ))}
                             </tbody>
