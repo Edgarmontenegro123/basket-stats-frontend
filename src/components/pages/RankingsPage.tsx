@@ -142,39 +142,47 @@ const RankingsPage = () => {
                     </p>
                 )}
 
-                <div className='table-wrapper'>
-                    <table className='data-table'>
-                        <thead>
-                        <tr>
-                            <th>Player</th>
-                            <th>Team</th>
-                            <th>{selectedStat.toUpperCase()}</th>
-                            {rankingMode === 'aggregated' && (
-                                <th>AVG</th>
-                            )}
-                        </tr>
-                        </thead>
+                {!isLoading && !errorMessage && players.length === 0 && (
+                    <p className='rankings-state'>
+                        No rankings available yet.
+                    </p>
+                )}
 
-                        <tbody>
-                        {rankingMode === 'single-game'
-                            ? (players as PlayerStats[]).map((player) => (
-                                <tr key={player.id}>
-                                    <td>{player.player_name}</td>
-                                    <td>{player.team_name}</td>
-                                    <td>{player[selectedStat]}</td>
-                                </tr>
-                            ))
-                            : (players as AggregatedPlayerRanking[]).map((player) => (
-                                <tr key={`${player.player_name}-${player.team_name}`}>
-                                    <td>{player.player_name}</td>
-                                    <td>{player.team_name}</td>
-                                    <td>{player.total}</td>
-                                    <td>{player.average}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                {players.length > 0 && (
+                    <div className='table-wrapper'>
+                        <table className='data-table'>
+                            <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>{selectedStat.toUpperCase()}</th>
+                                {rankingMode === 'aggregated' && (
+                                    <th>AVG</th>
+                                )}
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            {rankingMode === 'single-game'
+                                ? (players as PlayerStats[]).map((player) => (
+                                    <tr key={player.id}>
+                                        <td>{player.player_name}</td>
+                                        <td>{player.team_name}</td>
+                                        <td>{player[selectedStat]}</td>
+                                    </tr>
+                                ))
+                                : (players as AggregatedPlayerRanking[]).map((player) => (
+                                    <tr key={`${player.player_name}-${player.team_name}`}>
+                                        <td>{player.player_name}</td>
+                                        <td>{player.team_name}</td>
+                                        <td>{player.total}</td>
+                                        <td>{player.average}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </SectionCard>
         </div>
     )
