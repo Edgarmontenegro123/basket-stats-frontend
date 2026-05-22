@@ -21,7 +21,8 @@
 }
 
 .rankings-tab--active {
-    background: var(--accent-soft);
+    background: var(--accent);
     border-color: var(--accent);
     color: var(--title);
+    font-weight: 700;
 }

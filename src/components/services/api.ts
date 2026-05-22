@@ -338,7 +338,7 @@ export const getTopScorers = async (
     limit: number = 5,
 ) => {
     const res = await fetch(
-        `${ANALYTICS_API_URL}/analytics/players/top-scorers?limit=${limit}`,
+        `${ANALYTICS_API_URL}/analytics/players/rankings?stat=points&limit=${limit}`,
     );
 
     if (!res.ok) {
