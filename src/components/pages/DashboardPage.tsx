@@ -4,11 +4,13 @@ import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import StatCard from '../common/StatCard'
 import type {Game} from '../types/game'
+import type { PlayerStats } from '../types/player'
 
 import {
     getTeams,
     getSeasons,
     getGames,
+    getTopScorers,
 } from '../services/api'
 
 import './DashboardPage.css'
@@ -18,6 +20,7 @@ const DashboardPage = () => {
     const [seasonsCount, setSeasonsCount] = useState<number>(0)
     const [gamesCount, setGamesCount] = useState<number>(0)
     const [recentGames, setRecentGames] = useState<Game[]>([])
+    const [topScorers, setTopScorers] = useState<PlayerStats[]>([])
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -25,6 +28,8 @@ const DashboardPage = () => {
                 const teams = await getTeams()
                 const seasons = await getSeasons()
                 const games = await getGames()
+                const scorers = await getTopScorers(5)
+                setTopScorers(scorers)
 
                 setTeamsCount(teams.length)
                 setSeasonsCount(seasons.length)
@@ -74,6 +79,25 @@ const DashboardPage = () => {
 
                 <SectionCard title='Next Step'>
                     <p>Persist data using PostgreSQL.</p>
+                </SectionCard>
+
+                <SectionCard title='Top Scorers'>
+                    {topScorers.length === 0 ? (
+                        <p>No player stats available yet.</p>
+                    ) : (
+                        <ul className='dashboard-list'>
+                            {topScorers.map((player) => (
+                                <li key={player.id} className='dashboard-list__item'>
+                    <span>
+                        {player.player_name} · {player.team_name}
+                    </span>
+                                    <small>
+                                        {player.points} PTS · {player.rebounds} REB · {player.assists} AST
+                                    </small>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </SectionCard>
             </section>
         </div>

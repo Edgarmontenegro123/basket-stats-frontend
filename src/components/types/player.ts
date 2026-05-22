@@ -1,4 +1,4 @@
-export type PlayerStats = {
+export interface PlayerStats {
     id: string
     game_id: string
     team_name: string

@@ -1,4 +1,4 @@
-export type Season = {
+export interface Season {
     id: string
     name: string
     team_id: string

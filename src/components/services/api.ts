@@ -333,3 +333,19 @@ export const deleteTeam = async (id: string) => {
         throw new Error(text);
     }
 };
+
+export const getTopScorers = async (
+    limit: number = 5,
+) => {
+    const res = await fetch(
+        `${ANALYTICS_API_URL}/analytics/players/top-scorers?limit=${limit}`,
+    );
+
+    if (!res.ok) {
+        const text = await res.text();
+
+        throw new Error(text);
+    }
+
+    return res.json();
+};
