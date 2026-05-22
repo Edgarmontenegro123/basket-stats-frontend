@@ -37,3 +37,10 @@
     color: #ff6b6b;
     font-weight: 600;
 }
+
+.rankings-table th:first-child,
+.rankings-table td:first-child {
+    width: 56px;
+    text-align: center;
+    font-weight: 700;
+}

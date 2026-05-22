@@ -150,9 +150,10 @@ const RankingsPage = () => {
 
                 {players.length > 0 && (
                     <div className='table-wrapper'>
-                        <table className='data-table'>
+                        <table className='data-table rankings-table'>
                             <thead>
                             <tr>
+                                <th>#</th>
                                 <th>Player</th>
                                 <th>Team</th>
                                 <th>{selectedStat.toUpperCase()}</th>
@@ -164,15 +165,17 @@ const RankingsPage = () => {
 
                             <tbody>
                             {rankingMode === 'single-game'
-                                ? (players as PlayerStats[]).map((player) => (
+                                ? (players as PlayerStats[]).map((player, index) => (
                                     <tr key={player.id}>
+                                        <td>{index + 1}</td>
                                         <td>{player.player_name}</td>
                                         <td>{player.team_name}</td>
                                         <td>{player[selectedStat]}</td>
                                     </tr>
                                 ))
-                                : (players as AggregatedPlayerRanking[]).map((player) => (
+                                : (players as AggregatedPlayerRanking[]).map((player, index) => (
                                     <tr key={`${player.player_name}-${player.team_name}`}>
+                                        <td>{index + 1}</td>
                                         <td>{player.player_name}</td>
                                         <td>{player.team_name}</td>
                                         <td>{player.total}</td>
