@@ -14,3 +14,11 @@ export interface PlayerStats {
     created_at: string
     updated_at: string
 }
+
+export interface AggregatedPlayerRanking {
+    player_name: string
+    team_name: string
+    games_played: number
+    total: number
+    average: number
+}

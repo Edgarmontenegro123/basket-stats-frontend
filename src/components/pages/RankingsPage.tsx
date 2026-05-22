@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
-import type { PlayerStats } from '../types/player'
-import { getPlayerRankings } from '../services/api'
+import type { PlayerStats, AggregatedPlayerRanking } from '../types/player'
+import { getPlayerRankings, getAggregatedPlayerRankings } from '../services/api'
 import './RankingsPage.css'
 import '../common/PageLayout.css'
 
 const RankingsPage = () => {
-    const [players, setPlayers] = useState<PlayerStats[]>([])
+    const [players, setPlayers] = useState<PlayerStats[] | AggregatedPlayerRanking[]>([])
     const [selectedStat, setSelectedStat] = useState<
         'points' |
         'rebounds' |
@@ -16,12 +16,15 @@ const RankingsPage = () => {
         'blocks'
     >('points')
 
+    const [rankingMode, setRankingMode] = useState<'single-game' | 'aggregated'>('single-game')
+
     useEffect(() => {
         const fetchRankings = async () => {
             try {
-                const data = await getPlayerRankings(
-                    selectedStat,
-                )
+                const data =
+                    rankingMode === 'single-game'
+                    ? await getPlayerRankings(selectedStat)
+                    : await getAggregatedPlayerRankings(selectedStat)
 
                 setPlayers(data)
             } catch (error) {
@@ -30,7 +33,7 @@ const RankingsPage = () => {
         }
 
         void fetchRankings()
-    }, [selectedStat])
+    }, [selectedStat, rankingMode])
 
     return (
         <div>
@@ -40,6 +43,29 @@ const RankingsPage = () => {
             />
 
             <SectionCard title='Rankings'>
+                <div className='rankings-tabs'>
+                    <button
+                        className={
+                            rankingMode === 'single-game'
+                                ? 'rankings-tab rankings-tab--active'
+                                : 'rankings-tab'
+                        }
+                        onClick={() => setRankingMode('single-game')}
+                    >
+                        Single Game
+                    </button>
+
+                    <button
+                        className={
+                            rankingMode === 'aggregated'
+                                ? 'rankings-tab rankings-tab--active'
+                                : 'rankings-tab'
+                        }
+                        onClick={() => setRankingMode('aggregated')}
+                    >
+                        Aggregated
+                    </button>
+                </div>
                 <div className='rankings-tabs'>
                     <button
                         className={
@@ -104,20 +130,29 @@ const RankingsPage = () => {
                             <th>Player</th>
                             <th>Team</th>
                             <th>{selectedStat.toUpperCase()}</th>
+                            {rankingMode === 'aggregated' && (
+                                <th>AVG</th>
+                            )}
                         </tr>
                         </thead>
 
                         <tbody>
-                        {players.map((player) => (
-                            <tr key={player.id}>
-                                <td>{player.player_name}</td>
-                                <td>{player.team_name}</td>
-
-                                <td>
-                                    {player[selectedStat]}
-                                </td>
-                            </tr>
-                        ))}
+                        {rankingMode === 'single-game'
+                            ? (players as PlayerStats[]).map((player) => (
+                                <tr key={player.id}>
+                                    <td>{player.player_name}</td>
+                                    <td>{player.team_name}</td>
+                                    <td>{player[selectedStat]}</td>
+                                </tr>
+                            ))
+                            : (players as AggregatedPlayerRanking[]).map((player) => (
+                                <tr key={`${player.player_name}-${player.team_name}`}>
+                                    <td>{player.player_name}</td>
+                                    <td>{player.team_name}</td>
+                                    <td>{player.total}</td>
+                                    <td>{player.average}</td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>

@@ -365,4 +365,21 @@ export const getPlayerRankings = async (
     }
 
     return res.json()
-}
+};
+
+export const getAggregatedPlayerRankings = async (
+    stat: string,
+    limit: number = 10,
+) => {
+    const res = await fetch(
+        `${ANALYTICS_API_URL}/analytics/players/aggregated-rankings?stat=${stat}&limit=${limit}`,
+    )
+
+    if (!res.ok) {
+        const text = await res.text()
+
+        throw new Error(text)
+    }
+
+    return res.json()
+};
