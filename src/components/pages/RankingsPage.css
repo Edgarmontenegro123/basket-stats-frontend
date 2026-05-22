@@ -26,3 +26,14 @@
     color: var(--title);
     font-weight: 700;
 }
+
+.rankings-state {
+    margin: 16px 0;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.rankings-state--error {
+    color: #ff6b6b;
+    font-weight: 600;
+}

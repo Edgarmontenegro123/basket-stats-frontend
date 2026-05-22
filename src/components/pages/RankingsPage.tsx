@@ -17,10 +17,14 @@ const RankingsPage = () => {
     >('points')
 
     const [rankingMode, setRankingMode] = useState<'single-game' | 'aggregated'>('single-game')
+    const [isLoading, setIsLoading] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
 
     useEffect(() => {
         const fetchRankings = async () => {
             try {
+                setIsLoading(true)
+                setErrorMessage('')
                 setPlayers([])
 
                 const data =
@@ -31,6 +35,9 @@ const RankingsPage = () => {
                 setPlayers(data)
             } catch (error) {
                 console.error(error)
+                setErrorMessage('Could not load rankings. Please try again.')
+            } finally {
+                setIsLoading(false)
             }
         }
 
@@ -124,6 +131,16 @@ const RankingsPage = () => {
                         Blocks
                     </button>
                 </div>
+
+                {isLoading && (
+                    <p className='rankings-state'>Loading rankings...</p>
+                )}
+
+                {errorMessage && (
+                    <p className='rankings-state rankings-state--error'>
+                        {errorMessage}
+                    </p>
+                )}
 
                 <div className='table-wrapper'>
                     <table className='data-table'>
