@@ -1,0 +1,27 @@
+.rankings-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.rankings-tabs button {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.rankings-tabs button:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+.rankings-tab--active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--title);
+}

@@ -349,3 +349,20 @@ export const getTopScorers = async (
 
     return res.json();
 };
+
+export const getPlayerRankings = async (
+    stat: string,
+    limit: number = 10,
+) => {
+    const res = await fetch(
+        `${ANALYTICS_API_URL}/analytics/players/rankings?stat=${stat}&limit=${limit}`,
+    )
+
+    if (!res.ok) {
+        const text = await res.text()
+
+        throw new Error(text)
+    }
+
+    return res.json()
+}
