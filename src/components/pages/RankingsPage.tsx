@@ -21,6 +21,8 @@ const RankingsPage = () => {
     useEffect(() => {
         const fetchRankings = async () => {
             try {
+                setPlayers([])
+
                 const data =
                     rankingMode === 'single-game'
                     ? await getPlayerRankings(selectedStat)
