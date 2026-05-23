@@ -4,10 +4,9 @@ import SectionCard from '../common/SectionCard'
 import type { PlayerStats, AggregatedPlayerRanking } from '../types/player'
 import type { Game } from '../types/game'
 import {
-    getPlayerRankings,
     getAggregatedPlayerRankings,
     getGames,
-    /*getPlayerStatsByGameId,*/
+    getPlayerStatsByGameId,
 } from '../services/api'
 import './RankingsPage.css'
 import '../common/PageLayout.css'
@@ -35,9 +34,14 @@ const RankingsPage = () => {
                 setErrorMessage('')
                 setPlayers([])
 
+                if (rankingMode === 'single-game' && !selectedGameId) {
+                    setPlayers([])
+                    return
+                }
+
                 const data =
                     rankingMode === 'single-game'
-                    ? await getPlayerRankings(selectedStat)
+                    ? await getPlayerStatsByGameId(selectedGameId)
                     : await getAggregatedPlayerRankings(selectedStat)
 
                 setPlayers(data)
@@ -50,7 +54,7 @@ const RankingsPage = () => {
         }
 
         void fetchRankings()
-    }, [selectedStat, rankingMode])
+    }, [selectedStat, rankingMode, selectedGameId])
 
     useEffect(() => {
         const fetchGames = async () => {
