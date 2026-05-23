@@ -3,9 +3,11 @@ import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import type { PlayerStats, AggregatedPlayerRanking } from '../types/player'
 import type { Game } from '../types/game'
+import type { Team } from '../types/team'
 import {
     getAggregatedPlayerRankings,
     getGames,
+    getTeams,
     getPlayerStatsByGameId,
 } from '../services/api'
 import './RankingsPage.css'
@@ -26,6 +28,8 @@ const RankingsPage = () => {
     const [errorMessage, setErrorMessage] = useState('')
     const [games, setGames] = useState<Game[]>([])
     const [selectedGameId, setSelectedGameId] = useState('')
+    const [teams, setTeams] = useState<Team[]>([])
+    const [selectedTeamName, setSelectedTeamName] = useState('')
 
     useEffect(() => {
         const fetchRankings = async () => {
@@ -74,6 +78,23 @@ const RankingsPage = () => {
         void fetchGames()
     }, [])
 
+    useEffect(() => {
+        const fetchTeams = async () => {
+            try {
+                const data = await getTeams()
+
+                setTeams(data)
+
+                if (data.length > 0) {
+                    setSelectedTeamName(data[0].name)
+                }
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        void fetchTeams()
+    }, [])
 
     const getRankClassName = (index: number) => {
         if (index === 0) return 'ranking-row ranking-row--gold'
@@ -127,6 +148,24 @@ const RankingsPage = () => {
                             {games.map((game) => (
                                 <option key={game.id} value={game.id}>
                                     {game.home_team_name} vs {game.away_team_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {rankingMode === 'aggregated' && (
+                    <div className='rankings-filter'>
+                        <label htmlFor='team-select'>Team</label>
+
+                        <select
+                            id='team-select'
+                            value={selectedTeamName}
+                            onChange={(event) => setSelectedTeamName(event.target.value)}
+                        >
+                            {teams.map((team) => (
+                                <option key={team.id} value={team.name}>
+                                    {team.name}
                                 </option>
                             ))}
                         </select>
