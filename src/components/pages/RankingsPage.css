@@ -44,3 +44,19 @@
     text-align: center;
     font-weight: 700;
 }
+
+.ranking-row {
+    transition: 0.2s ease;
+}
+
+.ranking-row--gold {
+    background: rgba(255, 215, 0, 0.08);
+}
+
+.ranking-row--silver {
+    background: rgba(192, 192, 192, 0.08);
+}
+
+.ranking-row--bronze {
+    background: rgba(205, 127, 50, 0.08);
+}

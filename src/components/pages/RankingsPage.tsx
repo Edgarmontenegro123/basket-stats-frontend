@@ -44,6 +44,14 @@ const RankingsPage = () => {
         void fetchRankings()
     }, [selectedStat, rankingMode])
 
+    const getRankClassName = (index: number) => {
+        if (index === 0) return 'ranking-row ranking-row--gold'
+        if (index === 1) return 'ranking-row ranking-row--silver'
+        if (index === 2) return 'ranking-row ranking-row--bronze'
+
+        return 'ranking-row'
+    }
+
     return (
         <div>
             <PageHeader
@@ -170,7 +178,9 @@ const RankingsPage = () => {
                             <tbody>
                             {rankingMode === 'single-game'
                                 ? (players as PlayerStats[]).map((player, index) => (
-                                    <tr key={player.id}>
+                                    <tr key={player.id}
+                                        className={getRankClassName(index)}
+                                    >
                                         <td>{index + 1}</td>
                                         <td>{player.player_name}</td>
                                         <td>{player.team_name}</td>
@@ -178,7 +188,9 @@ const RankingsPage = () => {
                                     </tr>
                                 ))
                                 : (players as AggregatedPlayerRanking[]).map((player, index) => (
-                                    <tr key={`${player.player_name}-${player.team_name}`}>
+                                    <tr key={`${player.player_name}-${player.team_name}`}
+                                        className={getRankClassName(index)}
+                                    >
                                         <td>{index + 1}</td>
                                         <td>{player.player_name}</td>
                                         <td>{player.team_name}</td>
