@@ -48,7 +48,14 @@ const RankingsPage = () => {
                     ? await getPlayerStatsByGameId(selectedGameId)
                     : await getAggregatedPlayerRankings(selectedStat)
 
-                setPlayers(data)
+                const filteredData =
+                    rankingMode === 'aggregated' && selectedTeamName
+                        ? (data as AggregatedPlayerRanking[]).filter(
+                            (player) => player.team_name === selectedTeamName,
+                        )
+                        : data
+
+                setPlayers(filteredData)
             } catch (error) {
                 console.error(error)
                 setErrorMessage('Could not load rankings. Please try again.')
@@ -58,7 +65,7 @@ const RankingsPage = () => {
         }
 
         void fetchRankings()
-    }, [selectedStat, rankingMode, selectedGameId])
+    }, [selectedStat, rankingMode, selectedGameId, selectedTeamName])
 
     useEffect(() => {
         const fetchGames = async () => {
