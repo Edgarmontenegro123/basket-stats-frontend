@@ -61,6 +61,28 @@
     background: rgba(205, 127, 50, 0.08);
 }
 
+.rankings-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+    max-width: 360px;
+}
+
+.rankings-filter label {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.rankings-filter select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+    color: var(--text);
+}
+
 @media (max-width: 640px) {
     .rankings-tabs {
         gap: 8px;

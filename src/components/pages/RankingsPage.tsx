@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import type { PlayerStats, AggregatedPlayerRanking } from '../types/player'
-import { getPlayerRankings, getAggregatedPlayerRankings } from '../services/api'
+import type { Game } from '../types/game'
+import {
+    getPlayerRankings,
+    getAggregatedPlayerRankings,
+    getGames,
+    /*getPlayerStatsByGameId,*/
+} from '../services/api'
 import './RankingsPage.css'
 import '../common/PageLayout.css'
 
@@ -19,6 +25,8 @@ const RankingsPage = () => {
     const [rankingMode, setRankingMode] = useState<'single-game' | 'aggregated'>('single-game')
     const [isLoading, setIsLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const [games, setGames] = useState<Game[]>([])
+    const [selectedGameId, setSelectedGameId] = useState('')
 
     useEffect(() => {
         const fetchRankings = async () => {
@@ -43,6 +51,25 @@ const RankingsPage = () => {
 
         void fetchRankings()
     }, [selectedStat, rankingMode])
+
+    useEffect(() => {
+        const fetchGames = async () => {
+            try {
+                const data = await getGames()
+
+                setGames(data)
+
+                if (data.length > 0) {
+                    setSelectedGameId(data[0].id)
+                }
+            } catch (error) {
+                console.error(error)
+            }
+        }
+
+        void fetchGames()
+    }, [])
+
 
     const getRankClassName = (index: number) => {
         if (index === 0) return 'ranking-row ranking-row--gold'
@@ -83,6 +110,25 @@ const RankingsPage = () => {
                         Aggregated
                     </button>
                 </div>
+
+                {rankingMode === 'single-game' && (
+                    <div className='rankings-filter'>
+                        <label htmlFor='game-select'>Game</label>
+
+                        <select
+                            id='game-select'
+                            value={selectedGameId}
+                            onChange={(event) => setSelectedGameId(event.target.value)}
+                        >
+                            {games.map((game) => (
+                                <option key={game.id} value={game.id}>
+                                    {game.home_team_name} vs {game.away_team_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
                 <div className='rankings-tabs'>
                     <button
                         className={
