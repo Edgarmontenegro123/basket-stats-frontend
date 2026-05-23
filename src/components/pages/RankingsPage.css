@@ -60,3 +60,20 @@
 .ranking-row--bronze {
     background: rgba(205, 127, 50, 0.08);
 }
+
+@media (max-width: 640px) {
+    .rankings-tabs {
+        gap: 8px;
+    }
+
+    .rankings-tabs button {
+        flex: 1;
+        padding: 9px 10px;
+        font-size: 13px;
+    }
+
+    .rankings-table th,
+    .rankings-table td {
+        white-space: nowrap;
+    }
+}
