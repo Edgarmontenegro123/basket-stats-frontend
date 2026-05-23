@@ -227,7 +227,9 @@ const RankingsPage = () => {
 
                             <tbody>
                             {rankingMode === 'single-game'
-                                ? (players as PlayerStats[]).map((player, index) => (
+                                ? (players as PlayerStats[])
+                                    .sort((a, b) => b[selectedStat] - a[selectedStat])
+                                    .map((player, index) => (
                                     <tr key={player.id}
                                         className={getRankClassName(index)}
                                     >
