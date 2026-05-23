@@ -13,6 +13,14 @@ import {
 import './RankingsPage.css'
 import '../common/PageLayout.css'
 
+const rankingStats = [
+    { value: 'points', label: 'Points' },
+    { value: 'rebounds', label: 'Rebounds' },
+    { value: 'assists', label: 'Assists' },
+    { value: 'steals', label: 'Steals' },
+    { value: 'blocks', label: 'Blocks' },
+] as const
+
 const RankingsPage = () => {
     const [players, setPlayers] = useState<PlayerStats[] | AggregatedPlayerRanking[]>([])
     const [selectedStat, setSelectedStat] = useState<
@@ -180,60 +188,19 @@ const RankingsPage = () => {
                 )}
 
                 <div className='rankings-tabs'>
-                    <button
-                        className={
-                            selectedStat === 'points'
-                                ? 'rankings-tab rankings-tab--active'
-                                : 'rankings-tab'
-                        }
-                        onClick={() => setSelectedStat('points')}
-                    >
-                        Points
-                    </button>
-
-                    <button
-                        className={
-                            selectedStat === 'rebounds'
-                                ? 'rankings-tab rankings-tab--active'
-                                : 'rankings-tab'
-                        }
-                        onClick={() => setSelectedStat('rebounds')}
-                    >
-                        Rebounds
-                    </button>
-
-                    <button
-                        className={
-                            selectedStat === 'assists'
-                                ? 'rankings-tab rankings-tab--active'
-                                : 'rankings-tab'
-                        }
-                        onClick={() => setSelectedStat('assists')}
-                    >
-                        Assists
-                    </button>
-
-                    <button
-                        className={
-                            selectedStat === 'steals'
-                                ? 'rankings-tab rankings-tab--active'
-                                : 'rankings-tab'
-                        }
-                        onClick={() => setSelectedStat('steals')}
-                    >
-                        Steals
-                    </button>
-
-                    <button
-                        className={
-                            selectedStat === 'blocks'
-                                ? 'rankings-tab rankings-tab--active'
-                                : 'rankings-tab'
-                        }
-                        onClick={() => setSelectedStat('blocks')}
-                    >
-                        Blocks
-                    </button>
+                    {rankingStats.map((stat) => (
+                        <button
+                            key={stat.value}
+                            className={
+                                selectedStat === stat.value
+                                    ? 'rankings-tab rankings-tab--active'
+                                    : 'rankings-tab'
+                            }
+                            onClick={() => setSelectedStat(stat.value)}
+                        >
+                            {stat.label}
+                        </button>
+                    ))}
                 </div>
 
                 {isLoading && (
