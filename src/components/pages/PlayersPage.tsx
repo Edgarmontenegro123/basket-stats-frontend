@@ -296,20 +296,21 @@ export const PlayersPage = () => {
                                             : '-'}
                                     </td>
                                     <td>
-                                        <button
-                                            className='players-edit-button'
-                                            onClick={() => handleEditPlayer(player)}
-                                        >
-                                            Edit
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <button
-                                            className='players-delete-button'
-                                            onClick={() => handleDeletePlayer(player.id)}
-                                        >
-                                            Delete
-                                        </button>
+                                        <div className='players-actions'>
+                                            <button
+                                                className='players-edit-button'
+                                                onClick={() => handleEditPlayer(player)}
+                                            >
+                                                Edit
+                                            </button>
+
+                                            <button
+                                                className='players-delete-button'
+                                                onClick={() => handleDeletePlayer(player.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             )
