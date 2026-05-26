@@ -23,15 +23,18 @@ export const PlayersPage = () => {
     }, [])
 
     return (
-        <div className='players-header'>
-            <div>
-                <h1>Players</h1>
-                <p className='players-subtitle'>Manage real players by team.</p>
+        <div className='players-page'>
+            <div className='players-header'>
+                <div>
+                    <h1>Players</h1>
+                    <p className='players-subtitle'>
+                        Manage team rosters and player information.
+                    </p>
+                </div>
+                <button className='players-add-button'>
+                    Add Player
+                </button>
             </div>
-
-            <button className='players-add-button'>
-                Add Player
-            </button>
 
             <div className='players-summary'>
                 <div className='summary-card'>
