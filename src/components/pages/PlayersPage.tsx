@@ -77,8 +77,52 @@ export const PlayersPage = () => {
             <h1>Players</h1>
             <p>Manage real players by team.</p>
 
-            <p>Total players: {players.length}</p>
-            <p>Total teams: {teams.length}</p>
+            <div>
+                <p>Total players: {players.length}</p>
+                <p>Total teams: {teams.length}</p>
+            </div>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Number</th>
+                    <th>Player</th>
+                    <th>Team</th>
+                    <th>Position</th>
+                    <th>Height</th>
+                    <th>Weight</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {players.map((player) => {
+                    const team = teams.find(
+                        (team) => team.id === player.team_id,
+                    )
+
+                    return (
+                        <tr key={player.id}>
+                            <td>{player.number}</td>
+                            <td>
+                                {player.first_name} {player.last_name}
+                            </td>
+                            <td>{team?.name || 'Unknown team'}</td>
+                            <td>{player.position || '-'}</td>
+                            <td>
+                                {player.height_cm
+                                    ? `${player.height_cm} cm`
+                                    : '-'}
+                            </td>
+                            <td>
+                                {player.weight_kg
+                                    ? `${player.weight_kg} kg`
+                                    : '-'}
+                            </td>
+                        </tr>
+                    )
+                })}
+                </tbody>
+            </table>
         </div>
     )
 }
