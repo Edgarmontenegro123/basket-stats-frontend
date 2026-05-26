@@ -60,6 +60,14 @@ export const PlayersPage = () => {
     }
 
     const handleDeletePlayer = async (id: string) => {
+        const confirmDelete = window.confirm(
+            'Are you sure you want to delete this player?',
+        )
+
+        if (!confirmDelete) {
+            return
+        }
+
         await deletePlayer(id)
 
         const updatedPlayers = await getPlayers()
