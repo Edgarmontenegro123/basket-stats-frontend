@@ -4,7 +4,7 @@ import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import StatCard from '../common/StatCard'
 import type {Game} from '../types/game'
-import type { PlayerStats } from '../types/player'
+import type {PlayerStats} from '../types/player'
 
 import {
     getTeams,
@@ -81,7 +81,13 @@ const DashboardPage = () => {
                             {recentGames.map((game) => (
                                 <li key={game.id} className='dashboard-list__item'>
                     <span>
-                        {game.home_team_name} vs {game.away_team_name}
+                        {game.home_team_name}
+                        {' '}
+                        {game.home_score !== null ? game.home_score : '-'}
+                        {' - '}
+                        {game.away_score !== null ? game.away_score : '-'}
+                        {' '}
+                        {game.away_team_name}
                     </span>
                                     <small>
                                         {new Date(game.game_date).toLocaleDateString()} · {game.status}
