@@ -1,6 +1,7 @@
 .players-page {
-    padding: 24px;
-    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
 .players-header {
@@ -11,71 +12,87 @@
 }
 
 .players-header h1 {
-    color: var(--title);
+    margin: 0;
+    font-size: 40px;
 }
 
 .players-subtitle {
+    margin: 8px 0 0;
     color: var(--text-soft);
-    margin-top: 4px;
 }
 
 .players-add-button {
-    padding: 10px 16px;
-    border: 1px solid var(--border);
+    min-height: 40px;
     border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 0 14px;
+    cursor: pointer;
     background: var(--accent);
     color: var(--title);
-    cursor: pointer;
     font-weight: 600;
 }
 
 .players-summary {
     display: flex;
     gap: 16px;
-    margin: 24px 0;
+}
+
+.summary-card,
+.players-card {
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--bg-soft);
 }
 
 .summary-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow);
-    padding: 20px;
-    border-radius: var(--radius);
     min-width: 180px;
 }
 
 .summary-card h3 {
+    margin: 0;
     font-size: 28px;
-    margin-bottom: 8px;
     color: var(--title);
 }
 
 .summary-card p {
+    margin: 8px 0 0;
     color: var(--text-soft);
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
 }
 
 .players-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 16px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
 }
 
 .players-table th,
 .players-table td {
-    padding: 12px;
-    text-align: left;
+    padding: 12px 14px;
     border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
 }
 
 .players-table th {
     color: var(--text-soft);
-    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .players-table td {
-    color: var(--text);
+    color: var(--title);
+}
+
+@media (max-width: 768px) {
+    .players-header,
+    .players-summary {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }
