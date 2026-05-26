@@ -112,6 +112,14 @@ const ComparePage = () => {
     const teamBName =
         teams.find((team) => team.id === teamBId)?.name || 'Team B'
 
+    const formatPointDifferential = (value: number) => {
+        if (value > 0) {
+            return `+${value}`
+        }
+
+        return String(value)
+    }
+
 
     return (
         <div>
@@ -207,8 +215,8 @@ const ComparePage = () => {
                             </tr>
                             <tr>
                                 <td>Point differential</td>
-                                <td>{teamASummary.pointDifferential}</td>
-                                <td>{teamBSummary.pointDifferential}</td>
+                                <td>{formatPointDifferential(teamASummary.pointDifferential)}</td>
+                                <td>{formatPointDifferential(teamBSummary.pointDifferential)}</td>
                             </tr>
                             </tbody>
                         </table>
