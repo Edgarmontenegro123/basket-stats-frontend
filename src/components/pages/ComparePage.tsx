@@ -89,6 +89,8 @@ const ComparePage = () => {
                 ? Number((pointsAgainst / completedGames.length).toFixed(2))
                 : 0
 
+        const pointDifferential = pointsFor - pointsAgainst
+
         return {
             gamesPlayed: completedGames.length,
             wins,
@@ -97,6 +99,7 @@ const ComparePage = () => {
             pointsAgainst,
             averagePointsFor,
             averagePointsAgainst,
+            pointDifferential,
         }
     }
 
@@ -201,6 +204,11 @@ const ComparePage = () => {
                                 <td>Average points against</td>
                                 <td>{teamASummary.averagePointsAgainst}</td>
                                 <td>{teamBSummary.averagePointsAgainst}</td>
+                            </tr>
+                            <tr>
+                                <td>Point differential</td>
+                                <td>{teamASummary.pointDifferential}</td>
+                                <td>{teamBSummary.pointDifferential}</td>
                             </tr>
                             </tbody>
                         </table>
