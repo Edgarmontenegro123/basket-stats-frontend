@@ -13,7 +13,7 @@
 
 .players-header h1 {
     margin: 0;
-    font-size: 40px;
+    font-size: 32px;
 }
 
 .players-subtitle {
@@ -22,14 +22,18 @@
 }
 
 .players-add-button {
-    min-height: 40px;
+    min-height: 34px;
     border-radius: 10px;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(59, 130, 246, 0.55);
     padding: 0 14px;
     cursor: pointer;
-    background: var(--accent);
+    background: var(--accent-soft);
     color: var(--title);
     font-weight: 600;
+}
+
+.players-add-button:hover {
+    background: var(--accent);
 }
 
 .players-summary {
