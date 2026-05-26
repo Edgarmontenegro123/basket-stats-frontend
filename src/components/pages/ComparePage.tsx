@@ -41,7 +41,7 @@ const ComparePage = () => {
             <SectionCard title='Comparison'>
                 <div className='form-row'>
                     <div className='form-group'>
-                        <label>Team A</label>
+                        <label>Home Team</label>
                         <select
                             className='form-select'
                             value={teamAId}
@@ -60,7 +60,7 @@ const ComparePage = () => {
                     </div>
 
                     <div className='form-group'>
-                        <label>Team B</label>
+                        <label>Away Team</label>
                         <select
                             className='form-select'
                             value={teamBId}
