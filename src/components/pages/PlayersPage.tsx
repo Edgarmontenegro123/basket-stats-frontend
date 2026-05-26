@@ -1,12 +1,25 @@
 import { useEffect, useState } from 'react'
-import { getPlayers, getTeams } from '../services/api'
-import type { Player } from '../types/player'
+import { /*createPlayer,*/ getPlayers, getTeams } from '../services/api'
+import type { CreatePlayerPayload, Player } from '../types/player'
 import type { Team } from '../types/team'
 import './PlayersPage.css'
 
 export const PlayersPage = () => {
     const [players, setPlayers] = useState<Player[]>([])
     const [teams, setTeams] = useState<Team[]>([])
+    const [showForm, setShowForm] = useState(false)
+
+    const [form, setForm] = useState<CreatePlayerPayload>({
+        team_id: '',
+        first_name: '',
+        last_name: '',
+        number: 0,
+        position: '',
+        height_cm: undefined,
+        weight_kg: undefined,
+        birth_date: '',
+        photo_url: '',
+    })
 
     useEffect(() => {
         const fetchData = async () => {
@@ -31,7 +44,10 @@ export const PlayersPage = () => {
                         Manage team rosters and player information.
                     </p>
                 </div>
-                <button className='players-add-button'>
+                <button
+                    className='players-add-button'
+                    onClick={() => setShowForm(true)}
+                >
                     Add Player
                 </button>
             </div>
@@ -46,6 +62,59 @@ export const PlayersPage = () => {
                     <p>Total teams</p>
                 </div>
             </div>
+
+            {showForm && (
+                <div className='players-form-card'>
+                    <h2>Add Player</h2>
+
+                    <form>
+                        <select
+                            value={form.team_id}
+                            onChange={(e) =>
+                                setForm({ ...form, team_id: e.target.value })
+                            }
+                        >
+                            <option value=''>Select team</option>
+                            {teams.map((team) => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))}
+                        </select>
+
+                        <input
+                            type='text'
+                            placeholder='First name'
+                            value={form.first_name}
+                            onChange={(e) =>
+                                setForm({ ...form, first_name: e.target.value })
+                            }
+                        />
+
+                        <input
+                            type='text'
+                            placeholder='Last name'
+                            value={form.last_name}
+                            onChange={(e) =>
+                                setForm({ ...form, last_name: e.target.value })
+                            }
+                        />
+
+                        <input
+                            type='number'
+                            placeholder='Number'
+                            value={form.number}
+                            onChange={(e) =>
+                                setForm({ ...form, number: Number(e.target.value) })
+                            }
+                        />
+
+                        <button type='button' onClick={() => setShowForm(false)}>
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+            )}
 
             <div className='players-card'>
                 <div className='table-wrapper'>
