@@ -1,19 +1,24 @@
 import {useEffect, useState} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
+import type {Game} from '../types/game'
 import type {Team} from '../types/team'
-import {getTeams} from '../services/api'
+import {getTeams, getGames} from '../services/api'
 import '../common/PageLayout.css'
 
 const ComparePage = () => {
     const [teams, setTeams] = useState<Team[]>([])
     const [teamAId, setTeamAId] = useState('')
     const [teamBId, setTeamBId] = useState('')
+    const [games, setGames] = useState<Game[]>([])
 
     useEffect(() => {
         const fetchTeams = async () => {
             try {
                 const data = await getTeams()
+                const gamesData = await getGames()
+
+                setGames(gamesData)
                 setTeams(data)
 
                 if (data.length > 0) {
@@ -31,6 +36,40 @@ const ComparePage = () => {
         void fetchTeams()
     }, []);
 
+    const getTeamSummary = (teamId: string) => {
+        const completedGames = games.filter(
+            (game) =>
+                game.status === 'completed' &&
+                (game.home_team_id === teamId || game.away_team_id === teamId),
+        )
+
+        const pointsFor = completedGames.reduce((total, game) => {
+            if (game.home_team_id === teamId) {
+                return total + (game.home_score || 0)
+            }
+
+            return total + (game.away_score || 0)
+        }, 0)
+
+        const pointsAgainst = completedGames.reduce((total, game) => {
+            if (game.home_team_id === teamId) {
+                return total + (game.away_score || 0)
+            }
+
+            return total + (game.home_score || 0)
+        }, 0)
+
+        return {
+            gamesPlayed: completedGames.length,
+            pointsFor,
+            pointsAgainst,
+        }
+    }
+
+    const teamASummary = getTeamSummary(teamAId)
+    const teamBSummary = getTeamSummary(teamBId)
+
+
     return (
         <div>
             <PageHeader
@@ -40,6 +79,35 @@ const ComparePage = () => {
 
             <SectionCard title='Comparison'>
                 <div className='form-row'>
+                    <div className='table-wrapper'>
+                        <table className='data-table'>
+                            <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Home Team</th>
+                                <th>Away Team</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <tr>
+                                <td>Games played</td>
+                                <td>{teamASummary.gamesPlayed}</td>
+                                <td>{teamBSummary.gamesPlayed}</td>
+                            </tr>
+                            <tr>
+                                <td>Points for</td>
+                                <td>{teamASummary.pointsFor}</td>
+                                <td>{teamBSummary.pointsFor}</td>
+                            </tr>
+                            <tr>
+                                <td>Points against</td>
+                                <td>{teamASummary.pointsAgainst}</td>
+                                <td>{teamBSummary.pointsAgainst}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <div className='form-group'>
                         <label>Home Team</label>
                         <select
