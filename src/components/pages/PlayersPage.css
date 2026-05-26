@@ -1,0 +1,29 @@
+.players-page {
+    padding: 24px;
+}
+
+.players-summary {
+    margin: 16px 0;
+}
+
+.players-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+.players-table th,
+.players-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #263244;
+}
+
+.players-table th {
+    color: #cbd5e1;
+    font-weight: 600;
+}
+
+.players-table td {
+    color: #f8fafc;
+}

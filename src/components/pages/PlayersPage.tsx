@@ -53,6 +53,7 @@ import { useEffect, useState } from 'react'
 import { getPlayers, getTeams } from '../services/api'
 import type { Player } from '../types/player'
 import type { Team } from '../types/team'
+import './PlayersPage.css'
 
 export const PlayersPage = () => {
     const [players, setPlayers] = useState<Player[]>([])
@@ -73,16 +74,16 @@ export const PlayersPage = () => {
     }, [])
 
     return (
-        <div>
+        <div className='players-page'>
             <h1>Players</h1>
             <p>Manage real players by team.</p>
 
-            <div>
+            <div className='players-summary'>
                 <p>Total players: {players.length}</p>
                 <p>Total teams: {teams.length}</p>
             </div>
 
-            <table>
+            <table className='players-table'>
                 <thead>
                 <tr>
                     <th>Number</th>
