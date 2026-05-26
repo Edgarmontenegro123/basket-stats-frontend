@@ -51,7 +51,7 @@ const ComparePage = () => {
                                 <option
                                     key={team.id}
                                     value={team.id}
-                                    disabled={team.id === teamAId}
+                                    disabled={team.id === teamBId}
                                 >
                                     {team.name}
                                 </option>
@@ -67,7 +67,11 @@ const ComparePage = () => {
                             onChange={(event) => setTeamBId(event.target.value)}
                         >
                             {teams.map((team) => (
-                                <option key={team.id} value={team.id}>
+                                <option
+                                    key={team.id}
+                                    value={team.id}
+                                    disabled={team.id === teamAId}
+                                >
                                     {team.name}
                                 </option>
                             ))}
