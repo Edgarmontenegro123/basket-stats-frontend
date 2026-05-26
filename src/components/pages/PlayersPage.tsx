@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useEffect, useState } from 'react'
-import { createPlayer, getPlayers, getTeams } from '../services/api'
+import { createPlayer, getPlayers, deletePlayer,getTeams } from '../services/api'
 import type { CreatePlayerPayload, Player } from '../types/player'
 import type { Team } from '../types/team'
 import './PlayersPage.css'
@@ -57,6 +57,13 @@ export const PlayersPage = () => {
         })
 
         setShowForm(false)
+    }
+
+    const handleDeletePlayer = async (id: string) => {
+        await deletePlayer(id)
+
+        const updatedPlayers = await getPlayers()
+        setPlayers(updatedPlayers)
     }
 
     return (
@@ -155,6 +162,7 @@ export const PlayersPage = () => {
                             <th>Position</th>
                             <th>Height</th>
                             <th>Weight</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
 
@@ -181,6 +189,14 @@ export const PlayersPage = () => {
                                         {player.weight_kg
                                             ? `${player.weight_kg} kg`
                                             : '-'}
+                                    </td>
+                                    <td>
+                                        <button
+                                            className='players-delete-button'
+                                            onClick={() => handleDeletePlayer(player.id)}
+                                        >
+                                            Delete
+                                        </button>
                                     </td>
                                 </tr>
                             )
