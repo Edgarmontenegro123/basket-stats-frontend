@@ -93,6 +93,17 @@
     color: var(--title);
 }
 
+.players-edit-button {
+    min-height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 0 12px;
+    cursor: pointer;
+    background: var(--accent-soft);
+    color: var(--title);
+    font-weight: 600;
+}
+
 .players-delete-button {
     min-height: 34px;
     border-radius: 10px;

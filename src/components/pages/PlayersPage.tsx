@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useEffect, useState } from 'react'
-import { createPlayer, getPlayers, deletePlayer,getTeams } from '../services/api'
+import { createPlayer, getPlayers, updatePlayer,deletePlayer,getTeams } from '../services/api'
 import type { CreatePlayerPayload, Player } from '../types/player'
 import type { Team } from '../types/team'
 import './PlayersPage.css'
@@ -9,6 +9,7 @@ export const PlayersPage = () => {
     const [players, setPlayers] = useState<Player[]>([])
     const [teams, setTeams] = useState<Team[]>([])
     const [showForm, setShowForm] = useState(false)
+    const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
 
     const [form, setForm] = useState<CreatePlayerPayload>({
         team_id: '',
@@ -39,7 +40,11 @@ export const PlayersPage = () => {
     const handleCreatePlayer = async (e: React.BaseSyntheticEvent) => {
         e.preventDefault()
 
-        await createPlayer(form)
+        if (editingPlayer) {
+            await updatePlayer(editingPlayer.id, form)
+        } else {
+            await createPlayer(form)
+        }
 
         const updatedPlayers = await getPlayers()
         setPlayers(updatedPlayers)
@@ -56,7 +61,26 @@ export const PlayersPage = () => {
             photo_url: '',
         })
 
+        setEditingPlayer(null)
         setShowForm(false)
+    }
+
+    const handleEditPlayer = (player: Player) => {
+        setEditingPlayer(player)
+
+        setForm({
+            team_id: player.team_id,
+            first_name: player.first_name,
+            last_name: player.last_name,
+            number: player.number,
+            position: player.position || '',
+            height_cm: player.height_cm || undefined,
+            weight_kg: player.weight_kg || undefined,
+            birth_date: player.birth_date || '',
+            photo_url: player.photo_url || '',
+        })
+
+        setShowForm(true)
     }
 
     const handleDeletePlayer = async (id: string) => {
@@ -104,7 +128,7 @@ export const PlayersPage = () => {
 
             {showForm && (
                 <div className='players-form-card'>
-                    <h2>Add Player</h2>
+                    <h2>{editingPlayer ? 'Edit Player' : 'Add Player'}</h2>
 
                     <form onSubmit={handleCreatePlayer}>
                         <select
@@ -197,6 +221,14 @@ export const PlayersPage = () => {
                                         {player.weight_kg
                                             ? `${player.weight_kg} kg`
                                             : '-'}
+                                    </td>
+                                    <td>
+                                        <button
+                                            className='players-edit-button'
+                                            onClick={() => handleEditPlayer(player)}
+                                        >
+                                            Edit
+                                        </button>
                                     </td>
                                     <td>
                                         <button
