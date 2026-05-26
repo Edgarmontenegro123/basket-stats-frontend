@@ -26,6 +26,12 @@ export const MainLayout = () => {
                         Teams
                     </NavLink>
                     <NavLink
+                        to='/players'
+                        className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                    >
+                        Players
+                    </NavLink>
+                    <NavLink
                         to='/games'
                         className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >

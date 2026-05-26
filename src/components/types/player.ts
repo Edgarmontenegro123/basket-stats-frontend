@@ -22,3 +22,23 @@ export interface AggregatedPlayerRanking {
     total: number
     average: number
 }
+
+export interface Player {
+    id: string
+    team_id: string
+    first_name: string
+    last_name: string
+    number: number
+    position?: string | null
+    height_cm?: number | null
+    weight_kg?: number | null
+    birth_date?: string | null
+    photo_url?: string | null
+    created_at?: string
+    updated_at?: string
+}
+
+export type CreatePlayerPayload = Omit<
+    Player,
+    'id' | 'created_at' | 'updated_at'
+>

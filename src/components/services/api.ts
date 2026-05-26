@@ -1,3 +1,5 @@
+import type { CreatePlayerPayload, Player } from '../types/player'
+
 const MANAGEMENT_API_URL = import.meta.env.VITE_MANAGEMENT_API_URL;
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL;
 
@@ -383,3 +385,77 @@ export const getAggregatedPlayerRankings = async (
 
     return res.json()
 };
+
+export const getPlayers = async (): Promise<Player[]> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players`)
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const getPlayersByTeam = async (
+    teamId: string,
+): Promise<Player[]> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${teamId}/players`)
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const createPlayer = async (
+    payload: CreatePlayerPayload,
+): Promise<Player> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const updatePlayer = async (
+    id: string,
+    payload: CreatePlayerPayload,
+): Promise<Player> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const deletePlayer = async (id: string): Promise<void> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`, {
+        method: 'DELETE',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+}

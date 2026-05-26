@@ -8,6 +8,7 @@ import RankingsPage from '../components/pages/RankingsPage'
 import ComparePage from '../components/pages/ComparePage'
 import SeasonsPage from '../components/pages/SeasonsPage'
 import GameAnalyticsPage from '../components/pages/GameAnalyticsPage'
+import {PlayersPage} from '../components/pages/PlayersPage';
 
 export const AppRouter = () => {
     return (
@@ -17,6 +18,7 @@ export const AppRouter = () => {
                 <Route element={<MainLayout/>}>
                     <Route path='/dashboard' element={<DashboardPage/>}/>
                     <Route path='/teams' element={<TeamsPage/>}/>
+                    <Route path='/players' element={<PlayersPage />}/>
                     <Route path='/games' element={<GamesPage/>}/>
                     <Route path='/upload-stats' element={<UploadStatsPage/>}/>
                     <Route path='/rankings' element={<RankingsPage/>}/>
