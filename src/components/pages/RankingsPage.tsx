@@ -119,6 +119,26 @@ const RankingsPage = () => {
         return 'ranking-row'
     }
 
+    const getEmptyStateMessage = () => {
+        if (rankingMode === 'single-game' && games.length === 0) {
+            return 'No games available yet.'
+        }
+
+        if (rankingMode === 'single-game' && selectedGameId) {
+            return 'No stats processed for this game yet.'
+        }
+
+        if (rankingMode === 'aggregated' && teams.length === 0) {
+            return 'No teams available yet.'
+        }
+
+        if (rankingMode === 'aggregated' && selectedTeamName) {
+            return 'No aggregated stats available for this team yet.'
+        }
+
+        return 'No rankings available yet.'
+    }
+
     return (
         <div>
             <PageHeader
@@ -215,7 +235,7 @@ const RankingsPage = () => {
 
                 {!isLoading && !errorMessage && players.length === 0 && (
                     <p className='rankings-state'>
-                        No rankings available yet.
+                        {getEmptyStateMessage()}
                     </p>
                 )}
 
