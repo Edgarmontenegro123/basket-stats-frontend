@@ -172,6 +172,65 @@ export const PlayersPage = () => {
                             }
                         />
 
+                        <select
+                            value={form.position || ''}
+                            onChange={(e) =>
+                                setForm({ ...form, position: e.target.value })
+                            }
+                        >
+                            <option value=''>Select position</option>
+                            <option value='PG'>PG</option>
+                            <option value='SG'>SG</option>
+                            <option value='SF'>SF</option>
+                            <option value='PF'>PF</option>
+                            <option value='C'>C</option>
+                        </select>
+
+                        <input
+                            type='number'
+                            placeholder='Height cm'
+                            value={form.height_cm || ''}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    height_cm: e.target.value
+                                        ? Number(e.target.value)
+                                        : undefined,
+                                })
+                            }
+                        />
+
+                        <input
+                            type='number'
+                            placeholder='Weight kg'
+                            value={form.weight_kg || ''}
+                            onChange={(e) =>
+                                setForm({
+                                    ...form,
+                                    weight_kg: e.target.value
+                                        ? Number(e.target.value)
+                                        : undefined,
+                                })
+                            }
+                        />
+
+                        <input
+                            type='date'
+                            value={form.birth_date || ''}
+                            onChange={(e) =>
+                                setForm({ ...form, birth_date: e.target.value })
+                            }
+                        />
+
+                        <input
+                            type='text'
+                            placeholder='Photo URL'
+                            value={form.photo_url || ''}
+                            onChange={(e) =>
+                                setForm({ ...form, photo_url: e.target.value })
+                            }
+                        />
+
                         <button type='button' onClick={() => setShowForm(false)}>
                             Cancel
                         </button>
@@ -188,6 +247,7 @@ export const PlayersPage = () => {
                     <table className='players-table'>
                         <thead>
                         <tr>
+                            <th>Photo</th>
                             <th>Number</th>
                             <th>Player</th>
                             <th>Team</th>
@@ -206,6 +266,19 @@ export const PlayersPage = () => {
 
                             return (
                                 <tr key={player.id}>
+                                    <td>
+                                        {player.photo_url ? (
+                                            <img
+                                                src={player.photo_url}
+                                                alt={player.first_name}
+                                                className='player-avatar'
+                                            />
+                                        ) : (
+                                            <div className='player-avatar-placeholder'>
+                                                {player.first_name.charAt(0)}
+                                            </div>
+                                        )}
+                                    </td>
                                     <td>{player.number}</td>
                                     <td>
                                         {player.first_name} {player.last_name}

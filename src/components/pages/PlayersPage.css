@@ -143,6 +143,26 @@
     padding: 0 12px;
 }
 
+.player-avatar,
+.player-avatar-placeholder {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+}
+
+.player-avatar {
+    object-fit: cover;
+}
+
+.player-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--title);
+    font-weight: 700;
+}
+
 @media (max-width: 768px) {
     .players-header,
     .players-summary {
