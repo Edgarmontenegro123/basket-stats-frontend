@@ -8,7 +8,7 @@ import type { PlayerStats } from '../types/player'
 
 import {
     getTeams,
-    getSeasons,
+    /*getSeasons,*/
     getGames,
     getTopScorers,
 } from '../services/api'
@@ -17,8 +17,10 @@ import './DashboardPage.css'
 
 const DashboardPage = () => {
     const [teamsCount, setTeamsCount] = useState<number>(0)
-    const [seasonsCount, setSeasonsCount] = useState<number>(0)
+    /*const [seasonsCount, setSeasonsCount] = useState<number>(0)*/
     const [gamesCount, setGamesCount] = useState<number>(0)
+    const [completedGamesCount, setCompletedGamesCount] = useState<number>(0)
+    const [scheduledGamesCount, setScheduledGamesCount] = useState<number>(0)
     const [recentGames, setRecentGames] = useState<Game[]>([])
     const [topScorers, setTopScorers] = useState<PlayerStats[]>([])
 
@@ -26,14 +28,27 @@ const DashboardPage = () => {
         const fetchDashboardData = async () => {
             try {
                 const teams = await getTeams()
-                const seasons = await getSeasons()
+                /*const seasons = await getSeasons()*/
                 const games = await getGames()
+
+                const completedGames = games.filter(
+                    (game: Game) => game.status === 'completed',
+                )
+
+                const scheduledGames = games.filter(
+                    (game: Game) => game.status === 'scheduled',
+                )
+
                 const scorers = await getTopScorers(5)
                 setTopScorers(scorers)
 
                 setTeamsCount(teams.length)
-                setSeasonsCount(seasons.length)
+                /*setSeasonsCount(seasons.length)*/
                 setGamesCount(games.length)
+
+                setCompletedGamesCount(completedGames.length)
+                setScheduledGamesCount(scheduledGames.length)
+
                 setRecentGames(games.slice(0, 5))
             } catch (error) {
                 console.error(error)
@@ -52,9 +67,9 @@ const DashboardPage = () => {
 
             <section className='dashboard-page__stats'>
                 <StatCard label='Teams' value={String(teamsCount)}/>
-                <StatCard label='Seasons' value={String(seasonsCount)}/>
                 <StatCard label='Games' value={String(gamesCount)}/>
-                <StatCard label='Status' value='MVP'/>
+                <StatCard label='Completed' value={String(completedGamesCount)}/>
+                <StatCard label='Scheduled' value={String(scheduledGamesCount)}/>
             </section>
 
             <section className='dashboard-page__grid'>
