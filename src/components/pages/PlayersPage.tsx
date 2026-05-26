@@ -1,5 +1,6 @@
+import * as React from 'react'
 import { useEffect, useState } from 'react'
-import { /*createPlayer,*/ getPlayers, getTeams } from '../services/api'
+import { createPlayer, getPlayers, getTeams } from '../services/api'
 import type { CreatePlayerPayload, Player } from '../types/player'
 import type { Team } from '../types/team'
 import './PlayersPage.css'
@@ -35,6 +36,29 @@ export const PlayersPage = () => {
         void fetchData()
     }, [])
 
+    const handleCreatePlayer = async (e: React.BaseSyntheticEvent) => {
+        e.preventDefault()
+
+        await createPlayer(form)
+
+        const updatedPlayers = await getPlayers()
+        setPlayers(updatedPlayers)
+
+        setForm({
+            team_id: '',
+            first_name: '',
+            last_name: '',
+            number: 0,
+            position: '',
+            height_cm: undefined,
+            weight_kg: undefined,
+            birth_date: '',
+            photo_url: '',
+        })
+
+        setShowForm(false)
+    }
+
     return (
         <div className='players-page'>
             <div className='players-header'>
@@ -67,7 +91,7 @@ export const PlayersPage = () => {
                 <div className='players-form-card'>
                     <h2>Add Player</h2>
 
-                    <form>
+                    <form onSubmit={handleCreatePlayer}>
                         <select
                             value={form.team_id}
                             onChange={(e) =>
@@ -111,6 +135,10 @@ export const PlayersPage = () => {
 
                         <button type='button' onClick={() => setShowForm(false)}>
                             Cancel
+                        </button>
+
+                        <button type='submit'>
+                            Save Player
                         </button>
                     </form>
                 </div>
