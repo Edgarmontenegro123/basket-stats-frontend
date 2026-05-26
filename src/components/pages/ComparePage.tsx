@@ -79,35 +79,6 @@ const ComparePage = () => {
 
             <SectionCard title='Comparison'>
                 <div className='form-row'>
-                    <div className='table-wrapper'>
-                        <table className='data-table'>
-                            <thead>
-                            <tr>
-                                <th>Metric</th>
-                                <th>Home Team</th>
-                                <th>Away Team</th>
-                            </tr>
-                            </thead>
-
-                            <tbody>
-                            <tr>
-                                <td>Games played</td>
-                                <td>{teamASummary.gamesPlayed}</td>
-                                <td>{teamBSummary.gamesPlayed}</td>
-                            </tr>
-                            <tr>
-                                <td>Points for</td>
-                                <td>{teamASummary.pointsFor}</td>
-                                <td>{teamBSummary.pointsFor}</td>
-                            </tr>
-                            <tr>
-                                <td>Points against</td>
-                                <td>{teamASummary.pointsAgainst}</td>
-                                <td>{teamBSummary.pointsAgainst}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
                     <div className='form-group'>
                         <label>Home Team</label>
                         <select
@@ -144,6 +115,35 @@ const ComparePage = () => {
                                 </option>
                             ))}
                         </select>
+                    </div>
+                    <div className='table-wrapper'>
+                        <table className='data-table'>
+                            <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Home Team</th>
+                                <th>Away Team</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <tr>
+                                <td>Games played</td>
+                                <td>{teamASummary.gamesPlayed}</td>
+                                <td>{teamBSummary.gamesPlayed}</td>
+                            </tr>
+                            <tr>
+                                <td>Points for</td>
+                                <td>{teamASummary.pointsFor}</td>
+                                <td>{teamBSummary.pointsFor}</td>
+                            </tr>
+                            <tr>
+                                <td>Points against</td>
+                                <td>{teamASummary.pointsAgainst}</td>
+                                <td>{teamBSummary.pointsAgainst}</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </SectionCard>
