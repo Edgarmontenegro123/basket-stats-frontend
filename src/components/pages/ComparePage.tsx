@@ -103,6 +103,12 @@ const ComparePage = () => {
     const teamASummary = getTeamSummary(teamAId)
     const teamBSummary = getTeamSummary(teamBId)
 
+    const teamAName =
+        teams.find((team) => team.id === teamAId)?.name || 'Team A'
+
+    const teamBName =
+        teams.find((team) => team.id === teamBId)?.name || 'Team B'
+
 
     return (
         <div>
@@ -155,8 +161,8 @@ const ComparePage = () => {
                             <thead>
                             <tr>
                                 <th>Metric</th>
-                                <th>Home Team</th>
-                                <th>Away Team</th>
+                                <th>{teamAName}</th>
+                                <th>{teamBName}</th>
                             </tr>
                             </thead>
 
