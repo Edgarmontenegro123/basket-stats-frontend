@@ -59,10 +59,44 @@ const ComparePage = () => {
             return total + (game.home_score || 0)
         }, 0)
 
+        const wins = completedGames.filter((game) => {
+            const teamScore =
+                game.home_team_id === teamId ? game.home_score : game.away_score
+
+            const opponentScore =
+                game.home_team_id === teamId ? game.away_score : game.home_score
+
+            return (teamScore || 0) > (opponentScore || 0)
+        }).length
+
+        const losses = completedGames.filter((game) => {
+            const teamScore =
+                game.home_team_id === teamId ? game.home_score : game.away_score
+
+            const opponentScore =
+                game.home_team_id === teamId ? game.away_score : game.home_score
+
+            return (teamScore || 0) < (opponentScore || 0)
+        }).length
+
+        const averagePointsFor =
+            completedGames.length > 0
+                ? Number((pointsFor / completedGames.length).toFixed(2))
+                : 0
+
+        const averagePointsAgainst =
+            completedGames.length > 0
+                ? Number((pointsAgainst / completedGames.length).toFixed(2))
+                : 0
+
         return {
             gamesPlayed: completedGames.length,
+            wins,
+            losses,
             pointsFor,
             pointsAgainst,
+            averagePointsFor,
+            averagePointsAgainst,
         }
     }
 
@@ -141,6 +175,26 @@ const ComparePage = () => {
                                 <td>Points against</td>
                                 <td>{teamASummary.pointsAgainst}</td>
                                 <td>{teamBSummary.pointsAgainst}</td>
+                            </tr>
+                            <tr>
+                                <td>Wins</td>
+                                <td>{teamASummary.wins}</td>
+                                <td>{teamBSummary.wins}</td>
+                            </tr>
+                            <tr>
+                                <td>Losses</td>
+                                <td>{teamASummary.losses}</td>
+                                <td>{teamBSummary.losses}</td>
+                            </tr>
+                            <tr>
+                                <td>Average points for</td>
+                                <td>{teamASummary.averagePointsFor}</td>
+                                <td>{teamBSummary.averagePointsFor}</td>
+                            </tr>
+                            <tr>
+                                <td>Average points against</td>
+                                <td>{teamASummary.averagePointsAgainst}</td>
+                                <td>{teamBSummary.averagePointsAgainst}</td>
                             </tr>
                             </tbody>
                         </table>
