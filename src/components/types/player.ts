@@ -38,6 +38,24 @@ export interface Player {
     updated_at?: string
 }
 
+export interface PlayerSummary {
+    player_name: string
+    team_name: string
+    games_played: string
+    total_points: string
+    total_rebounds: string
+    total_assists: string
+    total_turnovers: string
+    total_steals: string
+    total_blocks: string
+    average_points: string
+    average_rebounds: string
+    average_assists: string
+    average_turnovers: string
+    average_steals: string
+    average_blocks: string
+}
+
 export type CreatePlayerPayload = Omit<
     Player,
     'id' | 'created_at' | 'updated_at'

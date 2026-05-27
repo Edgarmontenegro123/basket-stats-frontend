@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
-import {getPlayerById, getTeams} from '../services/api'
-import type {Player} from '../types/player'
+import {getPlayerById, getTeams, getPlayerSummaryByName} from '../services/api'
+import type {Player, PlayerSummary} from '../types/player'
 import type {Team} from '../types/team'
 import './PlayerProfilePage.css'
 
@@ -9,6 +9,7 @@ export const PlayerProfilePage = () => {
     const {id} = useParams()
     const navigate = useNavigate()
     const [player, setPlayer] = useState<Player | null>(null)
+    const [playerSummary, setPlayerSummary] = useState<PlayerSummary | null>(null)
     const [team, setTeam] = useState<Team | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
@@ -27,6 +28,11 @@ export const PlayerProfilePage = () => {
                     getPlayerById(id),
                     getTeams(),
                 ])
+
+                const fullName = `${playerData.first_name} ${playerData.last_name}`
+                const summaryData = await getPlayerSummaryByName(fullName)
+
+                setPlayerSummary(summaryData)
 
                 const playerTeam = teamsData.find(
                     (team: Team) => team.id === playerData.team_id,
@@ -106,22 +112,45 @@ export const PlayerProfilePage = () => {
                 </div>
             </section>
 
-            <section className='player-details-grid'>
-                <div className='player-detail-card'>
-                    <span>Height</span>
-                    <strong>{player.height_cm ? `${player.height_cm} cm` : '-'}</strong>
-                </div>
+                <section className='player-details-grid'>
+                    <div className='player-detail-card'>
+                        <span>Height</span>
+                        <strong>{player.height_cm ? `${player.height_cm} cm` : '-'}</strong>
+                    </div>
 
-                <div className='player-detail-card'>
-                    <span>Weight</span>
-                    <strong>{player.weight_kg ? `${player.weight_kg} kg` : '-'}</strong>
-                </div>
+                    <div className='player-detail-card'>
+                        <span>Weight</span>
+                        <strong>{player.weight_kg ? `${player.weight_kg} kg` : '-'}</strong>
+                    </div>
 
-                <div className='player-detail-card'>
-                    <span>Birth date</span>
-                    <strong>{formatBirthDate(player.birth_date)}</strong>
-                </div>
-            </section>
+                    <div className='player-detail-card'>
+                        <span>Birth date</span>
+                        <strong>{formatBirthDate(player.birth_date)}</strong>
+                    </div>
+                </section>
+            {playerSummary && (
+                <section className='player-details-grid'>
+                    <div className='player-detail-card'>
+                        <span>Games played</span>
+                        <strong>{playerSummary.games_played}</strong>
+                    </div>
+
+                    <div className='player-detail-card'>
+                        <span>AVG points</span>
+                        <strong>{playerSummary.average_points}</strong>
+                    </div>
+
+                    <div className='player-detail-card'>
+                        <span>AVG rebounds</span>
+                        <strong>{playerSummary.average_rebounds}</strong>
+                    </div>
+
+                    <div className='player-detail-card'>
+                        <span>AVG assists</span>
+                        <strong>{playerSummary.average_assists}</strong>
+                    </div>
+                </section>
+            )}
         </div>
     )
 }

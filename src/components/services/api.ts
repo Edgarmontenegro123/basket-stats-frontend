@@ -469,3 +469,18 @@ export const deletePlayer = async (id: string): Promise<void> => {
         throw new Error(text)
     }
 }
+
+export const getPlayerSummaryByName = async (
+    playerName: string,
+) => {
+    const res = await fetch(
+        `${ANALYTICS_API_URL}/analytics/players/${encodeURIComponent(playerName)}/summary`,
+    )
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
