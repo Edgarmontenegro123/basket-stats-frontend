@@ -43,6 +43,26 @@ export const PlayersPage = () => {
     const handleCreatePlayer = async (e: React.BaseSyntheticEvent) => {
         e.preventDefault()
 
+        if (!form.team_id) {
+            alert('Please select a team.')
+            return
+        }
+
+        if (form.first_name.trim().length < 2) {
+            alert('First name must contain at least 2 characters.')
+            return
+        }
+
+        if (form.last_name.trim().length < 2) {
+            alert('Last name must contain at least 2 characters.')
+            return
+        }
+
+        if (form.number < 0 || form.number > 99) {
+            alert('Player number must be between 0 and 99.')
+            return
+        }
+
         if (editingPlayer) {
             await updatePlayer(editingPlayer.id, form)
         } else {
@@ -123,7 +143,21 @@ export const PlayersPage = () => {
                 </div>
                 <button
                     className='players-add-button'
-                    onClick={() => setShowForm(true)}
+                    onClick={() => {
+                        setEditingPlayer(null)
+                        setForm({
+                            team_id: '',
+                            first_name: '',
+                            last_name: '',
+                            number: 0,
+                            position: '',
+                            height_cm: undefined,
+                            weight_kg: undefined,
+                            birth_date: '',
+                            photo_url: '',
+                        })
+                        setShowForm(true)
+                    }}
                 >
                     Add Player
                 </button>
