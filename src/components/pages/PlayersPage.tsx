@@ -1,8 +1,8 @@
 import * as React from 'react'
-import { useEffect, useState } from 'react'
-import { createPlayer, getPlayers, updatePlayer,deletePlayer,getTeams } from '../services/api'
-import type { CreatePlayerPayload, Player } from '../types/player'
-import type { Team } from '../types/team'
+import {useEffect, useState} from 'react'
+import {createPlayer, getPlayers, updatePlayer, deletePlayer, getTeams} from '../services/api'
+import type {CreatePlayerPayload, Player} from '../types/player'
+import type {Team} from '../types/team'
 import './PlayersPage.css'
 
 export const PlayersPage = () => {
@@ -10,6 +10,9 @@ export const PlayersPage = () => {
     const [teams, setTeams] = useState<Team[]>([])
     const [showForm, setShowForm] = useState(false)
     const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
+    const [searchTerm, setSearchTerm] = useState('')
+    const [selectedTeamId, setSelectedTeamId] = useState('')
+
 
     const [form, setForm] = useState<CreatePlayerPayload>({
         team_id: '',
@@ -98,6 +101,17 @@ export const PlayersPage = () => {
         setPlayers(updatedPlayers)
     }
 
+    const filteredPlayers = players.filter((player) => {
+        const fullName = `${player.first_name} ${player.last_name}`.toLowerCase()
+        const matchesSearch = fullName.includes(searchTerm.toLowerCase())
+
+        const matchesTeam = selectedTeamId
+            ? player.team_id === selectedTeamId
+            : true
+
+        return matchesSearch && matchesTeam
+    })
+
     return (
         <div className='players-page'>
             <div className='players-header'>
@@ -134,7 +148,7 @@ export const PlayersPage = () => {
                         <select
                             value={form.team_id}
                             onChange={(e) =>
-                                setForm({ ...form, team_id: e.target.value })
+                                setForm({...form, team_id: e.target.value})
                             }
                         >
                             <option value=''>Select team</option>
@@ -150,7 +164,7 @@ export const PlayersPage = () => {
                             placeholder='First name'
                             value={form.first_name}
                             onChange={(e) =>
-                                setForm({ ...form, first_name: e.target.value })
+                                setForm({...form, first_name: e.target.value})
                             }
                         />
 
@@ -159,7 +173,7 @@ export const PlayersPage = () => {
                             placeholder='Last name'
                             value={form.last_name}
                             onChange={(e) =>
-                                setForm({ ...form, last_name: e.target.value })
+                                setForm({...form, last_name: e.target.value})
                             }
                         />
 
@@ -168,14 +182,14 @@ export const PlayersPage = () => {
                             placeholder='Number'
                             value={form.number}
                             onChange={(e) =>
-                                setForm({ ...form, number: Number(e.target.value) })
+                                setForm({...form, number: Number(e.target.value)})
                             }
                         />
 
                         <select
                             value={form.position || ''}
                             onChange={(e) =>
-                                setForm({ ...form, position: e.target.value })
+                                setForm({...form, position: e.target.value})
                             }
                         >
                             <option value=''>Select position</option>
@@ -218,7 +232,7 @@ export const PlayersPage = () => {
                             type='date'
                             value={form.birth_date || ''}
                             onChange={(e) =>
-                                setForm({ ...form, birth_date: e.target.value })
+                                setForm({...form, birth_date: e.target.value})
                             }
                         />
 
@@ -227,7 +241,7 @@ export const PlayersPage = () => {
                             placeholder='Photo URL'
                             value={form.photo_url || ''}
                             onChange={(e) =>
-                                setForm({ ...form, photo_url: e.target.value })
+                                setForm({...form, photo_url: e.target.value})
                             }
                         />
 
@@ -244,6 +258,29 @@ export const PlayersPage = () => {
 
             <div className='players-card'>
                 <div className='table-wrapper'>
+                    <div className='players-toolbar'>
+                        <input
+                            type='text'
+                            placeholder='Search player...'
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
+                            className='players-search'
+                        />
+
+                        <select
+                            value={selectedTeamId}
+                            onChange={(event) => setSelectedTeamId(event.target.value)}
+                            className='players-filter'
+                        >
+                            <option value=''>All teams</option>
+
+                            {teams.map((team) => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <table className='players-table'>
                         <thead>
                         <tr>
@@ -259,62 +296,69 @@ export const PlayersPage = () => {
                         </thead>
 
                         <tbody>
-                        {players.map((player) => {
-                            const team = teams.find(
-                                (team) => team.id === player.team_id,
-                            )
+                        {filteredPlayers.length === 0 ? (
+                            <tr>
+                                <td colSpan={8} className='players-empty'>
+                                    No players found.
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredPlayers.map((player) => {
+                                const team = teams.find(
+                                    (team) => team.id === player.team_id,
+                                )
+                                return (
+                                    <tr key={player.id}>
+                                        <td>
+                                            {player.photo_url ? (
+                                                <img
+                                                    src={player.photo_url}
+                                                    alt={player.first_name}
+                                                    className='player-avatar'
+                                                />
+                                            ) : (
+                                                <div className='player-avatar-placeholder'>
+                                                    {player.first_name.charAt(0)}
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td>{player.number}</td>
+                                        <td>
+                                            {player.first_name} {player.last_name}
+                                        </td>
+                                        <td>{team?.name || 'Unknown team'}</td>
+                                        <td>{player.position || '-'}</td>
+                                        <td>
+                                            {player.height_cm
+                                                ? `${player.height_cm} cm`
+                                                : '-'}
+                                        </td>
+                                        <td>
+                                            {player.weight_kg
+                                                ? `${player.weight_kg} kg`
+                                                : '-'}
+                                        </td>
+                                        <td>
+                                            <div className='players-actions'>
+                                                <button
+                                                    className='players-edit-button'
+                                                    onClick={() => handleEditPlayer(player)}
+                                                >
+                                                    Edit
+                                                </button>
 
-                            return (
-                                <tr key={player.id}>
-                                    <td>
-                                        {player.photo_url ? (
-                                            <img
-                                                src={player.photo_url}
-                                                alt={player.first_name}
-                                                className='player-avatar'
-                                            />
-                                        ) : (
-                                            <div className='player-avatar-placeholder'>
-                                                {player.first_name.charAt(0)}
+                                                <button
+                                                    className='players-delete-button'
+                                                    onClick={() => handleDeletePlayer(player.id)}
+                                                >
+                                                    Delete
+                                                </button>
                                             </div>
-                                        )}
-                                    </td>
-                                    <td>{player.number}</td>
-                                    <td>
-                                        {player.first_name} {player.last_name}
-                                    </td>
-                                    <td>{team?.name || 'Unknown team'}</td>
-                                    <td>{player.position || '-'}</td>
-                                    <td>
-                                        {player.height_cm
-                                            ? `${player.height_cm} cm`
-                                            : '-'}
-                                    </td>
-                                    <td>
-                                        {player.weight_kg
-                                            ? `${player.weight_kg} kg`
-                                            : '-'}
-                                    </td>
-                                    <td>
-                                        <div className='players-actions'>
-                                            <button
-                                                className='players-edit-button'
-                                                onClick={() => handleEditPlayer(player)}
-                                            >
-                                                Edit
-                                            </button>
-
-                                            <button
-                                                className='players-delete-button'
-                                                onClick={() => handleDeletePlayer(player.id)}
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )
-                        })}
+                                        </td>
+                                    </tr>
+                                )
+                            })
+                        )}
                         </tbody>
                     </table>
                 </div>
