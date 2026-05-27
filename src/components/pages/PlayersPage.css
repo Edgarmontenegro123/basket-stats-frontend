@@ -39,6 +39,7 @@
 .players-summary {
     display: flex;
     gap: 16px;
+    flex-wrap: wrap;
 }
 
 .summary-card,
@@ -51,6 +52,11 @@
 
 .summary-card {
     min-width: 180px;
+}
+
+.players-card {
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .summary-card h3 {
@@ -66,6 +72,7 @@
 
 .table-wrapper {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
 }
 
@@ -199,13 +206,6 @@
     background: rgba(239, 68, 68, 0.12);
 }
 
-.players-loading {
-    padding: 1rem;
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
-    color: var(--text);
-    background: var(--panel);
-}
 
 @media (max-width: 768px) {
     .players-page {
@@ -232,6 +232,11 @@
         padding: 16px;
     }
 
+    .summary-card {
+        width: 100%;
+        min-width: 0;
+    }
+
     .players-toolbar {
         flex-direction: column;
     }
@@ -247,6 +252,6 @@
     }
 
     .players-table {
-        min-width: 760px;
+        min-width: 820px;
     }
 }

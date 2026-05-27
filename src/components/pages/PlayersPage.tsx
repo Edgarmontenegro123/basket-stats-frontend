@@ -301,7 +301,20 @@ export const PlayersPage = () => {
                 </div>
             )}
 
-            {!isLoading && (
+            {error && (
+                <div className='players-error'>
+                    {error}
+                </div>
+            )}
+
+            {isLoading ? (
+                <div className='loading-overlay'>
+                    <div className='loading-box'>
+                        <div className='loading-spinner'/>
+                        <p>Loading players...</p>
+                    </div>
+                </div>
+            ) : (
                 <div className='players-card'>
                     <div className='players-toolbar'>
                         <input
@@ -327,19 +340,6 @@ export const PlayersPage = () => {
                         </select>
                     </div>
                     <div className='table-wrapper'>
-
-                        {error && (
-                            <div className='players-error'>
-                                {error}
-                            </div>
-                        )}
-
-                        {isLoading && (
-                            <div className='players-loading'>
-                                Loading players...
-                            </div>
-                        )}
-
                         <table className='players-table'>
                             <thead>
                             <tr>
