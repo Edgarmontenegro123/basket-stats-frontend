@@ -115,53 +115,67 @@ export const PlayerProfilePage = () => {
                 </div>
             </section>
 
-                <section className='player-details-grid'>
+            <section>
+                <h2 className='player-section-title'>Personal Details</h2>
+
+                <div className='player-details-grid'>
                     <div className='player-detail-card'>
                         <span>Height</span>
-                        <strong>{player.height_cm ? `${player.height_cm} cm` : '-'}</strong>
+                        <strong>
+                            {player.height_cm ? `${player.height_cm} cm` : '-'}
+                        </strong>
                     </div>
 
                     <div className='player-detail-card'>
                         <span>Weight</span>
-                        <strong>{player.weight_kg ? `${player.weight_kg} kg` : '-'}</strong>
+                        <strong>
+                            {player.weight_kg ? `${player.weight_kg} kg` : '-'}
+                        </strong>
                     </div>
 
                     <div className='player-detail-card'>
                         <span>Birth date</span>
                         <strong>{formatBirthDate(player.birth_date)}</strong>
                     </div>
-                </section>
-            {playerSummary && (
-                <section className='player-details-grid'>
-                    <div className='player-detail-card'>
-                        <span>Games played</span>
-                        <strong>{playerSummary.games_played}</strong>
-                    </div>
-
-                    <div className='player-detail-card'>
-                        <span>AVG points</span>
-                        <strong>{playerSummary.average_points}</strong>
-                    </div>
-
-                    <div className='player-detail-card'>
-                        <span>AVG rebounds</span>
-                        <strong>{playerSummary.average_rebounds}</strong>
-                    </div>
-
-                    <div className='player-detail-card'>
-                        <span>AVG assists</span>
-                        <strong>{playerSummary.average_assists}</strong>
-                    </div>
-                </section>
-            )}
-            {!playerSummary && (
-                <section className='player-details-grid'>
-                <div className='player-detail-card'>
-                <span>Analytics</span>
-                <strong>No processed stats yet.</strong>
                 </div>
-                </section>
+            </section>
+
+            <section>
+                <h2 className='player-section-title'>Performance Summary</h2>
+
+                {playerSummary ? (
+                    <div className='player-details-grid'>
+                        <div className='player-detail-card'>
+                            <span>Games played</span>
+                            <strong>{playerSummary.games_played}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
+                            <span>AVG points</span>
+                            <strong>{playerSummary.average_points}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
+                            <span>AVG rebounds</span>
+                            <strong>{playerSummary.average_rebounds}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
+                            <span>AVG assists</span>
+                            <strong>{playerSummary.average_assists}</strong>
+                        </div>
+                    </div>
+                ) : (
+                    <div className='player-empty-analytics'>
+                        <span>Analytics</span>
+                        <strong>No processed stats yet.</strong>
+                        <p>
+                            Upload and process game stats to generate this player
+                            summary.
+                        </p>
+                    </div>
                 )}
+            </section>
         </div>
     )
 }

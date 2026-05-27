@@ -119,6 +119,37 @@
     background: var(--accent);
 }
 
+.player-section-title {
+    margin: 0 0 12px;
+    color: var(--title);
+    font-size: 20px;
+}
+
+.player-empty-analytics {
+    padding: 24px;
+    border: 1px dashed var(--border);
+    border-radius: 18px;
+    background: var(--bg-soft);
+}
+
+.player-empty-analytics span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-soft);
+}
+
+.player-empty-analytics strong {
+    display: block;
+    color: var(--title);
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.player-empty-analytics p {
+    margin: 0;
+    color: var(--text-soft);
+}
+
 @media (max-width: 768px) {
     .player-details-grid {
         grid-template-columns: 1fr;
