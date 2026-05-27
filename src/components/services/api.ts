@@ -105,6 +105,16 @@ export const getPlayerStats = async (gameId: string) => {
     return res.json();
 }
 
+export const getPlayerById = async (id: string) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`)
+
+    if (!res.ok) {
+        throw new Error('Could not fetch player')
+    }
+
+    return res.json()
+}
+
 export const getTeams = async () => {
     // Go backend connection
     // const res = await fetch('http://localhost:8080/teams');
