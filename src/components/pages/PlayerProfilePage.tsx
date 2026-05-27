@@ -47,14 +47,34 @@ export const PlayerProfilePage = () => {
     }
 
     return (
-        <div>
-            <h1>
-                {player.first_name} {player.last_name}
-            </h1>
-            <p>Number: {player.number}</p>
-            <p>Position: {player.position || '-'}</p>
-            <p>Height: {player.height_cm || '-'} cm</p>
-            <p>Weight: {player.weight_kg || '-'} kg</p>
+        <div className='player-profile-page'>
+            <section className='player-profile-card'>
+                {player.photo_url ? (
+                    <img
+                        src={player.photo_url}
+                        alt={player.first_name}
+                        className='player-profile-avatar'
+                    />
+                ) : (
+                    <div className='player-profile-avatar-placeholder'>
+                        {player.first_name.charAt(0)}
+                    </div>
+                )}
+
+                <div>
+                    <h1>
+                        {player.first_name} {player.last_name}
+                    </h1>
+
+                    <div className='player-profile-info'>
+                        <p>Number: {player.number}</p>
+                        <p>Position: {player.position || '-'}</p>
+                        <p>Height: {player.height_cm ? `${player.height_cm} cm` : '-'}</p>
+                        <p>Weight: {player.weight_kg ? `${player.weight_kg} kg` : '-'}</p>
+                        <p>Birth date: {player.birth_date || '-'}</p>
+                    </div>
+                </div>
+            </section>
         </div>
     )
 }
