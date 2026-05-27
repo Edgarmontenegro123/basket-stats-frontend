@@ -1,10 +1,11 @@
 import * as React from 'react'
 import {useEffect, useState} from 'react'
-import {Link} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom'
 import {createPlayer, getPlayers, updatePlayer, deletePlayer, getTeams} from '../services/api'
 import type {CreatePlayerPayload, Player} from '../types/player'
 import type {Team} from '../types/team'
 import './PlayersPage.css'
+
 
 export const PlayersPage = () => {
     const [players, setPlayers] = useState<Player[]>([])
@@ -16,6 +17,7 @@ export const PlayersPage = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
+    const navigate = useNavigate()
 
     const [form, setForm] = useState<CreatePlayerPayload>({
         team_id: '',
@@ -368,7 +370,11 @@ export const PlayersPage = () => {
                                         (team) => team.id === player.team_id,
                                     )
                                     return (
-                                        <tr key={player.id}>
+                                        <tr
+                                            key={player.id}
+                                            className='player-row'
+                                            onClick={() => navigate(`/players/${player.id}`)}
+                                        >
                                             <td>
                                                 {player.photo_url ? (
                                                     <img
@@ -384,9 +390,7 @@ export const PlayersPage = () => {
                                             </td>
                                             <td>{player.number}</td>
                                             <td>
-                                                <Link to={`/players/${player.id}`} className='player-name-link'>
-                                                    {player.first_name} {player.last_name}
-                                                </Link>
+                                                {player.first_name} {player.last_name}
                                             </td>
                                             <td>{team?.name || 'Unknown team'}</td>
                                             <td>{player.position || '-'}</td>
@@ -404,14 +408,20 @@ export const PlayersPage = () => {
                                                 <div className='players-actions'>
                                                     <button
                                                         className='players-edit-button'
-                                                        onClick={() => handleEditPlayer(player)}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            handleEditPlayer(player)
+                                                        }}
                                                     >
                                                         Edit
                                                     </button>
 
                                                     <button
                                                         className='players-delete-button'
-                                                        onClick={() => handleDeletePlayer(player.id)}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            void handleDeletePlayer(player.id)
+                                                        }}
                                                     >
                                                         Delete
                                                     </button>
