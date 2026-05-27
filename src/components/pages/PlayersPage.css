@@ -122,6 +122,16 @@
     font-weight: 600;
 }
 
+.player-name-link {
+    color: var(--title);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.player-name-link:hover {
+    color: var(--accent);
+}
+
 /*================ Form ================*/
 
 .players-form-card {

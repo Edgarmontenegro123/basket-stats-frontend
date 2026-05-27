@@ -1,5 +1,6 @@
 import * as React from 'react'
 import {useEffect, useState} from 'react'
+import {Link} from 'react-router-dom'
 import {createPlayer, getPlayers, updatePlayer, deletePlayer, getTeams} from '../services/api'
 import type {CreatePlayerPayload, Player} from '../types/player'
 import type {Team} from '../types/team'
@@ -383,7 +384,9 @@ export const PlayersPage = () => {
                                             </td>
                                             <td>{player.number}</td>
                                             <td>
-                                                {player.first_name} {player.last_name}
+                                                <Link to={`/players/${player.id}`} className='player-name-link'>
+                                                    {player.first_name} {player.last_name}
+                                                </Link>
                                             </td>
                                             <td>{team?.name || 'Unknown team'}</td>
                                             <td>{player.position || '-'}</td>
