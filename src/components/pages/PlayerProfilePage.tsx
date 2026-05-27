@@ -1,10 +1,11 @@
 import {useEffect, useState} from 'react'
-import {useParams} from 'react-router-dom'
+import {useParams, useNavigate} from 'react-router-dom'
 import {getPlayerById} from '../services/api'
 import type {Player} from '../types/player'
 
 export const PlayerProfilePage = () => {
     const {id} = useParams()
+    const navigate = useNavigate()
     const [player, setPlayer] = useState<Player | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
@@ -56,6 +57,13 @@ export const PlayerProfilePage = () => {
 
     return (
         <div className='player-profile-page'>
+            <button
+                type='button'
+                className='back-button'
+                onClick={() => navigate('/players')}
+            >
+                ← Back to Players
+            </button>
             <section className='player-profile-card'>
                 {player.photo_url ? (
                     <img
