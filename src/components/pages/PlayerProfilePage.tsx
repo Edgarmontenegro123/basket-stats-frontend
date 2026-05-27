@@ -46,6 +46,14 @@ export const PlayerProfilePage = () => {
         return <p>{error || 'Player not found.'}</p>
     }
 
+    const formatBirthDate = (birthDate?: string | null) => {
+        if (!birthDate) {
+            return '-'
+        }
+
+        return new Date(birthDate).toLocaleDateString('en-GB')
+    }
+
     return (
         <div className='player-profile-page'>
             <section className='player-profile-card'>
@@ -71,7 +79,7 @@ export const PlayerProfilePage = () => {
                         <p>Position: {player.position || '-'}</p>
                         <p>Height: {player.height_cm ? `${player.height_cm} cm` : '-'}</p>
                         <p>Weight: {player.weight_kg ? `${player.weight_kg} kg` : '-'}</p>
-                        <p>Birth date: {player.birth_date || '-'}</p>
+                        <p>Birth date: {formatBirthDate(player.birth_date)}</p>
                     </div>
                 </div>
             </section>
