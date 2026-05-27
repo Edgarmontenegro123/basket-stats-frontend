@@ -115,7 +115,7 @@ const GameAnalyticsPage = () => {
 
             <section className='analytics-card'>
                 <h2>Team Stats</h2>
-                    <div className='table-wrapper'>
+                    <div className='table-wrapper analytics-table-wrapper'>
                         <table>
                             <thead>
                             <tr>
@@ -143,10 +143,27 @@ const GameAnalyticsPage = () => {
                             </tbody>
                         </table>
                     </div>
+
+                <div className='analytics-mobile-list'>
+                    {teamStats.map((stat) => (
+                        <div key={stat.id} className='analytics-mobile-card'>
+                            <h3>{stat.team_name}</h3>
+
+                            <div className='analytics-mobile-stats-grid'>
+                                <p><span>PTS</span><strong>{stat.points}</strong></p>
+                                <p><span>REB</span><strong>{stat.rebounds}</strong></p>
+                                <p><span>AST</span><strong>{stat.assists}</strong></p>
+                                <p><span>TO</span><strong>{stat.turnovers}</strong></p>
+                                <p><span>STL</span><strong>{stat.steals}</strong></p>
+                                <p><span>BLK</span><strong>{stat.blocks}</strong></p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </section>
             <section className='analytics-card'>
                 <h2>Player Stats</h2>
-                <div className='table-wrapper'>
+                <div className='table-wrapper analytics-table-wrapper'>
                     <table>
                         <thead>
                         <tr>
@@ -177,6 +194,25 @@ const GameAnalyticsPage = () => {
                         ))}
                         </tbody>
                     </table>
+                </div>
+                <div className='analytics-mobile-list'>
+                    {playerStats.map((stat) => (
+                        <div key={stat.id} className='analytics-mobile-card'>
+                            <h3>{stat.player_name}</h3>
+                            <p className='analytics-mobile-subtitle'>
+                                #{stat.player_number} · {stat.team_name}
+                            </p>
+
+                            <div className='analytics-mobile-stats-grid'>
+                                <p><span>PTS</span><strong>{stat.points}</strong></p>
+                                <p><span>REB</span><strong>{stat.rebounds}</strong></p>
+                                <p><span>AST</span><strong>{stat.assists}</strong></p>
+                                <p><span>TO</span><strong>{stat.turnovers}</strong></p>
+                                <p><span>STL</span><strong>{stat.steals}</strong></p>
+                                <p><span>BLK</span><strong>{stat.blocks}</strong></p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </section>
         </main>
