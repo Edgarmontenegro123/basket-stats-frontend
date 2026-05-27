@@ -251,6 +251,20 @@
         padding: 16px;
     }
 
+    .players-form-card form {
+        grid-template-columns: 1fr;
+    }
+
+    .players-form-card input,
+    .players-form-card select,
+    .players-form-card button {
+        width: 100%;
+    }
+
+    .players-form-card {
+        overflow: hidden;
+    }
+
     .summary-card {
         width: 100%;
         min-width: 0;
