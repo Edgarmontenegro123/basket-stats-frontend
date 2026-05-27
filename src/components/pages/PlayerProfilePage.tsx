@@ -30,10 +30,10 @@ export const PlayerProfilePage = () => {
                 ])
 
                 const fullName = `${playerData.first_name} ${playerData.last_name}`
-                const summaryData = await getPlayerSummaryByName(fullName)
+                const reversedFullName = `${playerData.last_name} ${playerData.first_name}`
 
-                console.log('Player full name:', fullName)
-                console.log('Player summary:', summaryData)
+                const summaryData = await getPlayerSummaryByName(fullName)
+                || await getPlayerSummaryByName(reversedFullName)
 
                 setPlayerSummary(summaryData)
 
