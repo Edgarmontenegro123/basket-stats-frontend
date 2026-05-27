@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
 import {getPlayerById} from '../services/api'
 import type {Player} from '../types/player'
+import './PlayerProfilePage.css'
 
 export const PlayerProfilePage = () => {
     const {id} = useParams()
