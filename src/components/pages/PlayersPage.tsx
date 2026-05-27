@@ -433,6 +433,93 @@ export const PlayersPage = () => {
                             )}
                             </tbody>
                         </table>
+                        <div className='players-mobile-list'>
+                            {filteredPlayers.map((player) => {
+                                const team = teams.find(
+                                    (team) => team.id === player.team_id,
+                                )
+
+                                return (
+                                    <div
+                                        key={player.id}
+                                        className='player-mobile-card'
+                                        onClick={() => navigate(`/players/${player.id}`)}
+                                    >
+                                        <div className='player-mobile-header'>
+                                            {player.photo_url ? (
+                                                <img
+                                                    src={player.photo_url}
+                                                    alt={player.first_name}
+                                                    className='player-avatar'
+                                                />
+                                            ) : (
+                                                <div className='player-avatar-placeholder'>
+                                                    {player.first_name.charAt(0)}
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <h3>
+                                                    {player.first_name} {player.last_name}
+                                                </h3>
+
+                                                <p>
+                                                    #{player.number}
+                                                    {' · '}
+                                                    {player.position || 'No position'}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className='player-mobile-info'>
+                                            <p>
+                                                <strong>Team:</strong>
+                                                {' '}
+                                                {team?.name || 'Unknown team'}
+                                            </p>
+
+                                            <p>
+                                                <strong>Height:</strong>
+                                                {' '}
+                                                {player.height_cm
+                                                    ? `${player.height_cm} cm`
+                                                    : '-'}
+                                            </p>
+
+                                            <p>
+                                                <strong>Weight:</strong>
+                                                {' '}
+                                                {player.weight_kg
+                                                    ? `${player.weight_kg} kg`
+                                                    : '-'}
+                                            </p>
+                                        </div>
+
+                                        <div className='player-mobile-actions'>
+                                            <button
+                                                className='players-edit-button'
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    handleEditPlayer(player)
+                                                }}
+                                            >
+                                                Edit
+                                            </button>
+
+                                            <button
+                                                className='players-delete-button'
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    void handleDeletePlayer(player.id)
+                                                }}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
                 </div>
             )}
