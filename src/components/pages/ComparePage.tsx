@@ -4,6 +4,7 @@ import SectionCard from '../common/SectionCard'
 import type {Game} from '../types/game'
 import type {Team} from '../types/team'
 import {getTeams, getGames} from '../services/api'
+import './ComparePage.css'
 import '../common/PageLayout.css'
 
 const ComparePage = () => {
@@ -167,7 +168,7 @@ const ComparePage = () => {
                             ))}
                         </select>
                     </div>
-                    <div className='table-wrapper'>
+                    <div className='table-wrapper compare-table-wrapper'>
                         <table className='data-table'>
                             <thead>
                             <tr>
@@ -220,6 +221,34 @@ const ComparePage = () => {
                             </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div className='compare-mobile-list'>
+                        <div className='compare-mobile-card'>
+                            <h3>{teamAName}</h3>
+
+                            <p><span>Games played</span><strong>{teamASummary.gamesPlayed}</strong></p>
+                            <p><span>Points for</span><strong>{teamASummary.pointsFor}</strong></p>
+                            <p><span>Points against</span><strong>{teamASummary.pointsAgainst}</strong></p>
+                            <p><span>Wins</span><strong>{teamASummary.wins}</strong></p>
+                            <p><span>Losses</span><strong>{teamASummary.losses}</strong></p>
+                            <p><span>Average points for</span><strong>{teamASummary.averagePointsFor}</strong></p>
+                            <p><span>Average points against</span><strong>{teamASummary.averagePointsAgainst}</strong></p>
+                            <p><span>Point differential</span><strong>{formatPointDifferential(teamASummary.pointDifferential)}</strong></p>
+                        </div>
+
+                        <div className='compare-mobile-card'>
+                            <h3>{teamBName}</h3>
+
+                            <p><span>Games played</span><strong>{teamBSummary.gamesPlayed}</strong></p>
+                            <p><span>Points for</span><strong>{teamBSummary.pointsFor}</strong></p>
+                            <p><span>Points against</span><strong>{teamBSummary.pointsAgainst}</strong></p>
+                            <p><span>Wins</span><strong>{teamBSummary.wins}</strong></p>
+                            <p><span>Losses</span><strong>{teamBSummary.losses}</strong></p>
+                            <p><span>Average points for</span><strong>{teamBSummary.averagePointsFor}</strong></p>
+                            <p><span>Average points against</span><strong>{teamBSummary.averagePointsAgainst}</strong></p>
+                            <p><span>Point differential</span><strong>{formatPointDifferential(teamBSummary.pointDifferential)}</strong></p>
+                        </div>
                     </div>
                 </div>
             </SectionCard>

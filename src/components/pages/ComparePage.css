@@ -1,0 +1,45 @@
+.compare-mobile-list {
+    display: none;
+}
+
+.compare-mobile-card {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--bg-soft);
+}
+
+.compare-mobile-card h3 {
+    margin: 0 0 14px;
+    color: var(--title);
+}
+
+.compare-mobile-card p {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-soft);
+}
+
+.compare-mobile-card p:last-child {
+    border-bottom: none;
+}
+
+.compare-mobile-card strong {
+    color: var(--title);
+}
+
+@media (max-width: 768px) {
+    .compare-table-wrapper {
+        display: none;
+    }
+
+    .compare-mobile-list {
+        display: grid;
+        gap: 16px;
+        width: 100%;
+    }
+}
