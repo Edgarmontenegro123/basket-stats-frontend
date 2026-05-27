@@ -208,9 +208,30 @@
 }
 
 @media (max-width: 768px) {
-    .players-header,
-    .players-summary {
+    .players-toolbar {
         flex-direction: column;
-        align-items: stretch;
+    }
+
+    .players-search,
+    .players-filter {
+        width: 100%;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .players-table {
+        min-width: 760px;
+    }
+
+    .players-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .players-add-button {
+        width: 100%;
     }
 }
