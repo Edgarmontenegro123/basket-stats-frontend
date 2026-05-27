@@ -303,30 +303,30 @@ export const PlayersPage = () => {
 
             {!isLoading && (
                 <div className='players-card'>
+                    <div className='players-toolbar'>
+                        <input
+                            type='text'
+                            placeholder='Search player...'
+                            value={searchTerm}
+                            onChange={(event) => setSearchTerm(event.target.value)}
+                            className='players-search'
+                        />
+
+                        <select
+                            value={selectedTeamId}
+                            onChange={(event) => setSelectedTeamId(event.target.value)}
+                            className='players-filter'
+                        >
+                            <option value=''>All teams</option>
+
+                            {teams.map((team) => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <div className='table-wrapper'>
-                        <div className='players-toolbar'>
-                            <input
-                                type='text'
-                                placeholder='Search player...'
-                                value={searchTerm}
-                                onChange={(event) => setSearchTerm(event.target.value)}
-                                className='players-search'
-                            />
-
-                            <select
-                                value={selectedTeamId}
-                                onChange={(event) => setSelectedTeamId(event.target.value)}
-                                className='players-filter'
-                            >
-                                <option value=''>All teams</option>
-
-                                {teams.map((team) => (
-                                    <option key={team.id} value={team.id}>
-                                        {team.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
 
                         {error && (
                             <div className='players-error'>
