@@ -83,6 +83,77 @@
     color: var(--text);
 }
 
+.rankings-mobile-list {
+    display: none;
+}
+
+.ranking-mobile-card {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--bg-soft);
+}
+
+.ranking-mobile-header {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.ranking-mobile-position {
+    min-width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--title);
+    font-weight: 700;
+}
+
+.ranking-mobile-header h3 {
+    margin: 0;
+    color: var(--title);
+    font-size: 16px;
+}
+
+.ranking-mobile-header p {
+    margin: 4px 0 0;
+    color: var(--text-soft);
+}
+
+.ranking-mobile-stat,
+.ranking-mobile-stats-grid {
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+}
+
+.ranking-mobile-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ranking-mobile-stat span,
+.ranking-mobile-stats-grid span {
+    color: var(--text-soft);
+    font-size: 13px;
+}
+
+.ranking-mobile-stat strong,
+.ranking-mobile-stats-grid strong {
+    color: var(--title);
+    font-size: 20px;
+}
+
+.ranking-mobile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
 @media (max-width: 640px) {
     .rankings-tabs {
         gap: 8px;
@@ -97,5 +168,14 @@
     .rankings-table th,
     .rankings-table td {
         white-space: nowrap;
+    }
+
+    .rankings-table-wrapper {
+        display: none;
+    }
+
+    .rankings-mobile-list {
+        display: grid;
+        gap: 16px;
     }
 }

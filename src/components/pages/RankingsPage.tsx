@@ -240,53 +240,116 @@ const RankingsPage = () => {
                 )}
 
                 {players.length > 0 && (
-                    <div className='table-wrapper'>
-                        <table className='data-table rankings-table'>
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Player</th>
-                                <th>Team</th>
-                                <th>{selectedStat.toUpperCase()}</th>
-                                {rankingMode === 'aggregated' && (
-                                    <>
-                                        <th>AVG</th>
-                                        <th>Games</th>
-                                    </>
+                    <>
+                        <div className='table-wrapper rankings-table-wrapper'>
+                            <table className='data-table rankings-table'>
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Player</th>
+                                    <th>Team</th>
+                                    <th>{selectedStat.toUpperCase()}</th>
+                                    {rankingMode === 'aggregated' && (
+                                        <>
+                                            <th>AVG</th>
+                                            <th>Games</th>
+                                        </>
 
-                                )}
-                            </tr>
-                            </thead>
+                                    )}
+                                </tr>
+                                </thead>
 
-                            <tbody>
+                                <tbody>
+                                {rankingMode === 'single-game'
+                                    ? (players as PlayerStats[])
+                                        .sort((a, b) => b[selectedStat] - a[selectedStat])
+                                        .map((player, index) => (
+                                            <tr key={player.id}
+                                                className={getRankClassName(index)}
+                                            >
+                                                <td>{index + 1}</td>
+                                                <td>{player.player_name}</td>
+                                                <td>{player.team_name}</td>
+                                                <td>{player[selectedStat]}</td>
+                                            </tr>
+                                        ))
+                                    : (players as AggregatedPlayerRanking[]).map((player, index) => (
+                                        <tr key={`${player.player_name}-${player.team_name}`}
+                                            className={getRankClassName(index)}
+                                        >
+                                            <td>{index + 1}</td>
+                                            <td>{player.player_name}</td>
+                                            <td>{player.team_name}</td>
+                                            <td>{player.total}</td>
+                                            <td>{player.average}</td>
+                                            <td>{player.games_played}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className='rankings-mobile-list'>
                             {rankingMode === 'single-game'
                                 ? (players as PlayerStats[])
                                     .sort((a, b) => b[selectedStat] - a[selectedStat])
                                     .map((player, index) => (
-                                    <tr key={player.id}
-                                        className={getRankClassName(index)}
-                                    >
-                                        <td>{index + 1}</td>
-                                        <td>{player.player_name}</td>
-                                        <td>{player.team_name}</td>
-                                        <td>{player[selectedStat]}</td>
-                                    </tr>
-                                ))
+                                        <div
+                                            key={player.id}
+                                            className='ranking-mobile-card'
+                                        >
+                                            <div className='ranking-mobile-header'>
+                                <span className='ranking-mobile-position'>
+                                    #{index + 1}
+                                </span>
+
+                                                <div>
+                                                    <h3>{player.player_name}</h3>
+                                                    <p>{player.team_name}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className='ranking-mobile-stat'>
+                                                <span>{selectedStat.toUpperCase()}</span>
+                                                <strong>{player[selectedStat]}</strong>
+                                            </div>
+                                        </div>
+                                    ))
                                 : (players as AggregatedPlayerRanking[]).map((player, index) => (
-                                    <tr key={`${player.player_name}-${player.team_name}`}
-                                        className={getRankClassName(index)}
+                                    <div
+                                        key={`${player.player_name}-${player.team_name}`}
+                                        className='ranking-mobile-card'
                                     >
-                                        <td>{index + 1}</td>
-                                        <td>{player.player_name}</td>
-                                        <td>{player.team_name}</td>
-                                        <td>{player.total}</td>
-                                        <td>{player.average}</td>
-                                        <td>{player.games_played}</td>
-                                    </tr>
+                                        <div className='ranking-mobile-header'>
+                            <span className='ranking-mobile-position'>
+                                #{index + 1}
+                            </span>
+
+                                            <div>
+                                                <h3>{player.player_name}</h3>
+                                                <p>{player.team_name}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className='ranking-mobile-stats-grid'>
+                                            <div>
+                                                <span>Total</span>
+                                                <strong>{player.total}</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>AVG</span>
+                                                <strong>{player.average}</strong>
+                                            </div>
+
+                                            <div>
+                                                <span>Games</span>
+                                                <strong>{player.games_played}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
+                        </div>
+                    </>
                 )}
             </SectionCard>
         </div>
