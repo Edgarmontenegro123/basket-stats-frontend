@@ -1,3 +1,54 @@
+.player-profile-main {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-profile-team {
+    margin: 0;
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
+.player-profile-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.player-profile-badges span {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--title);
+    font-weight: 600;
+}
+
+.player-details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.player-detail-card {
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--bg-soft);
+}
+
+.player-detail-card span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-soft);
+}
+
+.player-detail-card strong {
+    color: var(--title);
+    font-size: 22px;
+}
+
 .player-profile-page {
     display: flex;
     flex-direction: column;
@@ -69,6 +120,10 @@
 }
 
 @media (max-width: 768px) {
+    .player-details-grid {
+        grid-template-columns: 1fr;
+    }
+
     .player-profile-card {
         flex-direction: column;
         align-items: flex-start;

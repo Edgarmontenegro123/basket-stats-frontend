@@ -1,13 +1,15 @@
 import {useEffect, useState} from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
-import {getPlayerById} from '../services/api'
+import {getPlayerById, getTeams} from '../services/api'
 import type {Player} from '../types/player'
+import type {Team} from '../types/team'
 import './PlayerProfilePage.css'
 
 export const PlayerProfilePage = () => {
     const {id} = useParams()
     const navigate = useNavigate()
     const [player, setPlayer] = useState<Player | null>(null)
+    const [team, setTeam] = useState<Team | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -21,8 +23,17 @@ export const PlayerProfilePage = () => {
                 setIsLoading(true)
                 setError('')
 
-                const playerData = await getPlayerById(id)
+                const [playerData, teamsData] = await Promise.all([
+                    getPlayerById(id),
+                    getTeams(),
+                ])
+
+                const playerTeam = teamsData.find(
+                    (team: Team) => team.id === playerData.team_id,
+                )
+
                 setPlayer(playerData)
+                setTeam(playerTeam || null)
             } catch {
                 setError('Could not load player.')
             } finally {
@@ -65,6 +76,7 @@ export const PlayerProfilePage = () => {
             >
                 ← Back to Players
             </button>
+
             <section className='player-profile-card'>
                 {player.photo_url ? (
                     <img
@@ -78,18 +90,36 @@ export const PlayerProfilePage = () => {
                     </div>
                 )}
 
-                <div>
+                <div className='player-profile-main'>
+                    <p className='player-profile-team'>
+                        {team?.name || 'Unknown team'}
+                    </p>
+
                     <h1>
                         {player.first_name} {player.last_name}
                     </h1>
 
-                    <div className='player-profile-info'>
-                        <p>Number: {player.number}</p>
-                        <p>Position: {player.position || '-'}</p>
-                        <p>Height: {player.height_cm ? `${player.height_cm} cm` : '-'}</p>
-                        <p>Weight: {player.weight_kg ? `${player.weight_kg} kg` : '-'}</p>
-                        <p>Birth date: {formatBirthDate(player.birth_date)}</p>
+                    <div className='player-profile-badges'>
+                        <span>#{player.number}</span>
+                        <span>{player.position || 'No position'}</span>
                     </div>
+                </div>
+            </section>
+
+            <section className='player-details-grid'>
+                <div className='player-detail-card'>
+                    <span>Height</span>
+                    <strong>{player.height_cm ? `${player.height_cm} cm` : '-'}</strong>
+                </div>
+
+                <div className='player-detail-card'>
+                    <span>Weight</span>
+                    <strong>{player.weight_kg ? `${player.weight_kg} kg` : '-'}</strong>
+                </div>
+
+                <div className='player-detail-card'>
+                    <span>Birth date</span>
+                    <strong>{formatBirthDate(player.birth_date)}</strong>
                 </div>
             </section>
         </div>
