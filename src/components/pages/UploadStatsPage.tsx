@@ -1,8 +1,9 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
+import type {PlayerStats} from '../types/player'
+import './UploadStatsPage.css'
 import '../common/PageLayout.css'
-import type {PlayerStats} from '../types/player';
 
 import {
     uploadStats,
@@ -138,7 +139,7 @@ const UploadStatsPage = () => {
 
             {players.length > 0 && (
                 <SectionCard title='Player Stats'>
-                    <div className='table-wrapper'>
+                    <div className='table-wrapper upload-table-wrapper'>
                         <table className='data-table'>
                             <thead>
                                 <tr>
@@ -169,6 +170,25 @@ const UploadStatsPage = () => {
                             ))}
                             </tbody>
                         </table>
+                    </div>
+
+                    <div className='upload-mobile-list'>
+                        {players.map((player, index) => (
+                            <div key={index} className='upload-mobile-card'>
+                                <h3>{player.player_name}</h3>
+                                <p className='upload-mobile-subtitle'>{player.team_name}</p>
+
+                                <div className='upload-mobile-stats-grid'>
+                                    <p><span>PTS</span><strong>{player.points}</strong></p>
+                                    <p><span>REB</span><strong>{player.rebounds}</strong></p>
+                                    <p><span>AST</span><strong>{player.assists}</strong></p>
+                                    <p><span>MIN</span><strong>{player.minutes}</strong></p>
+                                    <p><span>TOV</span><strong>{player.turnovers}</strong></p>
+                                    <p><span>STL</span><strong>{player.steals}</strong></p>
+                                    <p><span>BLK</span><strong>{player.blocks}</strong></p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </SectionCard>
             )}
