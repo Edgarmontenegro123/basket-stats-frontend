@@ -154,6 +154,14 @@ export const PlayerProfilePage = () => {
                     </div>
                 </section>
             )}
+            {!playerSummary && (
+                <section className='player-details-grid'>
+                <div className='player-detail-card'>
+                <span>Analytics</span>
+                <strong>No processed stats yet.</strong>
+                </div>
+                </section>
+                )}
         </div>
     )
 }
