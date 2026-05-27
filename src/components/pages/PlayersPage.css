@@ -191,6 +191,22 @@
     opacity: 0.7;
 }
 
+.players-error {
+    padding: 1rem;
+    border: 1px solid #ef4444;
+    border-radius: 0.75rem;
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.players-loading {
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    color: var(--text);
+    background: var(--panel);
+}
+
 @media (max-width: 768px) {
     .players-header,
     .players-summary {

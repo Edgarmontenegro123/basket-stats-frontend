@@ -12,6 +12,8 @@ export const PlayersPage = () => {
     const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
     const [searchTerm, setSearchTerm] = useState('')
     const [selectedTeamId, setSelectedTeamId] = useState('')
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState('')
 
 
     const [form, setForm] = useState<CreatePlayerPayload>({
@@ -28,13 +30,22 @@ export const PlayersPage = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const [playersData, teamsData] = await Promise.all([
-                getPlayers(),
-                getTeams(),
-            ])
+            try {
+                setIsLoading(true)
+                setError('')
 
-            setPlayers(playersData)
-            setTeams(teamsData)
+                const [playersData, teamsData] = await Promise.all([
+                    getPlayers(),
+                    getTeams(),
+                ])
+
+                setPlayers(playersData)
+                setTeams(teamsData)
+            } catch {
+                setError('Could not load players data.')
+            } finally {
+                setIsLoading(false)
+            }
         }
 
         void fetchData()
@@ -290,113 +301,128 @@ export const PlayersPage = () => {
                 </div>
             )}
 
-            <div className='players-card'>
-                <div className='table-wrapper'>
-                    <div className='players-toolbar'>
-                        <input
-                            type='text'
-                            placeholder='Search player...'
-                            value={searchTerm}
-                            onChange={(event) => setSearchTerm(event.target.value)}
-                            className='players-search'
-                        />
+            {!isLoading && (
+                <div className='players-card'>
+                    <div className='table-wrapper'>
+                        <div className='players-toolbar'>
+                            <input
+                                type='text'
+                                placeholder='Search player...'
+                                value={searchTerm}
+                                onChange={(event) => setSearchTerm(event.target.value)}
+                                className='players-search'
+                            />
 
-                        <select
-                            value={selectedTeamId}
-                            onChange={(event) => setSelectedTeamId(event.target.value)}
-                            className='players-filter'
-                        >
-                            <option value=''>All teams</option>
+                            <select
+                                value={selectedTeamId}
+                                onChange={(event) => setSelectedTeamId(event.target.value)}
+                                className='players-filter'
+                            >
+                                <option value=''>All teams</option>
 
-                            {teams.map((team) => (
-                                <option key={team.id} value={team.id}>
-                                    {team.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <table className='players-table'>
-                        <thead>
-                        <tr>
-                            <th>Photo</th>
-                            <th>Number</th>
-                            <th>Player</th>
-                            <th>Team</th>
-                            <th>Position</th>
-                            <th>Height</th>
-                            <th>Weight</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
+                                {teams.map((team) => (
+                                    <option key={team.id} value={team.id}>
+                                        {team.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                        <tbody>
-                        {filteredPlayers.length === 0 ? (
-                            <tr>
-                                <td colSpan={8} className='players-empty'>
-                                    No players found.
-                                </td>
-                            </tr>
-                        ) : (
-                            filteredPlayers.map((player) => {
-                                const team = teams.find(
-                                    (team) => team.id === player.team_id,
-                                )
-                                return (
-                                    <tr key={player.id}>
-                                        <td>
-                                            {player.photo_url ? (
-                                                <img
-                                                    src={player.photo_url}
-                                                    alt={player.first_name}
-                                                    className='player-avatar'
-                                                />
-                                            ) : (
-                                                <div className='player-avatar-placeholder'>
-                                                    {player.first_name.charAt(0)}
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td>{player.number}</td>
-                                        <td>
-                                            {player.first_name} {player.last_name}
-                                        </td>
-                                        <td>{team?.name || 'Unknown team'}</td>
-                                        <td>{player.position || '-'}</td>
-                                        <td>
-                                            {player.height_cm
-                                                ? `${player.height_cm} cm`
-                                                : '-'}
-                                        </td>
-                                        <td>
-                                            {player.weight_kg
-                                                ? `${player.weight_kg} kg`
-                                                : '-'}
-                                        </td>
-                                        <td>
-                                            <div className='players-actions'>
-                                                <button
-                                                    className='players-edit-button'
-                                                    onClick={() => handleEditPlayer(player)}
-                                                >
-                                                    Edit
-                                                </button>
-
-                                                <button
-                                                    className='players-delete-button'
-                                                    onClick={() => handleDeletePlayer(player.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )
-                            })
+                        {error && (
+                            <div className='players-error'>
+                                {error}
+                            </div>
                         )}
-                        </tbody>
-                    </table>
+
+                        {isLoading && (
+                            <div className='players-loading'>
+                                Loading players...
+                            </div>
+                        )}
+
+                        <table className='players-table'>
+                            <thead>
+                            <tr>
+                                <th>Photo</th>
+                                <th>Number</th>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>Position</th>
+                                <th>Height</th>
+                                <th>Weight</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            {filteredPlayers.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className='players-empty'>
+                                        No players found.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredPlayers.map((player) => {
+                                    const team = teams.find(
+                                        (team) => team.id === player.team_id,
+                                    )
+                                    return (
+                                        <tr key={player.id}>
+                                            <td>
+                                                {player.photo_url ? (
+                                                    <img
+                                                        src={player.photo_url}
+                                                        alt={player.first_name}
+                                                        className='player-avatar'
+                                                    />
+                                                ) : (
+                                                    <div className='player-avatar-placeholder'>
+                                                        {player.first_name.charAt(0)}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td>{player.number}</td>
+                                            <td>
+                                                {player.first_name} {player.last_name}
+                                            </td>
+                                            <td>{team?.name || 'Unknown team'}</td>
+                                            <td>{player.position || '-'}</td>
+                                            <td>
+                                                {player.height_cm
+                                                    ? `${player.height_cm} cm`
+                                                    : '-'}
+                                            </td>
+                                            <td>
+                                                {player.weight_kg
+                                                    ? `${player.weight_kg} kg`
+                                                    : '-'}
+                                            </td>
+                                            <td>
+                                                <div className='players-actions'>
+                                                    <button
+                                                        className='players-edit-button'
+                                                        onClick={() => handleEditPlayer(player)}
+                                                    >
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        className='players-delete-button'
+                                                        onClick={() => handleDeletePlayer(player.id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }
