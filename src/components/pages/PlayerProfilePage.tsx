@@ -32,6 +32,9 @@ export const PlayerProfilePage = () => {
                 const fullName = `${playerData.first_name} ${playerData.last_name}`
                 const summaryData = await getPlayerSummaryByName(fullName)
 
+                console.log('Player full name:', fullName)
+                console.log('Player summary:', summaryData)
+
                 setPlayerSummary(summaryData)
 
                 const playerTeam = teamsData.find(
