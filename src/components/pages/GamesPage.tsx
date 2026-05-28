@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import GameModal from '../games/GameModal'
-import '../common/PageLayout.css'
-import './TeamsPage.css'
-
+import BasketballLoader from '../common/BasketballLoader'
 import {
     createGame,
     deleteGame,
@@ -13,10 +11,13 @@ import {
     getTeams,
     updateGame,
 } from '../services/api'
-
 import type { Team } from '../types/team'
 import type { Season } from '../types/season'
 import type { Game } from '../types/game'
+import './TeamsPage.css'
+import '../common/PageLayout.css'
+
+
 
 const GamesPage = () => {
     const [teams, setTeams] = useState<Team[]>([])
@@ -24,6 +25,7 @@ const GamesPage = () => {
     const [games, setGames] = useState<Game[]>([])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [gameToEdit, setGameToEdit] = useState<Game | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
     const loadData = async () => {
         const [teamsData, seasonsData, gamesData] = await Promise.all([
@@ -39,7 +41,14 @@ const GamesPage = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            await loadData()
+            try {
+                setIsLoading(true)
+                await loadData()
+            } catch (error) {
+                console.error(error)
+            } finally {
+                setIsLoading(false)
+            }
         }
 
         void fetchData()
@@ -108,6 +117,17 @@ const GamesPage = () => {
         return (
             seasons.find((season) => season.id === selectedSeasonId)?.name ||
             'Unknown season'
+        )
+    }
+
+    if (isLoading) {
+        return (
+            <div className='loading-overlay'>
+                <div className='loading-box'>
+                    <BasketballLoader />
+                    <p>Loading games...</p>
+                </div>
+            </div>
         )
     }
 

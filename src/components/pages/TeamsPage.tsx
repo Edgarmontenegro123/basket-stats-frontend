@@ -1,17 +1,19 @@
 import {useEffect, useState} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
-import TeamModal from '../teams/TeamModal.tsx';
-import '../common/PageLayout.css'
-import './TeamsPage.css'
+import TeamModal from '../teams/TeamModal'
+import BasketballLoader from '../common/BasketballLoader'
 import {getTeams, createTeam, updateTeam, deleteTeam} from '../services/api'
 import type {Team} from '../types/team'
+import './TeamsPage.css'
+import '../common/PageLayout.css'
 
 
 const TeamsPage = () => {
     const [teams, setTeams] = useState<Team[]>([])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [teamToEdit, setTeamToEdit] = useState<Team | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -20,6 +22,8 @@ const TeamsPage = () => {
                 setTeams(data)
             } catch (error) {
                 console.error(error)
+            } finally {
+                setIsLoading(false)
             }
         }
 
@@ -97,6 +101,17 @@ const TeamsPage = () => {
         } catch (error) {
             console.error(error)
         }
+    }
+
+    if (isLoading) {
+        return (
+            <div className='loading-overlay'>
+                <div className='loading-box'>
+                    <BasketballLoader />
+                    <p>Loading teams...</p>
+                </div>
+            </div>
+        )
     }
 
     return (
