@@ -12,56 +12,70 @@ import './GameAnalyticsPage.css'
 
 
 const GameAnalyticsPage = () => {
-    const [games, setGames] = useState<Game[]>([]);
-    const [selectedGameId, setSelectedGameId] = useState('');
-    const [playerStats, setPlayerStats] = useState<PlayerStats[]>([]);
-    const [teamStats, setTeamStats] = useState<TeamStat[]>([]);
-    const [error, setError] = useState('');
-    const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
-    const hasLoadedAnalytics = playerStats.length > 0 || teamStats.length > 0;
-    const [hasTriedToLoadAnalytics, setHasTriedToLoadAnalytics] = useState(false);
+    const [games, setGames] = useState<Game[]>([])
+    const [selectedGameId, setSelectedGameId] = useState('')
+    const [playerStats, setPlayerStats] = useState<PlayerStats[]>([])
+    const [teamStats, setTeamStats] = useState<TeamStat[]>([])
+    const [error, setError] = useState('')
+    const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false)
+    const [isLoadingGames, setIsLoadingGames] = useState(true)
+    const hasLoadedAnalytics = playerStats.length > 0 || teamStats.length > 0
+    const [hasTriedToLoadAnalytics, setHasTriedToLoadAnalytics] = useState(false)
 
     useEffect(() => {
         const loadGames = async () => {
             try {
-                const data = await getGames();
-                setGames(data);
+                const data = await getGames()
+                setGames(data)
             } catch (error) {
                 console.error(error);
-                setError('Error loading games');
+                setError('Error loading games')
+            } finally {
+                setIsLoadingGames(false)
             }
         };
 
-        void loadGames();
-    }, []);
+        void loadGames()
+    }, [])
 
     const handleLoadAnalytics = async () => {
         if (!selectedGameId) {
-            setError('Select a game first');
-            return;
+            setError('Select a game first')
+            return
         }
 
         try {
-            setError('');
-            setIsLoadingAnalytics(true);
+            setError('')
+            setIsLoadingAnalytics(true)
             setHasTriedToLoadAnalytics(true)
-            setPlayerStats([]);
-            setTeamStats([]);
+            setPlayerStats([])
+            setTeamStats([])
 
             const [players, teams] = await Promise.all([
                 getPlayerStatsByGameId(selectedGameId),
                 getTeamStatsByGameId(selectedGameId)
             ])
 
-            setPlayerStats(players);
-            setTeamStats(teams);
+            setPlayerStats(players)
+            setTeamStats(teams)
         } catch (error) {
-            console.error(error);
-            setError('Error loading analytics');
+            console.error(error)
+            setError('Error loading analytics')
         } finally {
-            setIsLoadingAnalytics(false);
+            setIsLoadingAnalytics(false)
         }
-    };
+    }
+
+    if (isLoadingGames) {
+        return (
+            <div className='loading-overlay'>
+                <div className='loading-box'>
+                    <BasketballLoader />
+                    <p>Loading games...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <main className='analytics-page'>
