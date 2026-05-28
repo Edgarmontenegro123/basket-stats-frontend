@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import SeasonModal from '../seasons/SeasonModal'
-import '../common/PageLayout.css'
-import './TeamsPage.css'
-
+import BasketballLoader from '../common/BasketballLoader'
 import {
     getTeams,
     getSeasons,
@@ -12,15 +10,19 @@ import {
     updateSeason,
     deleteSeason,
 } from '../services/api'
-
 import type { Team } from '../types/team'
 import type { Season } from '../types/season'
+import './TeamsPage.css'
+import '../common/PageLayout.css'
+
+
 
 const SeasonsPage = () => {
     const [teams, setTeams] = useState<Team[]>([])
     const [seasons, setSeasons] = useState<Season[]>([])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [seasonToEdit, setSeasonToEdit] = useState<Season | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,6 +34,8 @@ const SeasonsPage = () => {
                 setSeasons(seasonsData)
             } catch (error) {
                 console.error(error)
+            } finally {
+                setIsLoading(false)
             }
         }
 
@@ -107,6 +111,17 @@ const SeasonsPage = () => {
         } catch (error) {
             console.error(error)
         }
+    }
+
+    if (isLoading) {
+        return (
+            <div className='loading-overlay'>
+                <div className='loading-box'>
+                    <BasketballLoader />
+                    <p>Loading seasons...</p>
+                </div>
+            </div>
+        )
     }
 
     return (

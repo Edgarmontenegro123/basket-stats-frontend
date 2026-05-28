@@ -2,30 +2,31 @@ import {useState, useEffect} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import type {PlayerStats} from '../types/player'
-import BasketballLoader from '../common/BasketballLoader.tsx'
-import './UploadStatsPage.css'
-import '../common/PageLayout.css'
+import BasketballLoader from '../common/BasketballLoader'
 import {
     uploadStats,
     processStats,
     getPlayerStats,
     getGames,
 } from '../services/api.ts'
+import './UploadStatsPage.css'
+import '../common/PageLayout.css'
 
 
 const UploadStatsPage = () => {
-    const [file, setFile] = useState<File | null>(null);
-    const [players, setPlayers] = useState<PlayerStats[]>([]);
+    const [file, setFile] = useState<File | null>(null)
+    const [players, setPlayers] = useState<PlayerStats[]>([])
     const [games, setGames] = useState<{
         id: string;
         game_date: string;
         status: string;
         home_team_name: string;
         away_team_name: string;
-    }[]>([]);
-    const [selectedGameId, setSelectedGameId] = useState('');
-    const [isProcessing, setIsProcessing] = useState<boolean>(false);
-    const [errorMessage, setErrorMessage] = useState<string>('');
+    }[]>([])
+    const [selectedGameId, setSelectedGameId] = useState('')
+    const [isProcessing, setIsProcessing] = useState<boolean>(false)
+    const [errorMessage, setErrorMessage] = useState<string>('')
+    const [isLoadingGames, setIsLoadingGames] = useState(true)
 
 
     useEffect(() => {
@@ -35,6 +36,8 @@ const UploadStatsPage = () => {
                 setGames(data);
             } catch (error) {
                 console.error(error);
+            } finally {
+                setIsLoadingGames(false)
             }
         };
 
@@ -81,6 +84,17 @@ const UploadStatsPage = () => {
         } finally {
             setIsProcessing(false);
         }
+    }
+
+    if (isLoadingGames) {
+        return (
+            <div className='loading-overlay'>
+                <div className='loading-box'>
+                    <BasketballLoader />
+                    <p>Loading games...</p>
+                </div>
+            </div>
+        )
     }
 
     return (
