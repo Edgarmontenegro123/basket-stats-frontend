@@ -1,0 +1,14 @@
+.basketball-loader {
+    font-size: 48px;
+    animation: bounceBall 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes bounceBall {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-12px);
+    }
+}

@@ -4,8 +4,9 @@ import {
     getPlayerStatsByGameId,
     getTeamStatsByGameId,
 } from '../services/api';
-
+import BasketballLoader from '../common/BasketballLoader.tsx';
 import './GameAnalyticsPage.css';
+
 
 type Game = {
     id: string;
@@ -134,7 +135,7 @@ const GameAnalyticsPage = () => {
 
             {isLoadingAnalytics && (
                 <section className='analytics-state-card'>
-                    <div className='loading-spinner'/>
+                    <BasketballLoader/>
                     <p>Loading analytics...</p>
                 </section>
             )}

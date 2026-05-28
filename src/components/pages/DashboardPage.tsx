@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react'
-import { Link } from 'react-router-dom'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import StatCard from '../common/StatCard'
@@ -17,7 +16,6 @@ import './DashboardPage.css'
 
 const DashboardPage = () => {
     const [teamsCount, setTeamsCount] = useState<number>(0)
-    /*const [seasonsCount, setSeasonsCount] = useState<number>(0)*/
     const [gamesCount, setGamesCount] = useState<number>(0)
     const [completedGamesCount, setCompletedGamesCount] = useState<number>(0)
     const [scheduledGamesCount, setScheduledGamesCount] = useState<number>(0)
@@ -28,7 +26,6 @@ const DashboardPage = () => {
         const fetchDashboardData = async () => {
             try {
                 const teams = await getTeams()
-                /*const seasons = await getSeasons()*/
                 const games = await getGames()
 
                 const completedGames = games.filter(
@@ -43,7 +40,6 @@ const DashboardPage = () => {
                 setTopScorers(scorers)
 
                 setTeamsCount(teams.length)
-                /*setSeasonsCount(seasons.length)*/
                 setGamesCount(games.length)
 
                 setCompletedGamesCount(completedGames.length)
@@ -96,15 +92,6 @@ const DashboardPage = () => {
                             ))}
                         </ul>
                     )}
-                </SectionCard>
-
-                <SectionCard title='Quick Actions'>
-                    <div className='dashboard-actions'>
-                        <Link to='/teams'>Manage Teams</Link>
-                        <Link to='/players'>Manage Players</Link>
-                        <Link to='/games'>Manage Games</Link>
-                        <Link to='/upload-stats'>Upload Stats</Link>
-                    </div>
                 </SectionCard>
 
                 <SectionCard title='Top Scorers'>
