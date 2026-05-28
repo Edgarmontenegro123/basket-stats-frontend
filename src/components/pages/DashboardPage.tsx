@@ -84,7 +84,7 @@ const DashboardPage = () => {
                         {game.home_team_name}
                         {' '}
                         {game.home_score !== null ? game.home_score : '-'}
-                        {' - '}
+                        <strong>{' Vs '}</strong>
                         {game.away_score !== null ? game.away_score : '-'}
                         {' '}
                         {game.away_team_name}
