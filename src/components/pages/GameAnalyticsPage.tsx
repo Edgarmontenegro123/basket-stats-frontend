@@ -49,6 +49,7 @@ const GameAnalyticsPage = () => {
     const [error, setError] = useState('');
     const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
     const hasLoadedAnalytics = playerStats.length > 0 || teamStats.length > 0;
+    const [hasTriedToLoadAnalytics, setHasTriedToLoadAnalytics] = useState(false);
 
     useEffect(() => {
         const loadGames = async () => {
@@ -73,6 +74,7 @@ const GameAnalyticsPage = () => {
         try {
             setError('');
             setIsLoadingAnalytics(true);
+            setHasTriedToLoadAnalytics(true)
             setPlayerStats([]);
             setTeamStats([]);
 
@@ -105,7 +107,12 @@ const GameAnalyticsPage = () => {
                     <select
                         id='game'
                         value={selectedGameId}
-                        onChange={(e) => setSelectedGameId(e.target.value)}
+                        onChange={(e) => {
+                            setSelectedGameId(e.target.value)
+                            setHasTriedToLoadAnalytics(false)
+                            setPlayerStats([])
+                            setTeamStats([])
+                        }}
                     >
                         <option value=''>Select a game</option>
 
@@ -131,7 +138,7 @@ const GameAnalyticsPage = () => {
                     <p>Loading analytics...</p>
                 </section>
             )}
-            {!isLoadingAnalytics && selectedGameId && !hasLoadedAnalytics && (
+            {!isLoadingAnalytics && hasTriedToLoadAnalytics && selectedGameId && !hasLoadedAnalytics && (
                 <section className='analytics-state-card'>
                     <strong>No analytics available yet.</strong>
                     <p>
