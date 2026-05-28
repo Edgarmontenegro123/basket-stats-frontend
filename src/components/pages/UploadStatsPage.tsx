@@ -26,7 +26,7 @@ const UploadStatsPage = () => {
     const [selectedGameId, setSelectedGameId] = useState('')
     const [isProcessing, setIsProcessing] = useState<boolean>(false)
     const [errorMessage, setErrorMessage] = useState<string>('')
-    const [isLoadingGames, setIsLoadingGames] = useState(true)
+    const [isLoadingUploads, setIsLoadingUploads] = useState(true)
 
 
     useEffect(() => {
@@ -37,7 +37,7 @@ const UploadStatsPage = () => {
             } catch (error) {
                 console.error(error);
             } finally {
-                setIsLoadingGames(false)
+                setIsLoadingUploads(false)
             }
         };
 
@@ -86,12 +86,12 @@ const UploadStatsPage = () => {
         }
     }
 
-    if (isLoadingGames) {
+    if (isLoadingUploads) {
         return (
             <div className='loading-overlay'>
                 <div className='loading-box'>
                     <BasketballLoader />
-                    <p>Loading games...</p>
+                    <p>Loading Uploads...</p>
                 </div>
             </div>
         )
