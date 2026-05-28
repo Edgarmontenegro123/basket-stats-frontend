@@ -147,6 +147,34 @@
     font-size: 20px;
 }
 
+.analytics-state-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px;
+    border: 1px dashed #334155;
+    border-radius: 20px;
+    background: #0f172a;
+    color: #cbd5e1;
+    text-align: center;
+}
+
+.analytics-state-card strong {
+    color: #f8fafc;
+    font-size: 20px;
+}
+
+.analytics-state-card p {
+    margin: 0;
+    color: #94a3b8;
+}
+
+.analytics-control-row button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
 @media (max-width: 768px) {
     .analytics-control-row {
         flex-direction: column;

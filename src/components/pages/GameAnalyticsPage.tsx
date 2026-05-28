@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import {
     getGames,
     getPlayerStatsByGameId,
@@ -47,6 +47,8 @@ const GameAnalyticsPage = () => {
     const [playerStats, setPlayerStats] = useState<PlayerStat[]>([]);
     const [teamStats, setTeamStats] = useState<TeamStat[]>([]);
     const [error, setError] = useState('');
+    const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
+    const hasLoadedAnalytics = playerStats.length > 0 || teamStats.length > 0;
 
     useEffect(() => {
         const loadGames = async () => {
@@ -70,15 +72,22 @@ const GameAnalyticsPage = () => {
 
         try {
             setError('');
+            setIsLoadingAnalytics(true);
+            setPlayerStats([]);
+            setTeamStats([]);
 
-            const players = await getPlayerStatsByGameId(selectedGameId);
-            const teams = await getTeamStatsByGameId(selectedGameId);
+            const [players, teams] = await Promise.all([
+                getPlayerStatsByGameId(selectedGameId),
+                getTeamStatsByGameId(selectedGameId)
+            ])
 
             setPlayerStats(players);
             setTeamStats(teams);
         } catch (error) {
             console.error(error);
             setError('Error loading analytics');
+        } finally {
+            setIsLoadingAnalytics(false);
         }
     };
 
@@ -107,114 +116,136 @@ const GameAnalyticsPage = () => {
                         ))}
                     </select>
 
-                    <button onClick={handleLoadAnalytics}>
-                        Load Analytics
+                    <button
+                        onClick={handleLoadAnalytics}
+                        disabled={isLoadingAnalytics}
+                    >
+                        {isLoadingAnalytics ? 'Loading...' : 'Load Analytics'}
                     </button>
                 </div>
             </section>
 
-            <section className='analytics-card'>
-                <h2>Team Stats</h2>
-                    <div className='table-wrapper analytics-table-wrapper'>
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>Team</th>
-                                <th>PTS</th>
-                                <th>REB</th>
-                                <th>AST</th>
-                                <th>TO</th>
-                                <th>STL</th>
-                                <th>BLK</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {teamStats.map((stat) => (
-                                <tr key={stat.id}>
-                                    <td>{stat.team_name}</td>
-                                    <td>{stat.points}</td>
-                                    <td>{stat.rebounds}</td>
-                                    <td>{stat.assists}</td>
-                                    <td>{stat.turnovers}</td>
-                                    <td>{stat.steals}</td>
-                                    <td>{stat.blocks}</td>
+            {isLoadingAnalytics && (
+                <section className='analytics-state-card'>
+                    <div className='loading-spinner'/>
+                    <p>Loading analytics...</p>
+                </section>
+            )}
+            {!isLoadingAnalytics && selectedGameId && !hasLoadedAnalytics && (
+                <section className='analytics-state-card'>
+                    <strong>No analytics available yet.</strong>
+                    <p>
+                        Upload and process stats for this game to see team and player analytics.
+                    </p>
+                </section>
+            )}
+            {!isLoadingAnalytics && hasLoadedAnalytics && (
+                <>
+                    <section className='analytics-card'>
+                        <h2>Team Stats</h2>
+                        <div className='table-wrapper analytics-table-wrapper'>
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>Team</th>
+                                    <th>PTS</th>
+                                    <th>REB</th>
+                                    <th>AST</th>
+                                    <th>TO</th>
+                                    <th>STL</th>
+                                    <th>BLK</th>
                                 </tr>
+                                </thead>
+                                <tbody>
+                                {teamStats.map((stat) => (
+                                    <tr key={stat.id}>
+                                        <td>{stat.team_name}</td>
+                                        <td>{stat.points}</td>
+                                        <td>{stat.rebounds}</td>
+                                        <td>{stat.assists}</td>
+                                        <td>{stat.turnovers}</td>
+                                        <td>{stat.steals}</td>
+                                        <td>{stat.blocks}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className='analytics-mobile-list'>
+                            {teamStats.map((stat) => (
+                                <div key={stat.id} className='analytics-mobile-card'>
+                                    <h3>{stat.team_name}</h3>
+
+                                    <div className='analytics-mobile-stats-grid'>
+                                        <p><span>PTS</span><strong>{stat.points}</strong></p>
+                                        <p><span>REB</span><strong>{stat.rebounds}</strong></p>
+                                        <p><span>AST</span><strong>{stat.assists}</strong></p>
+                                        <p><span>TO</span><strong>{stat.turnovers}</strong></p>
+                                        <p><span>STL</span><strong>{stat.steals}</strong></p>
+                                        <p><span>BLK</span><strong>{stat.blocks}</strong></p>
+                                    </div>
+                                </div>
                             ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                <div className='analytics-mobile-list'>
-                    {teamStats.map((stat) => (
-                        <div key={stat.id} className='analytics-mobile-card'>
-                            <h3>{stat.team_name}</h3>
-
-                            <div className='analytics-mobile-stats-grid'>
-                                <p><span>PTS</span><strong>{stat.points}</strong></p>
-                                <p><span>REB</span><strong>{stat.rebounds}</strong></p>
-                                <p><span>AST</span><strong>{stat.assists}</strong></p>
-                                <p><span>TO</span><strong>{stat.turnovers}</strong></p>
-                                <p><span>STL</span><strong>{stat.steals}</strong></p>
-                                <p><span>BLK</span><strong>{stat.blocks}</strong></p>
-                            </div>
                         </div>
-                    ))}
-                </div>
-            </section>
-            <section className='analytics-card'>
-                <h2>Player Stats</h2>
-                <div className='table-wrapper analytics-table-wrapper'>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Player</th>
-                            <th>Team</th>
-                            <th>PTS</th>
-                            <th>REB</th>
-                            <th>AST</th>
-                            <th>TO</th>
-                            <th>STL</th>
-                            <th>BLK</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {playerStats.map((stat) => (
-                            <tr key={stat.id}>
-                                <td>{stat.player_number}</td>
-                                <td>{stat.player_name}</td>
-                                <td>{stat.team_name}</td>
-                                <td>{stat.points}</td>
-                                <td>{stat.rebounds}</td>
-                                <td>{stat.assists}</td>
-                                <td>{stat.turnovers}</td>
-                                <td>{stat.steals}</td>
-                                <td>{stat.blocks}</td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-                </div>
-                <div className='analytics-mobile-list'>
-                    {playerStats.map((stat) => (
-                        <div key={stat.id} className='analytics-mobile-card'>
-                            <h3>{stat.player_name}</h3>
-                            <p className='analytics-mobile-subtitle'>
-                                #{stat.player_number} · {stat.team_name}
-                            </p>
+                    </section>
 
-                            <div className='analytics-mobile-stats-grid'>
-                                <p><span>PTS</span><strong>{stat.points}</strong></p>
-                                <p><span>REB</span><strong>{stat.rebounds}</strong></p>
-                                <p><span>AST</span><strong>{stat.assists}</strong></p>
-                                <p><span>TO</span><strong>{stat.turnovers}</strong></p>
-                                <p><span>STL</span><strong>{stat.steals}</strong></p>
-                                <p><span>BLK</span><strong>{stat.blocks}</strong></p>
-                            </div>
+                    <section className='analytics-card'>
+                        <h2>Player Stats</h2>
+                        <div className='table-wrapper analytics-table-wrapper'>
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Player</th>
+                                    <th>Team</th>
+                                    <th>PTS</th>
+                                    <th>REB</th>
+                                    <th>AST</th>
+                                    <th>TO</th>
+                                    <th>STL</th>
+                                    <th>BLK</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {playerStats.map((stat) => (
+                                    <tr key={stat.id}>
+                                        <td>{stat.player_number}</td>
+                                        <td>{stat.player_name}</td>
+                                        <td>{stat.team_name}</td>
+                                        <td>{stat.points}</td>
+                                        <td>{stat.rebounds}</td>
+                                        <td>{stat.assists}</td>
+                                        <td>{stat.turnovers}</td>
+                                        <td>{stat.steals}</td>
+                                        <td>{stat.blocks}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
                         </div>
-                    ))}
-                </div>
-            </section>
+                        <div className='analytics-mobile-list'>
+                            {playerStats.map((stat) => (
+                                <div key={stat.id} className='analytics-mobile-card'>
+                                    <h3>{stat.player_name}</h3>
+                                    <p className='analytics-mobile-subtitle'>
+                                        #{stat.player_number} · {stat.team_name}
+                                    </p>
+
+                                    <div className='analytics-mobile-stats-grid'>
+                                        <p><span>PTS</span><strong>{stat.points}</strong></p>
+                                        <p><span>REB</span><strong>{stat.rebounds}</strong></p>
+                                        <p><span>AST</span><strong>{stat.assists}</strong></p>
+                                        <p><span>TO</span><strong>{stat.turnovers}</strong></p>
+                                        <p><span>STL</span><strong>{stat.steals}</strong></p>
+                                        <p><span>BLK</span><strong>{stat.blocks}</strong></p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </>
+            )}
         </main>
     );
 };
