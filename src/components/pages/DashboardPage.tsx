@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-
+import { Link } from 'react-router-dom'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import StatCard from '../common/StatCard'
@@ -62,7 +62,7 @@ const DashboardPage = () => {
         <div className='dashboard-page'>
             <PageHeader
                 title='Dashboard'
-                subtitle='Resumen general del equipo'
+                subtitle='General overview of your basketball stats platform'
             />
 
             <section className='dashboard-page__stats'>
@@ -98,8 +98,13 @@ const DashboardPage = () => {
                     )}
                 </SectionCard>
 
-                <SectionCard title='Next Step'>
-                    <p>Persist data using PostgreSQL.</p>
+                <SectionCard title='Quick Actions'>
+                    <div className='dashboard-actions'>
+                        <Link to='/teams'>Manage Teams</Link>
+                        <Link to='/players'>Manage Players</Link>
+                        <Link to='/games'>Manage Games</Link>
+                        <Link to='/upload'>Upload Stats</Link>
+                    </div>
                 </SectionCard>
 
                 <SectionCard title='Top Scorers'>
