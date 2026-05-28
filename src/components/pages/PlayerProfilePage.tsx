@@ -144,55 +144,88 @@ export const PlayerProfilePage = () => {
                 <h2 className='player-section-title'>Performance Summary</h2>
 
                 {playerSummary ? (
-                    <div className='player-details-grid'>
-                        <div className='player-detail-card'>
-                            <span>Games played</span>
-                            <strong>{playerSummary.games_played}</strong>
+                    <div className='player-performance-layout'>
+                        <div>
+                            <h3 className='player-section-subtitle'>Overview</h3>
+
+                            <div className='player-details-grid'>
+                                <div className='player-detail-card'>
+                                    <span>Games played</span>
+                                    <strong>{playerSummary.games_played}</strong>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className='player-detail-card'>
-                            <span>Total points</span>
-                            <strong>{playerSummary.total_points}</strong>
+                        <div>
+                            <h3 className='player-section-subtitle'>Totals</h3>
+
+                            <div className='player-details-grid'>
+                                <div className='player-detail-card'>
+                                    <span>Total points</span>
+                                    <strong>{playerSummary.total_points}</strong>
+                                </div>
+
+                                <div className='player-detail-card'>
+                                    <span>Total rebounds</span>
+                                    <strong>{playerSummary.total_rebounds}</strong>
+                                </div>
+
+                                <div className='player-detail-card'>
+                                    <span>Total assists</span>
+                                    <strong>{playerSummary.total_assists}</strong>
+                                </div>
+
+                                <div className='player-detail-card'>
+                                    <span>Steals</span>
+                                    <strong>{playerSummary.total_steals}</strong>
+                                </div>
+
+                                <div className='player-detail-card'>
+                                    <span>Blocks</span>
+                                    <strong>{playerSummary.total_blocks}</strong>
+                                </div>
+
+                                <div className='player-detail-card'>
+                                    <span>Turnovers</span>
+                                    <strong>{playerSummary.total_turnovers}</strong>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className='player-detail-card'>
-                            <span>Total rebounds</span>
-                            <strong>{playerSummary.total_rebounds}</strong>
-                        </div>
+                        <div>
+                            <h3 className='player-section-subtitle'>Averages</h3>
 
-                        <div className='player-detail-card'>
-                            <span>Total assists</span>
-                            <strong>{playerSummary.total_assists}</strong>
-                        </div>
+                            <div className='player-details-grid'>
+                                <div className='player-detail-card'>
+                                    <span>AVG points</span>
+                                    <strong>{playerSummary.average_points}</strong>
+                                </div>
 
-                        <div className='player-detail-card'>
-                            <span>AVG points</span>
-                            <strong>{playerSummary.average_points}</strong>
-                        </div>
+                                <div className='player-detail-card'>
+                                    <span>AVG rebounds</span>
+                                    <strong>{playerSummary.average_rebounds}</strong>
+                                </div>
 
-                        <div className='player-detail-card'>
-                            <span>AVG rebounds</span>
-                            <strong>{playerSummary.average_rebounds}</strong>
-                        </div>
+                                <div className='player-detail-card'>
+                                    <span>AVG assists</span>
+                                    <strong>{playerSummary.average_assists}</strong>
+                                </div>
 
-                        <div className='player-detail-card'>
-                            <span>AVG assists</span>
-                            <strong>{playerSummary.average_assists}</strong>
-                        </div>
+                                <div className='player-detail-card'>
+                                    <span>AVG steals</span>
+                                    <strong>{playerSummary.average_steals}</strong>
+                                </div>
 
-                        <div className='player-detail-card'>
-                            <span>Steals</span>
-                            <strong>{playerSummary.total_steals}</strong>
-                        </div>
+                                <div className='player-detail-card'>
+                                    <span>AVG blocks</span>
+                                    <strong>{playerSummary.average_blocks}</strong>
+                                </div>
 
-                        <div className='player-detail-card'>
-                            <span>Blocks</span>
-                            <strong>{playerSummary.total_blocks}</strong>
-                        </div>
-
-                        <div className='player-detail-card'>
-                            <span>Turnovers</span>
-                            <strong>{playerSummary.total_turnovers}</strong>
+                                <div className='player-detail-card'>
+                                    <span>AVG turnovers</span>
+                                    <strong>{playerSummary.average_turnovers}</strong>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 ) : (
@@ -200,8 +233,7 @@ export const PlayerProfilePage = () => {
                         <span>Analytics</span>
                         <strong>No processed stats yet.</strong>
                         <p>
-                            Upload and process game stats to generate this player
-                            summary.
+                            Upload and process game stats to generate this player summary.
                         </p>
                     </div>
                 )}
