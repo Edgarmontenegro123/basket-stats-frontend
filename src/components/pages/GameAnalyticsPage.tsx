@@ -1,51 +1,20 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react'
 import {
     getGames,
     getPlayerStatsByGameId,
     getTeamStatsByGameId,
-} from '../services/api';
-import BasketballLoader from '../common/BasketballLoader.tsx';
-import './GameAnalyticsPage.css';
+} from '../services/api'
+import type { Game } from '../types/game'
+import type { PlayerStats } from '../types/player'
+import type { TeamStat } from '../types/analytics'
+import BasketballLoader from '../common/BasketballLoader'
+import './GameAnalyticsPage.css'
 
-
-type Game = {
-    id: string;
-    game_date: string;
-    status: string;
-    home_team_name: string;
-    away_team_name: string;
-};
-
-type PlayerStat = {
-    id: string;
-    game_id: string;
-    team_name: string;
-    player_number: string;
-    player_name: string;
-    points: number;
-    rebounds: number;
-    assists: number;
-    turnovers: number;
-    steals: number;
-    blocks: number;
-};
-
-type TeamStat = {
-    id: string;
-    game_id: string;
-    team_name: string;
-    points: number;
-    rebounds: number;
-    assists: number;
-    turnovers: number;
-    steals: number;
-    blocks: number;
-};
 
 const GameAnalyticsPage = () => {
     const [games, setGames] = useState<Game[]>([]);
     const [selectedGameId, setSelectedGameId] = useState('');
-    const [playerStats, setPlayerStats] = useState<PlayerStat[]>([]);
+    const [playerStats, setPlayerStats] = useState<PlayerStats[]>([]);
     const [teamStats, setTeamStats] = useState<TeamStat[]>([]);
     const [error, setError] = useState('');
     const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
@@ -63,7 +32,7 @@ const GameAnalyticsPage = () => {
             }
         };
 
-        loadGames();
+        void loadGames();
     }, []);
 
     const handleLoadAnalytics = async () => {

@@ -3,6 +3,7 @@ import {useParams, useNavigate} from 'react-router-dom'
 import {getPlayerById, getTeams, getPlayerSummaryByName} from '../services/api'
 import type {Player, PlayerSummary} from '../types/player'
 import type {Team} from '../types/team'
+import BasketballLoader from '../common/BasketballLoader.tsx'
 import './PlayerProfilePage.css'
 
 export const PlayerProfilePage = () => {
@@ -57,7 +58,7 @@ export const PlayerProfilePage = () => {
         return (
             <div className='loading-overlay'>
                 <div className='loading-box'>
-                    <div className='loading-spinner' />
+                    <BasketballLoader/>
                     <p>Loading player...</p>
                 </div>
             </div>

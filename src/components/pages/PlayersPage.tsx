@@ -4,6 +4,7 @@ import {useNavigate} from 'react-router-dom'
 import {createPlayer, getPlayers, updatePlayer, deletePlayer, getTeams} from '../services/api'
 import type {CreatePlayerPayload, Player} from '../types/player'
 import type {Team} from '../types/team'
+import BasketballLoader from '../common/BasketballLoader'
 import './PlayersPage.css'
 
 
@@ -313,7 +314,7 @@ export const PlayersPage = () => {
             {isLoading ? (
                 <div className='loading-overlay'>
                     <div className='loading-box'>
-                        <div className='loading-spinner'/>
+                        <BasketballLoader/>
                         <p>Loading players...</p>
                     </div>
                 </div>

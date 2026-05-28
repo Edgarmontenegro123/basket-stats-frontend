@@ -2,15 +2,16 @@ import {useState, useEffect} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
 import type {PlayerStats} from '../types/player'
+import BasketballLoader from '../common/BasketballLoader.tsx'
 import './UploadStatsPage.css'
 import '../common/PageLayout.css'
-
 import {
     uploadStats,
     processStats,
     getPlayerStats,
     getGames,
-} from '../services/api.ts';
+} from '../services/api.ts'
+
 
 const UploadStatsPage = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -87,7 +88,7 @@ const UploadStatsPage = () => {
             {isProcessing && (
                 <div className='loading-overlay'>
                     <div className='loading-box'>
-                        <div className='loading-spinner' />
+                        <BasketballLoader/>
                         <p>Processing...</p>
                     </div>
                 </div>

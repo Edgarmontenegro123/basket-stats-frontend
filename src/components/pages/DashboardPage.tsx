@@ -4,14 +4,13 @@ import SectionCard from '../common/SectionCard'
 import StatCard from '../common/StatCard'
 import type {Game} from '../types/game'
 import type {PlayerStats} from '../types/player'
-
 import {
     getTeams,
-    /*getSeasons,*/
     getGames,
     getTopScorers,
 } from '../services/api'
 
+import BasketballLoader from '../common/BasketballLoader'
 import './DashboardPage.css'
 
 const DashboardPage = () => {
@@ -21,6 +20,7 @@ const DashboardPage = () => {
     const [scheduledGamesCount, setScheduledGamesCount] = useState<number>(0)
     const [recentGames, setRecentGames] = useState<Game[]>([])
     const [topScorers, setTopScorers] = useState<PlayerStats[]>([])
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -48,11 +48,24 @@ const DashboardPage = () => {
                 setRecentGames(games.slice(0, 5))
             } catch (error) {
                 console.error(error)
+            } finally {
+                setIsLoading(false)
             }
         }
 
         void fetchDashboardData()
     }, []);
+
+    if (isLoading) {
+        return (
+            <div className='loading-overlay'>
+                <div className='loading-box'>
+                    <BasketballLoader/>
+                    <p>Loading dashboard...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className='dashboard-page'>
