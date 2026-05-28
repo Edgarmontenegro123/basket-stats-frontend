@@ -1,17 +1,19 @@
 import {useEffect, useState} from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
+import BasketballLoader from '../common/BasketballLoader'
+import {getTeams, getGames} from '../services/api'
 import type {Game} from '../types/game'
 import type {Team} from '../types/team'
-import {getTeams, getGames} from '../services/api'
-import './ComparePage.css'
 import '../common/PageLayout.css'
+import './ComparePage.css'
 
 const ComparePage = () => {
     const [teams, setTeams] = useState<Team[]>([])
     const [teamAId, setTeamAId] = useState('')
     const [teamBId, setTeamBId] = useState('')
     const [games, setGames] = useState<Game[]>([])
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -31,6 +33,8 @@ const ComparePage = () => {
                 }
             } catch (error) {
                 console.error(error)
+            } finally {
+                setIsLoading(false)
             }
         }
 
@@ -121,6 +125,16 @@ const ComparePage = () => {
         return String(value)
     }
 
+    if (isLoading) {
+        return (
+            <div className='loading-overlay'>
+                <div className='loading-box'>
+                    <BasketballLoader />
+                    <p>Loading comparison data...</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div>

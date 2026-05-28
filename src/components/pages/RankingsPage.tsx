@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
 import PageHeader from '../common/PageHeader'
 import SectionCard from '../common/SectionCard'
-import type { PlayerStats, AggregatedPlayerRanking } from '../types/player'
-import type { Game } from '../types/game'
-import type { Team } from '../types/team'
+import BasketballLoader from '../common/BasketballLoader'
 import {
     getAggregatedPlayerRankings,
     getGames,
     getTeams,
     getPlayerStatsByGameId,
 } from '../services/api'
+import type { PlayerStats, AggregatedPlayerRanking } from '../types/player'
+import type { Game } from '../types/game'
+import type { Team } from '../types/team'
 import './RankingsPage.css'
 import '../common/PageLayout.css'
 
@@ -32,12 +33,12 @@ const RankingsPage = () => {
     >('points')
 
     const [rankingMode, setRankingMode] = useState<'single-game' | 'aggregated'>('single-game')
-    const [isLoading, setIsLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
     const [games, setGames] = useState<Game[]>([])
     const [selectedGameId, setSelectedGameId] = useState('')
     const [teams, setTeams] = useState<Team[]>([])
     const [selectedTeamName, setSelectedTeamName] = useState('')
+    const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const fetchRankings = async () => {
@@ -137,6 +138,17 @@ const RankingsPage = () => {
         }
 
         return 'No rankings available yet.'
+    }
+
+    if (isLoading) {
+        return (
+            <div className='loading-overlay'>
+                <div className='loading-box'>
+                    <BasketballLoader />
+                    <p>Loading rankings...</p>
+                </div>
+            </div>
+        )
     }
 
     return (
