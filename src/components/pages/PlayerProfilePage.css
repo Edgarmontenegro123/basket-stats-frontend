@@ -150,6 +150,19 @@
     color: var(--text-soft);
 }
 
+.player-performance-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.player-section-subtitle {
+    margin: 0 0 12px;
+    color: var(--title);
+    font-size: 16px;
+    font-weight: 700;
+}
+
 @media (max-width: 768px) {
     .player-details-grid {
         grid-template-columns: 1fr;
