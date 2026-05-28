@@ -103,7 +103,7 @@ const DashboardPage = () => {
                         <Link to='/teams'>Manage Teams</Link>
                         <Link to='/players'>Manage Players</Link>
                         <Link to='/games'>Manage Games</Link>
-                        <Link to='/upload'>Upload Stats</Link>
+                        <Link to='/upload-stats'>Upload Stats</Link>
                     </div>
                 </SectionCard>
 
