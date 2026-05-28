@@ -151,6 +151,21 @@ export const PlayerProfilePage = () => {
                         </div>
 
                         <div className='player-detail-card'>
+                            <span>Total points</span>
+                            <strong>{playerSummary.total_points}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
+                            <span>Total rebounds</span>
+                            <strong>{playerSummary.total_rebounds}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
+                            <span>Total assists</span>
+                            <strong>{playerSummary.total_assists}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
                             <span>AVG points</span>
                             <strong>{playerSummary.average_points}</strong>
                         </div>
@@ -163,6 +178,21 @@ export const PlayerProfilePage = () => {
                         <div className='player-detail-card'>
                             <span>AVG assists</span>
                             <strong>{playerSummary.average_assists}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
+                            <span>Steals</span>
+                            <strong>{playerSummary.total_steals}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
+                            <span>Blocks</span>
+                            <strong>{playerSummary.total_blocks}</strong>
+                        </div>
+
+                        <div className='player-detail-card'>
+                            <span>Turnovers</span>
+                            <strong>{playerSummary.total_turnovers}</strong>
                         </div>
                     </div>
                 ) : (
