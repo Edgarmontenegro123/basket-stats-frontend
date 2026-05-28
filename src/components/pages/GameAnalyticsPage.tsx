@@ -71,7 +71,7 @@ const GameAnalyticsPage = () => {
             <div className='loading-overlay'>
                 <div className='loading-box'>
                     <BasketballLoader />
-                    <p>Loading games...</p>
+                    <p>Loading analytics page...</p>
                 </div>
             </div>
         )
