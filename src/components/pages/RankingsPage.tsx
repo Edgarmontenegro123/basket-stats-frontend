@@ -38,12 +38,13 @@ const RankingsPage = () => {
     const [selectedGameId, setSelectedGameId] = useState('')
     const [teams, setTeams] = useState<Team[]>([])
     const [selectedTeamName, setSelectedTeamName] = useState('')
-    const [isLoading, setIsLoading] = useState(true)
+    const [isInitialLoading, setIsInitialLoading] = useState(true)
+    const [isLoadingRankings, setIsLoadingRankings] = useState(false)
 
     useEffect(() => {
         const fetchRankings = async () => {
             try {
-                setIsLoading(true)
+                setIsLoadingRankings(true)
                 setErrorMessage('')
                 setPlayers([])
 
@@ -69,7 +70,7 @@ const RankingsPage = () => {
                 console.error(error)
                 setErrorMessage('Could not load rankings. Please try again.')
             } finally {
-                setIsLoading(false)
+                setIsLoadingRankings(false)
             }
         }
 
@@ -77,39 +78,33 @@ const RankingsPage = () => {
     }, [selectedStat, rankingMode, selectedGameId, selectedTeamName])
 
     useEffect(() => {
-        const fetchGames = async () => {
+        const fetchInitialData = async () => {
             try {
-                const data = await getGames()
+                setIsInitialLoading(true)
 
-                setGames(data)
+                const [gamesData, teamsData] = await Promise.all([
+                    getGames(),
+                    getTeams(),
+                ])
 
-                if (data.length > 0) {
-                    setSelectedGameId(data[0].id)
+                setGames(gamesData)
+                setTeams(teamsData)
+
+                if (gamesData.length > 0) {
+                    setSelectedGameId(gamesData[0].id)
+                }
+
+                if (teamsData.length > 0) {
+                    setSelectedTeamName(teamsData[0].name)
                 }
             } catch (error) {
                 console.error(error)
+            } finally {
+                setIsInitialLoading(false)
             }
         }
 
-        void fetchGames()
-    }, [])
-
-    useEffect(() => {
-        const fetchTeams = async () => {
-            try {
-                const data = await getTeams()
-
-                setTeams(data)
-
-                if (data.length > 0) {
-                    setSelectedTeamName(data[0].name)
-                }
-            } catch (error) {
-                console.error(error)
-            }
-        }
-
-        void fetchTeams()
+        void fetchInitialData()
     }, [])
 
     const getRankClassName = (index: number) => {
@@ -140,7 +135,7 @@ const RankingsPage = () => {
         return 'No rankings available yet.'
     }
 
-    if (isLoading) {
+    if (isInitialLoading) {
         return (
             <div className='loading-overlay'>
                 <div className='loading-box'>
@@ -235,7 +230,7 @@ const RankingsPage = () => {
                     ))}
                 </div>
 
-                {isLoading && (
+                {isLoadingRankings && (
                     <p className='rankings-state'>Loading rankings...</p>
                 )}
 
@@ -245,7 +240,7 @@ const RankingsPage = () => {
                     </p>
                 )}
 
-                {!isLoading && !errorMessage && players.length === 0 && (
+                {!isLoadingRankings && !errorMessage && players.length === 0 && (
                     <p className='rankings-state'>
                         {getEmptyStateMessage()}
                     </p>
