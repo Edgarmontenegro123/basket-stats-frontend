@@ -1,13 +1,14 @@
 import {useEffect, useState} from 'react'
+import {useSearchParams} from 'react-router-dom'
+import BasketballLoader from '../../common/BasketballLoader'
 import {
     getGames,
     getPlayerStatsByGameId,
     getTeamStatsByGameId,
-} from '../../services/api.ts'
-import type { Game } from '../../types/game.ts'
-import type { PlayerStats } from '../../types/player.ts'
-import type { TeamStat } from '../../types/analytics.ts'
-import BasketballLoader from '../../common/BasketballLoader.tsx'
+} from '../../services/api'
+import type { Game } from '../../types/game'
+import type { PlayerStats } from '../../types/player'
+import type { TeamStat } from '../../types/analytics'
 import './GameAnalyticsPage.css'
 
 
@@ -21,12 +22,18 @@ const GameAnalyticsPage = () => {
     const [isLoadingGames, setIsLoadingGames] = useState(true)
     const hasLoadedAnalytics = playerStats.length > 0 || teamStats.length > 0
     const [hasTriedToLoadAnalytics, setHasTriedToLoadAnalytics] = useState(false)
+    const [searchParams] = useSearchParams()
+    const gameIdFromUrl = searchParams.get('gameId')
 
     useEffect(() => {
         const loadGames = async () => {
             try {
                 const data = await getGames()
                 setGames(data)
+
+                if (gameIdFromUrl) {
+                    setSelectedGameId(gameIdFromUrl)
+                }
             } catch (error) {
                 console.error(error);
                 setError('Error loading games')
@@ -36,7 +43,7 @@ const GameAnalyticsPage = () => {
         };
 
         void loadGames()
-    }, [])
+    }, [gameIdFromUrl])
 
     const handleLoadAnalytics = async () => {
         if (!selectedGameId) {

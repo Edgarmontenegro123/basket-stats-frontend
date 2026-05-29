@@ -151,6 +151,16 @@
     color: var(--text-soft);
 }
 
+.team-games-item--clickable {
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.team-games-item--clickable:hover {
+    background: rgba(148, 163, 184, 0.08);
+    transform: translateY(-2px);
+}
+
 .team-summary-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));

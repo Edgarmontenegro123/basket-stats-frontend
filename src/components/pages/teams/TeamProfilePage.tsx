@@ -247,7 +247,11 @@ const TeamProfilePage = () => {
                 ) : (
                     <ul className='team-games-list'>
                         {games.map((game) => (
-                            <li key={game.id} className='team-games-item'>
+                            <li
+                                key={game.id}
+                                className='team-games-item team-games-item--clickable'
+                                onClick={() => navigate(`/analytics?gameId=${game.id}`)}
+                            >
                                 <span>
                                     {game.home_team_name}
                                     {' '}
