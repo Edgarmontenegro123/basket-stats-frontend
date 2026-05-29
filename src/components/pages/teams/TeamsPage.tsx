@@ -147,7 +147,21 @@ const TeamsPage = () => {
                                 className='data-list__item team-list-item'
                                 onClick={() => navigate(`/teams/${team.id}`)}
                             >
-                                <span>{team.name}</span>
+                                <div className='team-list-info'>
+                                    {team.logo_url ? (
+                                        <img
+                                            src={team.logo_url}
+                                            alt={team.name}
+                                            className='team-logo'
+                                        />
+                                    ) : (
+                                        <div className='team-logo-placeholder'>
+                                            {team.name.charAt(0)}
+                                        </div>
+                                    )}
+
+                                    <span>{team.name}</span>
+                                </div>
                                 <div className='data-list__actions'>
                                     <button
                                         type='button'

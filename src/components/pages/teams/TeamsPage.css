@@ -39,6 +39,33 @@
     transform: translateX(2px);
 }
 
+.team-list-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.team-logo,
+.team-logo-placeholder {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.team-logo {
+    object-fit: cover;
+    border: 1px solid var(--border);
+}
+
+.team-logo-placeholder {
+    display: grid;
+    place-items: center;
+    background: var(--accent-soft);
+    color: var(--title);
+    font-weight: 800;
+}
+
 .team-action-button {
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -100,5 +127,9 @@
 
     .data-list__actions button {
         flex: 1;
+    }
+
+    .team-list-info {
+        width: 100%;
     }
 }
