@@ -90,17 +90,50 @@ const TeamProfilePage = () => {
         )
     }
 
-    const totalGames = games.length
-
-    const completedGames = games.filter(
-        (game) => game.status === 'completed',
-    ).length
-
-    const scheduledGames = games.filter(
-        (game) => game.status === 'scheduled',
-    ).length
-
     const totalPlayers = players.length
+
+    const completedGamesList = games.filter(
+        (game) =>
+            game.status === 'completed' &&
+            game.home_score !== null &&
+            game.away_score !== null,
+    )
+
+    const wins = completedGamesList.filter((game) => {
+        const isHomeTeam = game.home_team_id === id
+        const isAwayTeam = game.away_team_id === id
+
+        if (isHomeTeam) {
+            return Number(game.home_score) > Number(game.away_score)
+        }
+
+        if (isAwayTeam) {
+            return Number(game.away_score) > Number(game.home_score)
+        }
+
+        return false
+    }).length
+
+    const losses = completedGamesList.filter((game) => {
+        const isHomeTeam = game.home_team_id === id
+        const isAwayTeam = game.away_team_id === id
+
+        if (isHomeTeam) {
+            return Number(game.home_score) < Number(game.away_score)
+        }
+
+        if (isAwayTeam) {
+            return Number(game.away_score) < Number(game.home_score)
+        }
+
+        return false
+    }).length
+
+    const winPercentage =
+        completedGamesList.length > 0
+            ? Math.round((wins / completedGamesList.length) * 100)
+            : 0
+
 
     return (
         <div className='team-profile-page'>
@@ -129,18 +162,18 @@ const TeamProfilePage = () => {
                 </div>
 
                 <div className='team-summary-card'>
-                    <span>Total games</span>
-                    <strong>{totalGames}</strong>
+                    <span>Wins</span>
+                    <strong>{wins}</strong>
                 </div>
 
                 <div className='team-summary-card'>
-                    <span>Completed</span>
-                    <strong>{completedGames}</strong>
+                    <span>Losses</span>
+                    <strong>{losses}</strong>
                 </div>
 
                 <div className='team-summary-card'>
-                    <span>Scheduled</span>
-                    <strong>{scheduledGames}</strong>
+                    <span>Win %</span>
+                    <strong>{winPercentage}%</strong>
                 </div>
             </section>
             <section className='team-profile-section'>
