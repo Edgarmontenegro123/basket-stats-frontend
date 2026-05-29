@@ -1,5 +1,5 @@
 import type { CreatePlayerPayload, Player } from '../types/player'
-import type {Team} from '../types/team.ts'
+import type {Team, CreateTeamPayload} from '../types/team'
 
 const MANAGEMENT_API_URL = import.meta.env.VITE_MANAGEMENT_API_URL
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL
@@ -327,8 +327,8 @@ export const getPlayerSummaryByName = async (
 
 /*================ Teams ================*/
 
-export const createTeam = async (name: string) => {
-    const shortName = name
+export const createTeam = async (payload: CreateTeamPayload) => {
+    const shortName = payload.name
         .split(' ')
         .map(word => word[0])
         .join('')
@@ -345,10 +345,13 @@ export const createTeam = async (name: string) => {
         },
 
         body: JSON.stringify({
-            name,
+            name: payload.name,
             short_name: shortName,
+            logo_url: payload.logo_url || '',
+            primary_color: '',
+            secondary_color: '',
         }),
-    });
+    })
 
     if (!res.ok) {
         const text = await res.text();
@@ -383,8 +386,8 @@ export const getTeamById = async (id: string): Promise<Team> => {
     return res.json()
 }
 
-export const updateTeam = async (id: string, name: string) => {
-    const shortName = name
+export const updateTeam = async (id: string, payload: CreateTeamPayload) => {
+    const shortName = payload.name
         .split(' ')
         .map(word => word[0])
         .join('')
@@ -397,10 +400,13 @@ export const updateTeam = async (id: string, name: string) => {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            name,
+            name: payload.name,
             short_name: shortName,
+            logo_url: payload.logo_url || '',
+            primary_color: '',
+            secondary_color: '',
         }),
-    });
+    })
 
     if (!res.ok) {
         const text = await res.text();

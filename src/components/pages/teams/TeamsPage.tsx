@@ -1,11 +1,11 @@
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import PageHeader from '../../common/PageHeader.tsx'
-import SectionCard from '../../common/SectionCard.tsx'
-import TeamModal from '../../teams/TeamModal.tsx'
-import BasketballLoader from '../../common/BasketballLoader.tsx'
-import {getTeams, createTeam, updateTeam, deleteTeam} from '../../services/api.ts'
-import type {Team} from '../../types/team.ts'
+import PageHeader from '../../common/PageHeader'
+import SectionCard from '../../common/SectionCard'
+import TeamModal from '../../teams/TeamModal'
+import BasketballLoader from '../../common/BasketballLoader'
+import {getTeams, createTeam, updateTeam, deleteTeam} from '../../services/api'
+import type {Team, CreateTeamPayload} from '../../types/team'
 import './TeamsPage.css'
 import '../../common/PageLayout.css'
 
@@ -33,8 +33,9 @@ const TeamsPage = () => {
         void fetchTeams()
     }, []);
 
-    const handleSubmitTeam = async (name: string) => {
-        const trimmedName = name.trim()
+    const handleSubmitTeam = async (payload: CreateTeamPayload) => {
+        const trimmedName = payload.name.trim()
+        const trimmedLogoUrl = payload.logo_url?.trim() || ''
 
         if (trimmedName.length < 2) {
             alert ('Team name must contain at least 2 characters')
@@ -48,7 +49,7 @@ const TeamsPage = () => {
 
         const exists = teams.some(
             (team) =>
-                team.name.toLowerCase() === name.toLowerCase() &&
+                team.name.toLowerCase() === trimmedName.toLowerCase() &&
                 team.id !== teamToEdit?.id,
         )
 
@@ -59,7 +60,10 @@ const TeamsPage = () => {
 
         try {
             if (teamToEdit) {
-                const updatedTeam = await updateTeam(teamToEdit.id, trimmedName)
+                const updatedTeam = await updateTeam(teamToEdit.id, {
+                    name: trimmedName,
+                    logo_url: trimmedLogoUrl,
+                })
 
                 setTeams((prev) =>
                     prev.map((team) =>
@@ -67,8 +71,12 @@ const TeamsPage = () => {
                     ),
                 )
             } else {
-                const newTeam = await createTeam(trimmedName)
-                setTeams((prev) => [...prev, newTeam])
+                const newTeam = await createTeam({
+                    name: trimmedName,
+                    logo_url: trimmedLogoUrl,
+                })
+
+                setTeams((prev) => [newTeam, ...prev])
             }
 
             setTeamToEdit(null)
