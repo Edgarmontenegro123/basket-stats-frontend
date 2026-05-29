@@ -29,6 +29,16 @@
     gap: 8px;
 }
 
+.team-list-item {
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.team-list-item:hover {
+    background: rgba(148, 163, 184, 0.08);
+    transform: translateX(2px);
+}
+
 .team-action-button {
     border: 1px solid var(--border);
     border-radius: 10px;

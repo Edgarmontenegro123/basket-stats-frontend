@@ -136,28 +136,28 @@ const TeamsPage = () => {
                         {teams.map((team) => (
                             <li
                                 key={team.id}
-                                className='data-list__item'
+                                className='data-list__item team-list-item'
+                                onClick={() => navigate(`/teams/${team.id}`)}
                             >
                                 <span>{team.name}</span>
                                 <div className='data-list__actions'>
                                     <button
                                         type='button'
-                                        className='team-action-button'
-                                        onClick={() => navigate(`/teams/${team.id}`)}
-                                    >
-                                        View profile
-                                    </button>
-                                    <button
-                                        type='button'
                                         className='secondary-button'
-                                        onClick={() => handleOpenEditModal(team)}
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                            handleOpenEditModal(team)
+                                        }}
                                     >
                                         Edit
                                     </button>
                                     <button
                                         type='button'
                                         className='danger-button'
-                                        onClick={() => handleDeleteTeam(team.id)}
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                            handleDeleteTeam(team.id)
+                                        }}
                                     >
                                         Delete
                                     </button>
