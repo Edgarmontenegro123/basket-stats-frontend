@@ -68,6 +68,32 @@
     color: var(--text-soft);
 }
 
+.team-analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.team-analytics-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.55);
+}
+
+.team-analytics-card span {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+.team-analytics-card strong {
+    color: var(--title);
+    font-size: 1.6rem;
+}
+
 .team-roster-list {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -207,10 +233,16 @@
     .team-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+    .team-analytics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 520px) {
     .team-summary-grid {
+        grid-template-columns: 1fr;
+    }
+    .team-analytics-grid {
         grid-template-columns: 1fr;
     }
 }

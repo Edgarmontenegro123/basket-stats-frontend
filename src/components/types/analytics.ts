@@ -9,3 +9,13 @@ export interface TeamStat {
     steals: number
     blocks: number
 }
+
+export interface TeamAnalyticsSummary  {
+    gamesWithStats: number
+    averagePoints: number
+    averageRebounds: number
+    averageAssists: number
+    averageSteals: number
+    averageBlocks: number
+    averageTurnovers: number
+}

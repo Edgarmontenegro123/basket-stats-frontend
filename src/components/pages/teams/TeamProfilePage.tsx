@@ -1,10 +1,16 @@
 import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 import BasketballLoader from '../../common/BasketballLoader'
-import {getGames, getPlayersByTeam, getTeamById} from '../../services/api'
+import {
+    getGames,
+    getPlayersByTeam,
+    getTeamById,
+} from '../../services/api'
+import buildTeamAnalyticsSummary from '../../services/teamAnalytics'
 import type {Game} from '../../types/game'
 import type {Player} from '../../types/player'
 import type {Team} from '../../types/team'
+import type {TeamAnalyticsSummary} from '../../types/analytics'
 import './TeamProfilePage.css'
 import '../../layout/MainLayout.css'
 
@@ -17,6 +23,9 @@ const TeamProfilePage = () => {
     const [games, setGames] = useState<Game[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
+    const [analyticsSummary, setAnalyticsSummary] =
+        useState<TeamAnalyticsSummary | null>(null)
+
 
     useEffect(() => {
         const fetchTeamProfile = async () => {
@@ -41,9 +50,15 @@ const TeamProfilePage = () => {
                         game.home_team_id === id || game.away_team_id === id,
                 )
 
+                const summary = await buildTeamAnalyticsSummary(
+                    teamData.name,
+                    teamGames,
+                )
+
                 setTeam(teamData)
                 setPlayers(playersData)
-                setGames(teamGames.slice(0, 5))
+                setGames(teamGames)
+                setAnalyticsSummary(summary)
             } catch (error) {
                 console.error(error)
                 setError('Could not load team profile. The server may be waking up. Please try again in a few seconds.')
@@ -146,9 +161,7 @@ const TeamProfilePage = () => {
             </button>
             <section className='team-profile-header'>
                 <span className='team-profile-eyebrow'>Team Profile</span>
-
                 <h1>{team.name}</h1>
-
                 <p>
                     {team.short_name
                         ? `Short name: ${team.short_name}`
@@ -160,17 +173,14 @@ const TeamProfilePage = () => {
                     <span>Players</span>
                     <strong>{totalPlayers}</strong>
                 </div>
-
                 <div className='team-summary-card'>
                     <span>Wins</span>
                     <strong>{wins}</strong>
                 </div>
-
                 <div className='team-summary-card'>
                     <span>Losses</span>
                     <strong>{losses}</strong>
                 </div>
-
                 <div className='team-summary-card'>
                     <span>Win %</span>
                     <strong>{winPercentage}%</strong>
@@ -179,15 +189,56 @@ const TeamProfilePage = () => {
             <section className='team-profile-section'>
                 <div className='team-profile-section__header'>
                     <div>
+                        <span className='team-profile-eyebrow'>Analytics</span>
+                        <h2>Team Averages</h2>
+                    </div>
+                    <span className='team-profile-count'>
+            {analyticsSummary?.gamesWithStats || 0} games
+        </span>
+                </div>
+                {!analyticsSummary ? (
+                    <p className='team-profile-empty'>
+                        No processed analytics available for this team yet.
+                    </p>
+                ) : (
+                    <div className='team-analytics-grid'>
+                        <article className='team-analytics-card'>
+                            <span>AVG Points</span>
+                            <strong>{analyticsSummary.averagePoints}</strong>
+                        </article>
+                        <article className='team-analytics-card'>
+                            <span>AVG Rebounds</span>
+                            <strong>{analyticsSummary.averageRebounds}</strong>
+                        </article>
+                        <article className='team-analytics-card'>
+                            <span>AVG Assists</span>
+                            <strong>{analyticsSummary.averageAssists}</strong>
+                        </article>
+                        <article className='team-analytics-card'>
+                            <span>AVG Steals</span>
+                            <strong>{analyticsSummary.averageSteals}</strong>
+                        </article>
+                        <article className='team-analytics-card'>
+                            <span>AVG Blocks</span>
+                            <strong>{analyticsSummary.averageBlocks}</strong>
+                        </article>
+                        <article className='team-analytics-card'>
+                            <span>AVG Turnovers</span>
+                            <strong>{analyticsSummary.averageTurnovers}</strong>
+                        </article>
+                    </div>
+                )}
+            </section>
+            <section className='team-profile-section'>
+                <div className='team-profile-section__header'>
+                    <div>
                         <span className='team-profile-eyebrow'>Roster</span>
                         <h2>Players</h2>
                     </div>
-
                     <span className='team-profile-count'>
                         {players.length} players
                     </span>
                 </div>
-
                 {players.length === 0 ? (
                     <p className='team-profile-empty'>
                         No players registered for this team yet.
@@ -211,12 +262,10 @@ const TeamProfilePage = () => {
                                         {player.first_name.charAt(0)}
                                     </div>
                                 )}
-
                                 <div>
                                     <h3>
                                         {player.first_name} {player.last_name}
                                     </h3>
-
                                     <p>
                                         #{player.number}
                                         {' · '}
@@ -234,12 +283,10 @@ const TeamProfilePage = () => {
                         <span className='team-profile-eyebrow'>Games</span>
                         <h2>Recent Games</h2>
                     </div>
-
                     <span className='team-profile-count'>
                         {games.length} games
                     </span>
                 </div>
-
                 {games.length === 0 ? (
                     <p className='team-profile-empty'>
                         No games registered for this team yet.
@@ -261,7 +308,6 @@ const TeamProfilePage = () => {
                                     {' '}
                                     {game.away_team_name}
                                 </span>
-
                                 <small>
                                     {new Date(game.game_date).toLocaleDateString()}
                                     {' · '}
