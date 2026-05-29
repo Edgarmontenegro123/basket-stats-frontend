@@ -160,13 +160,28 @@ const TeamProfilePage = () => {
                 ← Back to Teams
             </button>
             <section className='team-profile-header'>
-                <span className='team-profile-eyebrow'>Team Profile</span>
-                <h1>{team.name}</h1>
-                <p>
-                    {team.short_name
-                        ? `Short name: ${team.short_name}`
-                        : 'No short name available'}
-                </p>
+                <div className='team-profile-header__content'>
+                    {team.logo_url ? (
+                        <img
+                            src={team.logo_url}
+                            alt={team.name}
+                            className='team-profile-logo'
+                        />
+                    ) : (
+                        <div className='team-profile-logo-placeholder'>
+                            {team.name.charAt(0)}
+                        </div>
+                    )}
+                    <div>
+                        <span className='team-profile-eyebrow'>Team Profile</span>
+                        <h1>{team.name}</h1>
+                        <p>
+                            {team.short_name
+                                ? `Short name: ${team.short_name}`
+                                : 'No short name available'}
+                        </p>
+                    </div>
+                </div>
             </section>
             <section className='team-summary-grid'>
                 <div className='team-summary-card'>
