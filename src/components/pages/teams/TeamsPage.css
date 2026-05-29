@@ -29,6 +29,20 @@
     gap: 8px;
 }
 
+.team-action-button {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: var(--accent-soft);
+    color: var(--title);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.team-action-button:hover {
+    border-color: var(--accent);
+}
+
 .secondary-button,
 .danger-button {
     border: 1px solid var(--border);

@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
 import PageHeader from '../../common/PageHeader.tsx'
 import SectionCard from '../../common/SectionCard.tsx'
 import TeamModal from '../../teams/TeamModal.tsx'
@@ -14,6 +15,8 @@ const TeamsPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [teamToEdit, setTeamToEdit] = useState<Team | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -137,6 +140,13 @@ const TeamsPage = () => {
                             >
                                 <span>{team.name}</span>
                                 <div className='data-list__actions'>
+                                    <button
+                                        type='button'
+                                        className='team-action-button'
+                                        onClick={() => navigate(`/teams/${team.id}`)}
+                                    >
+                                        View profile
+                                    </button>
                                     <button
                                         type='button'
                                         className='secondary-button'
