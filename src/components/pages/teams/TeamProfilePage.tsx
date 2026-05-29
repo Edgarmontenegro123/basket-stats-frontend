@@ -46,7 +46,7 @@ const TeamProfilePage = () => {
                 setGames(teamGames.slice(0, 5))
             } catch (error) {
                 console.error(error)
-                setError('Could not load team profile.')
+                setError('Could not load team profile. The server may be waking up. Please try again in a few seconds.')
             } finally {
                 setIsLoading(false)
             }

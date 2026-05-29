@@ -46,7 +46,7 @@ import '../../layout/MainLayout.css'
                 setPlayer(playerData)
                 setTeam(playerTeam || null)
             } catch {
-                setError('Could not load player.')
+                setError('Could not load player. The server may be waking up. Please try again in a few seconds.')
             } finally {
                 setIsLoading(false)
             }
