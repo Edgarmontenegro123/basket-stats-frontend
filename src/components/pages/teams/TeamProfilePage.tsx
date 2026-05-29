@@ -90,6 +90,18 @@ const TeamProfilePage = () => {
         )
     }
 
+    const totalGames = games.length
+
+    const completedGames = games.filter(
+        (game) => game.status === 'completed',
+    ).length
+
+    const scheduledGames = games.filter(
+        (game) => game.status === 'scheduled',
+    ).length
+
+    const totalPlayers = players.length
+
     return (
         <div className='team-profile-page'>
             <button
@@ -109,6 +121,27 @@ const TeamProfilePage = () => {
                         ? `Short name: ${team.short_name}`
                         : 'No short name available'}
                 </p>
+            </section>
+            <section className='team-summary-grid'>
+                <div className='team-summary-card'>
+                    <span>Players</span>
+                    <strong>{totalPlayers}</strong>
+                </div>
+
+                <div className='team-summary-card'>
+                    <span>Total games</span>
+                    <strong>{totalGames}</strong>
+                </div>
+
+                <div className='team-summary-card'>
+                    <span>Completed</span>
+                    <strong>{completedGames}</strong>
+                </div>
+
+                <div className='team-summary-card'>
+                    <span>Scheduled</span>
+                    <strong>{scheduledGames}</strong>
+                </div>
             </section>
             <section className='team-profile-section'>
                 <div className='team-profile-section__header'>
