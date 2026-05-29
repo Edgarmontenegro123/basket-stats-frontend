@@ -81,6 +81,22 @@
     box-shadow: var(--shadow);
 }
 
+.back-button {
+    width: fit-content;
+    min-height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 0 14px;
+    cursor: pointer;
+    background: var(--accent-soft);
+    color: var(--title);
+    font-weight: 600;
+}
+
+.back-button:hover {
+    background: var(--accent);
+}
+
 @media (max-width: 768px) {
     .layout {
         grid-template-columns: 1fr;

@@ -5,6 +5,7 @@ import type {Player, PlayerSummary} from '../../types/player.ts'
 import type {Team} from '../../types/team.ts'
 import BasketballLoader from '../../common/BasketballLoader.tsx'
 import './PlayerProfilePage.css'
+import '../../layout/MainLayout.css'
 
     const PlayerProfilePage = () => {
     const {id} = useParams()

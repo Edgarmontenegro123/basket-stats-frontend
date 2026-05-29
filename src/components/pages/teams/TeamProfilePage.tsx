@@ -5,6 +5,7 @@ import {getPlayersByTeam, getTeamById} from '../../services/api'
 import type {Player} from '../../types/player'
 import type {Team} from '../../types/team'
 import './TeamProfilePage.css'
+import '../../layout/MainLayout.css'
 
 const TeamProfilePage = () => {
     const {id} = useParams()
@@ -82,6 +83,13 @@ const TeamProfilePage = () => {
 
     return (
         <div className='team-profile-page'>
+            <button
+                type='button'
+                className='back-button'
+                onClick={() => navigate('/teams')}
+            >
+                ← Back to Teams
+            </button>
             <section className='team-profile-header'>
                 <span className='team-profile-eyebrow'>Team Profile</span>
 
