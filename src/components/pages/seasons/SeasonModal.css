@@ -1,4 +1,4 @@
-@import '../teams/TeamModal.css';
+@import '../../teams/TeamModal.css';
 
 .season-modal__content {
     display: flex;

@@ -1,7 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import './MainLayout.css'
 
-export const MainLayout = () => {
+    const MainLayout = () => {
     return (
         <div className='layout'>
 
@@ -79,3 +79,5 @@ export const MainLayout = () => {
         </div>
     )
 }
+
+export default MainLayout

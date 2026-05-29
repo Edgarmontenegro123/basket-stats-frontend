@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
-import PageHeader from '../common/PageHeader'
-import SectionCard from '../common/SectionCard'
-import BasketballLoader from '../common/BasketballLoader'
+import PageHeader from '../../common/PageHeader.tsx'
+import SectionCard from '../../common/SectionCard.tsx'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
 import {
     getAggregatedPlayerRankings,
     getGames,
     getTeams,
     getPlayerStatsByGameId,
-} from '../services/api'
-import type { PlayerStats, AggregatedPlayerRanking } from '../types/player'
-import type { Game } from '../types/game'
-import type { Team } from '../types/team'
+} from '../../services/api.ts'
+import type { PlayerStats, AggregatedPlayerRanking } from '../../types/player.ts'
+import type { Game } from '../../types/game.ts'
+import type { Team } from '../../types/team.ts'
 import './RankingsPage.css'
-import '../common/PageLayout.css'
+import '../../common/PageLayout.css'
 
 const rankingStats = [
     { value: 'points', label: 'Points' },

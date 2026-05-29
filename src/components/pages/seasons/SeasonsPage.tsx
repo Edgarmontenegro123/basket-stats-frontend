@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
-import PageHeader from '../common/PageHeader'
-import SectionCard from '../common/SectionCard'
-import SeasonModal from '../seasons/SeasonModal'
-import BasketballLoader from '../common/BasketballLoader'
+import PageHeader from '../../common/PageHeader.tsx'
+import SectionCard from '../../common/SectionCard.tsx'
+import SeasonModal from './SeasonModal.tsx'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
 import {
     getTeams,
     getSeasons,
     createSeason,
     updateSeason,
     deleteSeason,
-} from '../services/api'
-import type { Team } from '../types/team'
-import type { Season } from '../types/season'
-import './TeamsPage.css'
-import '../common/PageLayout.css'
+} from '../../services/api.ts'
+import type { Team } from '../../types/team.ts'
+import type { Season } from '../../types/season.ts'
+import '../teams/TeamsPage.css'
+import '../../common/PageLayout.css'
 
 
 

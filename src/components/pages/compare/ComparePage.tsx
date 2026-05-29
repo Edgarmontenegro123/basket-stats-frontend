@@ -1,11 +1,11 @@
 import {useEffect, useState} from 'react'
-import PageHeader from '../common/PageHeader'
-import SectionCard from '../common/SectionCard'
-import BasketballLoader from '../common/BasketballLoader'
-import {getTeams, getGames} from '../services/api'
-import type {Game} from '../types/game'
-import type {Team} from '../types/team'
-import '../common/PageLayout.css'
+import PageHeader from '../../common/PageHeader.tsx'
+import SectionCard from '../../common/SectionCard.tsx'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
+import {getTeams, getGames} from '../../services/api.ts'
+import type {Game} from '../../types/game.ts'
+import type {Team} from '../../types/team.ts'
+import '../../common/PageLayout.css'
 import './ComparePage.css'
 
 const ComparePage = () => {

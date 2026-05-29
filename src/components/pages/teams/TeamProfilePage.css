@@ -1,0 +1,31 @@
+.team-profile-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.team-profile-header {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.team-profile-eyebrow {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    letter-spacing: 0.08em;
+}
+
+.team-profile-header h1 {
+    margin: 0.5rem 0;
+    color: var(--title);
+}
+
+.team-profile-header p {
+    margin: 0;
+    color: var(--text-soft);
+}

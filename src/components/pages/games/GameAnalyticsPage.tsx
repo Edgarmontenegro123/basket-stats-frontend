@@ -3,11 +3,11 @@ import {
     getGames,
     getPlayerStatsByGameId,
     getTeamStatsByGameId,
-} from '../services/api'
-import type { Game } from '../types/game'
-import type { PlayerStats } from '../types/player'
-import type { TeamStat } from '../types/analytics'
-import BasketballLoader from '../common/BasketballLoader'
+} from '../../services/api.ts'
+import type { Game } from '../../types/game.ts'
+import type { PlayerStats } from '../../types/player.ts'
+import type { TeamStat } from '../../types/analytics.ts'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
 import './GameAnalyticsPage.css'
 
 

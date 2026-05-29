@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { Team } from '../types/team'
-import type { Season } from '../types/season'
+import type { Team } from '../../types/team.ts'
+import type { Season } from '../../types/season.ts'
 import './SeasonModal.css'
 
 type SeasonModalProps = {

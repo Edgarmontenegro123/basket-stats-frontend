@@ -1,15 +1,16 @@
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
-import {MainLayout} from '../components/layout/MainLayout.tsx';
-import DashboardPage from '../components/pages/DashboardPage'
-import TeamsPage from '../components/pages/TeamsPage'
-import GamesPage from '../components/pages/GamesPage'
-import UploadStatsPage from '../components/pages/UploadStatsPage'
-import RankingsPage from '../components/pages/RankingsPage'
-import ComparePage from '../components/pages/ComparePage'
-import SeasonsPage from '../components/pages/SeasonsPage'
-import GameAnalyticsPage from '../components/pages/GameAnalyticsPage'
-import {PlayersPage} from '../components/pages/PlayersPage'
-import {PlayerProfilePage} from '../components/pages/PlayerProfilePage'
+import MainLayout from '../components/layout/MainLayout.tsx'
+import DashboardPage from '../components/pages/dashboard/DashboardPage.tsx'
+import TeamsPage from '../components/pages/teams/TeamsPage.tsx'
+import TeamProfilePage from '../components/pages/teams/TeamProfilePage'
+import GamesPage from '../components/pages/games/GamesPage.tsx'
+import UploadStatsPage from '../components/pages/uploads/UploadStatsPage.tsx'
+import RankingsPage from '../components/pages/rankings/RankingsPage.tsx'
+import ComparePage from '../components/pages/compare/ComparePage.tsx'
+import SeasonsPage from '../components/pages/seasons/SeasonsPage.tsx'
+import GameAnalyticsPage from '../components/pages/games/GameAnalyticsPage.tsx'
+import PlayersPage from '../components/pages/players/PlayersPage.tsx'
+import PlayerProfilePage from '../components/pages/players/PlayerProfilePage.tsx'
 
 export const AppRouter = () => {
     return (
@@ -19,6 +20,7 @@ export const AppRouter = () => {
                 <Route element={<MainLayout/>}>
                     <Route path='/dashboard' element={<DashboardPage/>}/>
                     <Route path='/teams' element={<TeamsPage/>}/>
+                    <Route path='/teams/:id' element={<TeamProfilePage />} />
                     <Route path='/players' element={<PlayersPage />}/>
                     <Route path='/players/:id' element={<PlayerProfilePage/>}/>
                     <Route path='/games' element={<GamesPage/>}/>

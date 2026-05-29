@@ -1,12 +1,12 @@
 import {useEffect, useState} from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
-import {getPlayerById, getTeams, getPlayerSummaryByName} from '../services/api'
-import type {Player, PlayerSummary} from '../types/player'
-import type {Team} from '../types/team'
-import BasketballLoader from '../common/BasketballLoader.tsx'
+import {getPlayerById, getTeams, getPlayerSummaryByName} from '../../services/api.ts'
+import type {Player, PlayerSummary} from '../../types/player.ts'
+import type {Team} from '../../types/team.ts'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
 import './PlayerProfilePage.css'
 
-export const PlayerProfilePage = () => {
+    const PlayerProfilePage = () => {
     const {id} = useParams()
     const navigate = useNavigate()
     const [player, setPlayer] = useState<Player | null>(null)
@@ -242,3 +242,5 @@ export const PlayerProfilePage = () => {
         </div>
     )
 }
+
+export default PlayerProfilePage

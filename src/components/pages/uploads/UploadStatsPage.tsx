@@ -1,16 +1,16 @@
 import {useState, useEffect} from 'react'
-import PageHeader from '../common/PageHeader'
-import SectionCard from '../common/SectionCard'
-import type {PlayerStats} from '../types/player'
-import BasketballLoader from '../common/BasketballLoader'
+import PageHeader from '../../common/PageHeader.tsx'
+import SectionCard from '../../common/SectionCard.tsx'
+import type {PlayerStats} from '../../types/player.ts'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
 import {
     uploadStats,
     processStats,
     getPlayerStats,
     getGames,
-} from '../services/api.ts'
+} from '../../services/api.ts'
 import './UploadStatsPage.css'
-import '../common/PageLayout.css'
+import '../../common/PageLayout.css'
 
 
 const UploadStatsPage = () => {

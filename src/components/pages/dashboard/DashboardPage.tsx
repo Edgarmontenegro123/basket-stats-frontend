@@ -1,16 +1,16 @@
 import {useEffect, useState} from 'react'
-import PageHeader from '../common/PageHeader'
-import SectionCard from '../common/SectionCard'
-import StatCard from '../common/StatCard'
-import type {Game} from '../types/game'
-import type {PlayerStats} from '../types/player'
+import PageHeader from '../../common/PageHeader.tsx'
+import SectionCard from '../../common/SectionCard.tsx'
+import StatCard from '../../common/StatCard.tsx'
+import type {Game} from '../../types/game.ts'
+import type {PlayerStats} from '../../types/player.ts'
 import {
     getTeams,
     getGames,
     getTopScorers,
-} from '../services/api'
+} from '../../services/api.ts'
 
-import BasketballLoader from '../common/BasketballLoader'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
 import './DashboardPage.css'
 
 const DashboardPage = () => {

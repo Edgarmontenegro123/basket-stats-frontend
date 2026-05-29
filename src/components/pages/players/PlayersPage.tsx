@@ -1,14 +1,14 @@
 import * as React from 'react'
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import {createPlayer, getPlayers, updatePlayer, deletePlayer, getTeams} from '../services/api'
-import type {CreatePlayerPayload, Player} from '../types/player'
-import type {Team} from '../types/team'
-import BasketballLoader from '../common/BasketballLoader'
+import {createPlayer, getPlayers, updatePlayer, deletePlayer, getTeams} from '../../services/api.ts'
+import type {CreatePlayerPayload, Player} from '../../types/player.ts'
+import type {Team} from '../../types/team.ts'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
 import './PlayersPage.css'
 
 
-export const PlayersPage = () => {
+    const PlayersPage = () => {
     const [players, setPlayers] = useState<Player[]>([])
     const [teams, setTeams] = useState<Team[]>([])
     const [showForm, setShowForm] = useState(false)
@@ -527,3 +527,5 @@ export const PlayersPage = () => {
         </div>
     )
 }
+
+export default PlayersPage

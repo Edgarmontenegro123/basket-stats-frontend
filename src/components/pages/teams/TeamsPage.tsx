@@ -1,12 +1,12 @@
 import {useEffect, useState} from 'react'
-import PageHeader from '../common/PageHeader'
-import SectionCard from '../common/SectionCard'
-import TeamModal from '../teams/TeamModal'
-import BasketballLoader from '../common/BasketballLoader'
-import {getTeams, createTeam, updateTeam, deleteTeam} from '../services/api'
-import type {Team} from '../types/team'
+import PageHeader from '../../common/PageHeader.tsx'
+import SectionCard from '../../common/SectionCard.tsx'
+import TeamModal from '../../teams/TeamModal.tsx'
+import BasketballLoader from '../../common/BasketballLoader.tsx'
+import {getTeams, createTeam, updateTeam, deleteTeam} from '../../services/api.ts'
+import type {Team} from '../../types/team.ts'
 import './TeamsPage.css'
-import '../common/PageLayout.css'
+import '../../common/PageLayout.css'
 
 
 const TeamsPage = () => {
