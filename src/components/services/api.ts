@@ -1,8 +1,10 @@
 import type { CreatePlayerPayload, Player } from '../types/player'
+import type {Team} from '../types/team.ts'
 
-const MANAGEMENT_API_URL = import.meta.env.VITE_MANAGEMENT_API_URL;
-const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL;
+const MANAGEMENT_API_URL = import.meta.env.VITE_MANAGEMENT_API_URL
+const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL
 
+/*================ Game ================*/
 
 export const createGame = async (
     seasonId: string,
@@ -53,6 +55,51 @@ export const getGames = async () => {
     return res.json();
 }
 
+export const updateGame = async (
+    id: string,
+    seasonId: string,
+    homeTeamId: string,
+    awayTeamId: string,
+) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            season_id: seasonId,
+            home_team_id: homeTeamId,
+            away_team_id: awayTeamId,
+            game_date: new Date().toISOString(),
+            location: null,
+            is_friendly: false,
+            home_score: null,
+            away_score: null,
+            status: 'scheduled',
+        }),
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const deleteGame = async (id: string) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
+        method: 'DELETE',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+}
+
+/*================ Stats ================*/
+
 export const uploadStats = async (gameId: string, file: File) => {
     const formData = new FormData();
     formData.append('game_id', gameId);
@@ -96,13 +143,108 @@ export const processStats = async (uploadId: string) => {
     return data;
 }
 
-export const getPlayerStats = async (gameId: string) => {
-    // Go backend connection
-    // const res = await fetch(`http://localhost:8081/analytics/games/${gameId}/players`);
-    // Node backend connection
+export const getPlayerStatsByGameId = async (gameId: string) => {
     const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`);
 
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
     return res.json();
+};
+
+export const getTeamStatsByGameId = async (gameId: string) => {
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/teams`);
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+};
+
+export const getTopScorers = async (
+    limit: number = 5,
+) => {
+    const res = await fetch(
+        `${ANALYTICS_API_URL}/analytics/players/rankings?stat=points&limit=${limit}`,
+    );
+
+    if (!res.ok) {
+        const text = await res.text();
+
+        throw new Error(text);
+    }
+
+    return res.json();
+};
+
+export const getPlayerRankings = async (
+    stat: string,
+    limit: number = 10,
+) => {
+    const res = await fetch(
+        `${ANALYTICS_API_URL}/analytics/players/rankings?stat=${stat}&limit=${limit}`,
+    )
+
+    if (!res.ok) {
+        const text = await res.text()
+
+        throw new Error(text)
+    }
+
+    return res.json()
+};
+
+export const getAggregatedPlayerRankings = async (
+    stat: string,
+    limit: number = 10,
+) => {
+    const res = await fetch(
+        `${ANALYTICS_API_URL}/analytics/players/aggregated-rankings?stat=${stat}&limit=${limit}`,
+    )
+
+    if (!res.ok) {
+        const text = await res.text()
+
+        throw new Error(text)
+    }
+
+    return res.json()
+};
+
+/*================ Players ================*/
+
+export const createPlayer = async (
+    payload: CreatePlayerPayload,
+): Promise<Player> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const getPlayers = async (): Promise<Player[]> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players`)
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
 }
 
 export const getPlayerById = async (id: string) => {
@@ -113,6 +255,107 @@ export const getPlayerById = async (id: string) => {
     }
 
     return res.json()
+}
+
+export const getPlayerStats = async (gameId: string) => {
+    // Go backend connection
+    // const res = await fetch(`http://localhost:8081/analytics/games/${gameId}/players`);
+    // Node backend connection
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`);
+
+    return res.json();
+}
+
+export const getPlayersByTeam = async (
+    teamId: string,
+): Promise<Player[]> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${teamId}/players`)
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const updatePlayer = async (
+    id: string,
+    payload: CreatePlayerPayload,
+): Promise<Player> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const deletePlayer = async (id: string): Promise<void> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`, {
+        method: 'DELETE',
+    })
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+}
+
+export const getPlayerSummaryByName = async (
+    playerName: string,
+) => {
+    const res = await fetch(
+        `${ANALYTICS_API_URL}/analytics/players/${encodeURIComponent(playerName)}/summary`,
+    )
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+/*================ Teams ================*/
+
+export const createTeam = async (name: string) => {
+    const shortName = name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 3);
+
+    // Go backend connection
+    // const res = await fetch('http://localhost:8080/teams', {
+    // Node backend connection
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+            name,
+            short_name: shortName,
+        }),
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
 }
 
 export const getTeams = async () => {
@@ -128,6 +371,57 @@ export const getTeams = async () => {
 
     return res.json();
 }
+
+export const getTeamById = async (id: string): Promise<Team> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`)
+
+    if (!res.ok) {
+        const text = await res.text()
+        throw new Error(text)
+    }
+
+    return res.json()
+}
+
+export const updateTeam = async (id: string, name: string) => {
+    const shortName = name
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 3);
+
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name,
+            short_name: shortName,
+        }),
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+
+    return res.json();
+};
+
+export const deleteTeam = async (id: string) => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
+        method: 'DELETE',
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text);
+    }
+};
+
+/*================ Seasons ================*/
 
 export const createSeason = async (
     teamId: string,
@@ -210,277 +504,4 @@ export const deleteSeason = async (id: string) => {
         const text = await res.text()
         throw new Error(text)
     }
-}
-
-export const createTeam = async (name: string) => {
-    const shortName = name
-        .split(' ')
-        .map(word => word[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 3);
-
-    // Go backend connection
-    // const res = await fetch('http://localhost:8080/teams', {
-    // Node backend connection
-    const res = await fetch(`${MANAGEMENT_API_URL}/teams`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-
-        body: JSON.stringify({
-            name,
-            short_name: shortName,
-        }),
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
-    }
-
-    return res.json();
-}
-
-export const getPlayerStatsByGameId = async (gameId: string) => {
-    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`);
-
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
-    }
-
-    return res.json();
-};
-
-export const getTeamStatsByGameId = async (gameId: string) => {
-    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/teams`);
-
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
-    }
-
-    return res.json();
-};
-
-export const updateGame = async (
-    id: string,
-    seasonId: string,
-    homeTeamId: string,
-    awayTeamId: string,
-) => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            season_id: seasonId,
-            home_team_id: homeTeamId,
-            away_team_id: awayTeamId,
-            game_date: new Date().toISOString(),
-            location: null,
-            is_friendly: false,
-            home_score: null,
-            away_score: null,
-            status: 'scheduled',
-        }),
-    })
-
-    if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-    }
-
-    return res.json()
-}
-
-export const deleteGame = async (id: string) => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
-        method: 'DELETE',
-    })
-
-    if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-    }
-}
-
-export const updateTeam = async (id: string, name: string) => {
-    const shortName = name
-        .split(' ')
-        .map(word => word[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 3);
-
-    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            name,
-            short_name: shortName,
-        }),
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
-    }
-
-    return res.json();
-};
-
-export const deleteTeam = async (id: string) => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
-        method: 'DELETE',
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
-    }
-};
-
-export const getTopScorers = async (
-    limit: number = 5,
-) => {
-    const res = await fetch(
-        `${ANALYTICS_API_URL}/analytics/players/rankings?stat=points&limit=${limit}`,
-    );
-
-    if (!res.ok) {
-        const text = await res.text();
-
-        throw new Error(text);
-    }
-
-    return res.json();
-};
-
-export const getPlayerRankings = async (
-    stat: string,
-    limit: number = 10,
-) => {
-    const res = await fetch(
-        `${ANALYTICS_API_URL}/analytics/players/rankings?stat=${stat}&limit=${limit}`,
-    )
-
-    if (!res.ok) {
-        const text = await res.text()
-
-        throw new Error(text)
-    }
-
-    return res.json()
-};
-
-export const getAggregatedPlayerRankings = async (
-    stat: string,
-    limit: number = 10,
-) => {
-    const res = await fetch(
-        `${ANALYTICS_API_URL}/analytics/players/aggregated-rankings?stat=${stat}&limit=${limit}`,
-    )
-
-    if (!res.ok) {
-        const text = await res.text()
-
-        throw new Error(text)
-    }
-
-    return res.json()
-};
-
-export const getPlayers = async (): Promise<Player[]> => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/players`)
-
-    if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-    }
-
-    return res.json()
-}
-
-export const getPlayersByTeam = async (
-    teamId: string,
-): Promise<Player[]> => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/teams/${teamId}/players`)
-
-    if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-    }
-
-    return res.json()
-}
-
-export const createPlayer = async (
-    payload: CreatePlayerPayload,
-): Promise<Player> => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/players`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    })
-
-    if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-    }
-
-    return res.json()
-}
-
-export const updatePlayer = async (
-    id: string,
-    payload: CreatePlayerPayload,
-): Promise<Player> => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    })
-
-    if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-    }
-
-    return res.json()
-}
-
-export const deletePlayer = async (id: string): Promise<void> => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`, {
-        method: 'DELETE',
-    })
-
-    if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-    }
-}
-
-export const getPlayerSummaryByName = async (
-    playerName: string,
-) => {
-    const res = await fetch(
-        `${ANALYTICS_API_URL}/analytics/players/${encodeURIComponent(playerName)}/summary`,
-    )
-
-    if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
-    }
-
-    return res.json()
 }
