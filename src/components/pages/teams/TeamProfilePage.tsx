@@ -1,7 +1,8 @@
 import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 import BasketballLoader from '../../common/BasketballLoader'
-import {getPlayersByTeam, getTeamById} from '../../services/api'
+import {getGames, getPlayersByTeam, getTeamById} from '../../services/api'
+import type {Game} from '../../types/game'
 import type {Player} from '../../types/player'
 import type {Team} from '../../types/team'
 import './TeamProfilePage.css'
@@ -13,6 +14,7 @@ const TeamProfilePage = () => {
 
     const [team, setTeam] = useState<Team | null>(null)
     const [players, setPlayers] = useState<Player[]>([])
+    const [games, setGames] = useState<Game[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
 
@@ -28,13 +30,20 @@ const TeamProfilePage = () => {
                 setIsLoading(true)
                 setError('')
 
-                const [teamData, playersData] = await Promise.all([
+                const [teamData, playersData, gamesData] = await Promise.all([
                     getTeamById(id),
-                    getPlayersByTeam(id)
+                    getPlayersByTeam(id),
+                    getGames()
                 ])
+
+                const teamGames = gamesData.filter(
+                    (game: Game) =>
+                        game.home_team_id === id || game.away_team_id === id,
+                )
 
                 setTeam(teamData)
                 setPlayers(playersData)
+                setGames(teamGames.slice(0, 5))
             } catch (error) {
                 console.error(error)
                 setError('Could not load team profile.')
@@ -151,6 +160,46 @@ const TeamProfilePage = () => {
                             </article>
                         ))}
                     </div>
+                )}
+            </section>
+            <section className='team-profile-section'>
+                <div className='team-profile-section__header'>
+                    <div>
+                        <span className='team-profile-eyebrow'>Games</span>
+                        <h2>Recent Games</h2>
+                    </div>
+
+                    <span className='team-profile-count'>
+                        {games.length} games
+                    </span>
+                </div>
+
+                {games.length === 0 ? (
+                    <p className='team-profile-empty'>
+                        No games registered for this team yet.
+                    </p>
+                ) : (
+                    <ul className='team-games-list'>
+                        {games.map((game) => (
+                            <li key={game.id} className='team-games-item'>
+                                <span>
+                                    {game.home_team_name}
+                                    {' '}
+                                    {game.home_score !== null ? game.home_score : '-'}
+                                    <strong>{' vs '}</strong>
+                                    {game.away_score !== null ? game.away_score : '-'}
+                                    {' '}
+                                    {game.away_team_name}
+                                </span>
+
+                                <small>
+                                    {new Date(game.game_date).toLocaleDateString()}
+                                    {' · '}
+                                    {game.status}
+                                </small>
+                            </li>
+                        ))}
+                    </ul>
                 )}
             </section>
         </div>
