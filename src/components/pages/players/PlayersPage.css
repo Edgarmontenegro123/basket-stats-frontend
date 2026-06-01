@@ -280,7 +280,6 @@
     gap: 10px;
 }
 
-
 @media (max-width: 768px) {
     .players-page {
         gap: 18px;
