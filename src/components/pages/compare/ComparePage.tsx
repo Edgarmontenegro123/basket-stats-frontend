@@ -24,6 +24,8 @@ const ComparePage = () => {
                 const data = await getTeams()
                 const gamesData = await getGames()
 
+                console.log('Compare games:', gamesData)
+
                 setGames(gamesData)
                 setTeams(data)
 
