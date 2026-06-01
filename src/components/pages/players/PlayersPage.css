@@ -73,13 +73,40 @@
 .table-wrapper {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: visible;
 }
 
 .players-table {
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
+}
+
+.players-table th:nth-child(1),
+.players-table td:nth-child(1) {
+    width: 80px;
+}
+
+.players-table th:nth-child(2),
+.players-table td:nth-child(2) {
+    width: 90px;
+}
+
+.players-table th:nth-child(5),
+.players-table td:nth-child(5) {
+    width: 110px;
+}
+
+.players-table th:nth-child(6),
+.players-table td:nth-child(6),
+.players-table th:nth-child(7),
+.players-table td:nth-child(7) {
+    width: 120px;
+}
+
+.players-table th:nth-child(8),
+.players-table td:nth-child(8) {
+    width: 170px;
 }
 
 .players-table th,
@@ -107,6 +134,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    white-space: nowrap;
 }
 
 .players-edit-button {
@@ -335,7 +363,7 @@
     }
 
     .table-wrapper {
-        overflow-x: hidden;
+        overflow-x: visible;
     }
 
     .players-table {
@@ -348,3 +376,4 @@
         gap: 16px;
     }
 }
+
