@@ -73,11 +73,12 @@
 .table-wrapper {
     width: 100%;
     max-width: 100%;
-    overflow-x: auto;
+    overflow-x: hidden;
 }
 
 .players-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
 }
 
@@ -86,6 +87,8 @@
     padding: 12px 14px;
     border-bottom: 1px solid var(--border);
     text-align: left;
+    text-overflow: ellipsis;
+    overflow: hidden;
     white-space: nowrap;
 }
 
@@ -100,25 +103,31 @@
     color: var(--title);
 }
 
+.players-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .players-edit-button {
-    min-height: 34px;
-    border-radius: 10px;
     border: 1px solid var(--border);
-    padding: 0 12px;
-    cursor: pointer;
     background: var(--accent-soft);
     color: var(--title);
-    font-weight: 600;
 }
 
 .players-delete-button {
-    min-height: 34px;
-    border-radius: 10px;
     border: 1px solid #ef4444;
-    padding: 0 12px;
-    cursor: pointer;
     background: rgba(239, 68, 68, 0.12);
     color: #fecaca;
+}
+
+.players-edit-button,
+.players-delete-button {
+    min-width: 72px;
+    min-height: 34px;
+    border-radius: 10px;
+    padding: 0 12px;
+    cursor: pointer;
     font-weight: 600;
 }
 
@@ -327,7 +336,7 @@
     }
 
     .table-wrapper {
-        overflow-x: auto;
+        overflow-x: hidden;
     }
 
     .players-table {
@@ -339,6 +348,4 @@
         display: grid;
         gap: 16px;
     }
-
-
 }
