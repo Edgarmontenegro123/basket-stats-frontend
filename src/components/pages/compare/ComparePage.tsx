@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useNavigate} from 'react-router-dom'
 import PageHeader from '../../common/PageHeader.tsx'
 import SectionCard from '../../common/SectionCard.tsx'
 import BasketballLoader from '../../common/BasketballLoader.tsx'
@@ -14,6 +15,8 @@ const ComparePage = () => {
     const [teamBId, setTeamBId] = useState('')
     const [games, setGames] = useState<Game[]>([])
     const [isLoading, setIsLoading] = useState(true)
+
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -142,7 +145,6 @@ const ComparePage = () => {
                 title='Compare Teams'
                 subtitle='Compare statistics between teams'
             />
-
             <SectionCard title='Comparison'>
                 <div className='form-row'>
                     <div className='form-group'>
@@ -163,7 +165,6 @@ const ComparePage = () => {
                             ))}
                         </select>
                     </div>
-
                     <div className='form-group'>
                         <label>Away Team</label>
                         <select
@@ -187,11 +188,26 @@ const ComparePage = () => {
                             <thead>
                             <tr>
                                 <th>Metric</th>
-                                <th>{teamAName}</th>
-                                <th>{teamBName}</th>
+                                <th>
+                                    <button
+                                        type='button'
+                                        className='compare-team-link'
+                                        onClick={() => navigate(`/teams/${teamAId}`)}
+                                    >
+                                        {teamAName}
+                                    </button>
+                                </th>
+                                <th>
+                                    <button
+                                        type='button'
+                                        className='compare-team-link'
+                                        onClick={() => navigate(`/teams/${teamBId}`)}
+                                    >
+                                        {teamBName}
+                                    </button>
+                                </th>
                             </tr>
                             </thead>
-
                             <tbody>
                             <tr>
                                 <td>Games played</td>
@@ -236,11 +252,17 @@ const ComparePage = () => {
                             </tbody>
                         </table>
                     </div>
-
                     <div className='compare-mobile-list'>
                         <div className='compare-mobile-card'>
-                            <h3>{teamAName}</h3>
-
+                            <h3>
+                                <button
+                                    type='button'
+                                    className='compare-team-link'
+                                    onClick={() => navigate(`/teams/${teamAId}`)}
+                                >
+                                    {teamAName}
+                                </button>
+                            </h3>
                             <p><span>Games played</span><strong>{teamASummary.gamesPlayed}</strong></p>
                             <p><span>Points for</span><strong>{teamASummary.pointsFor}</strong></p>
                             <p><span>Points against</span><strong>{teamASummary.pointsAgainst}</strong></p>
@@ -250,10 +272,16 @@ const ComparePage = () => {
                             <p><span>Average points against</span><strong>{teamASummary.averagePointsAgainst}</strong></p>
                             <p><span>Point differential</span><strong>{formatPointDifferential(teamASummary.pointDifferential)}</strong></p>
                         </div>
-
                         <div className='compare-mobile-card'>
-                            <h3>{teamBName}</h3>
-
+                            <h3>
+                                <button
+                                    type='button'
+                                    className='compare-team-link'
+                                    onClick={() => navigate(`/teams/${teamBId}`)}
+                                >
+                                    {teamBName}
+                                </button>
+                            </h3>
                             <p><span>Games played</span><strong>{teamBSummary.gamesPlayed}</strong></p>
                             <p><span>Points for</span><strong>{teamBSummary.pointsFor}</strong></p>
                             <p><span>Points against</span><strong>{teamBSummary.pointsAgainst}</strong></p>

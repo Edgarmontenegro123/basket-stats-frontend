@@ -32,6 +32,20 @@
     color: var(--title);
 }
 
+.compare-team-link {
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+}
+
+.compare-team-link:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 768px) {
     .compare-table-wrapper {
         display: none;
