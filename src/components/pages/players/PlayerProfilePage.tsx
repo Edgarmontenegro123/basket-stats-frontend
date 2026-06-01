@@ -102,9 +102,19 @@ import '../../layout/MainLayout.css'
                 )}
 
                 <div className='player-profile-main'>
-                    <p className='player-profile-team'>
-                        {team?.name || 'Unknown team'}
-                    </p>
+                    {team ? (
+                        <button
+                            type='button'
+                            className='player-profile-team-link'
+                            onClick={() => navigate(`/teams/${team.id}`)}
+                        >
+                            {team.name}
+                        </button>
+                    ) : (
+                        <p className='player-profile-team'>
+                            Unknown team
+                        </p>
+                    )}
 
                     <h1>
                         {player.first_name} {player.last_name}

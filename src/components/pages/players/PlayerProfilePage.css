@@ -10,6 +10,22 @@
     font-weight: 600;
 }
 
+.player-profile-team-link {
+    align-self: flex-start;
+    width: fit-content;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+}
+
+.player-profile-team-link:hover {
+    text-decoration: underline;
+}
+
 .player-profile-badges {
     display: flex;
     gap: 10px;
