@@ -1,14 +1,18 @@
 import {useState, useEffect} from 'react'
-import PageHeader from '../../common/PageHeader.tsx'
-import SectionCard from '../../common/SectionCard.tsx'
-import type {PlayerStats} from '../../types/player.ts'
-import BasketballLoader from '../../common/BasketballLoader.tsx'
+import PageHeader from '../../common/PageHeader'
+import SectionCard from '../../common/SectionCard'
+import type {PlayerStats} from '../../types/player'
+import type {Game} from '../../types/game'
+import type {TeamStat} from '../../types/analytics'
+import BasketballLoader from '../../common/BasketballLoader'
 import {
     uploadStats,
     processStats,
     getPlayerStats,
     getGames,
-} from '../../services/api.ts'
+    getTeamStatsByGameId,
+    completeGame,
+} from '../../services/api'
 import './UploadStatsPage.css'
 import '../../common/PageLayout.css'
 
@@ -16,13 +20,7 @@ import '../../common/PageLayout.css'
 const UploadStatsPage = () => {
     const [file, setFile] = useState<File | null>(null)
     const [players, setPlayers] = useState<PlayerStats[]>([])
-    const [games, setGames] = useState<{
-        id: string;
-        game_date: string;
-        status: string;
-        home_team_name: string;
-        away_team_name: string;
-    }[]>([])
+    const [games, setGames] = useState<Game[]>([])
     const [selectedGameId, setSelectedGameId] = useState('')
     const [isProcessing, setIsProcessing] = useState<boolean>(false)
     const [errorMessage, setErrorMessage] = useState<string>('')
@@ -69,7 +67,39 @@ const UploadStatsPage = () => {
             await processStats(upload.id);
 
             // 3. Obtener stats
-            const playersData = await getPlayerStats(selectedGameId);
+            const [playersData, teamStats] = await Promise.all([
+                getPlayerStats(selectedGameId),
+                getTeamStatsByGameId(selectedGameId),
+            ]) as [PlayerStats[], TeamStat[]];
+
+            const selectedGame = games.find((game) => game.id === selectedGameId)
+
+            if (!selectedGame) {
+                setErrorMessage('Selected game not found.')
+                return
+            }
+
+            const homeTeamStat = teamStats.find(
+                (team) => team.team_name === selectedGame.home_team_name,
+            )
+
+            const awayTeamStat = teamStats.find(
+                (team) => team.team_name === selectedGame.away_team_name,
+            )
+
+            if (!homeTeamStat || !awayTeamStat) {
+                setErrorMessage('Could not match processed team stats with selected game teams.')
+                return
+            }
+
+            await completeGame(
+                selectedGame.id,
+                selectedGame.season_id,
+                selectedGame.home_team_id,
+                selectedGame.away_team_id,
+                homeTeamStat.points,
+                awayTeamStat.points,
+            )
 
             setPlayers(playersData);
         } catch (error) {
