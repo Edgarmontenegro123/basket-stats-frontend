@@ -1,4 +1,6 @@
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
+import LoginPage from '../components/pages/login/LoginPage'
+import ProtectedRoute from './ProtectedRoute'
 import MainLayout from '../components/layout/MainLayout.tsx'
 import DashboardPage from '../components/pages/dashboard/DashboardPage.tsx'
 import TeamsPage from '../components/pages/teams/TeamsPage.tsx'
@@ -16,19 +18,24 @@ export const AppRouter = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path='/' element={<Navigate to='/dashboard' replace/>}/>
-                <Route element={<MainLayout/>}>
-                    <Route path='/dashboard' element={<DashboardPage/>}/>
-                    <Route path='/teams' element={<TeamsPage/>}/>
-                    <Route path='/teams/:id' element={<TeamProfilePage />} />
-                    <Route path='/players' element={<PlayersPage />}/>
-                    <Route path='/players/:id' element={<PlayerProfilePage/>}/>
-                    <Route path='/games' element={<GamesPage/>}/>
-                    <Route path='/upload-stats' element={<UploadStatsPage/>}/>
-                    <Route path='/rankings' element={<RankingsPage/>}/>
-                    <Route path='/compare' element={<ComparePage/>}/>
-                    <Route path='/seasons' element={<SeasonsPage />} />
-                    <Route path='/analytics' element={<GameAnalyticsPage/>}/>
+                <Route path='/login' element={<LoginPage/>}/>
+
+                <Route element={<ProtectedRoute/>}>
+
+                    <Route path='/' element={<Navigate to='/dashboard' replace/>}/>
+                    <Route element={<MainLayout/>}>
+                        <Route path='/dashboard' element={<DashboardPage/>}/>
+                        <Route path='/teams' element={<TeamsPage/>}/>
+                        <Route path='/teams/:id' element={<TeamProfilePage/>}/>
+                        <Route path='/players' element={<PlayersPage/>}/>
+                        <Route path='/players/:id' element={<PlayerProfilePage/>}/>
+                        <Route path='/games' element={<GamesPage/>}/>
+                        <Route path='/upload-stats' element={<UploadStatsPage/>}/>
+                        <Route path='/rankings' element={<RankingsPage/>}/>
+                        <Route path='/compare' element={<ComparePage/>}/>
+                        <Route path='/seasons' element={<SeasonsPage/>}/>
+                        <Route path='/analytics' element={<GameAnalyticsPage/>}/>
+                    </Route>
                 </Route>
             </Routes>
         </BrowserRouter>

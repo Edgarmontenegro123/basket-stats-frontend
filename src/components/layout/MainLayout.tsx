@@ -1,7 +1,22 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import './MainLayout.css'
 
     const MainLayout = () => {
+    const navigate = useNavigate()
+
+        const handleLogout = () => {
+            const shouldLogout = window.confirm('Are you sure you want to log out?')
+
+            if (!shouldLogout) {
+                return
+            }
+
+            localStorage.removeItem('basket_stats_token')
+            localStorage.removeItem('basket_stats_user')
+
+            navigate('/login')
+        }
+
     return (
         <div className='layout'>
 
@@ -68,6 +83,9 @@ import './MainLayout.css'
                         Compare
                     </NavLink>
                 </nav>
+                <button className='logout-button' onClick={handleLogout}>
+                    Logout
+                </button>
             </aside>
 
             {/* Content */}
