@@ -5,12 +5,6 @@ import './MainLayout.css'
     const navigate = useNavigate()
 
         const handleLogout = () => {
-            const shouldLogout = window.confirm('Are you sure you want to log out?')
-
-            if (!shouldLogout) {
-                return
-            }
-
             localStorage.removeItem('basket_stats_token')
             localStorage.removeItem('basket_stats_user')
 

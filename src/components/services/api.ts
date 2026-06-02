@@ -4,6 +4,25 @@ import type {Team, CreateTeamPayload} from '../types/team'
 const MANAGEMENT_API_URL = import.meta.env.VITE_MANAGEMENT_API_URL
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL
 
+/*================ Tokens ================*/
+
+const getAuthHeaders = () => {
+    const token = localStorage.getItem('basket_stats_token')
+
+    return {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    }
+}
+
+const getAuthUploadHeaders = () => {
+    const token = localStorage.getItem('basket_stats_token')
+
+    return {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    }
+}
+
 /*================ Game ================*/
 
 export const createGame = async (
@@ -17,9 +36,7 @@ export const createGame = async (
     // Node backend connection
     const res = await fetch(`${MANAGEMENT_API_URL}/games`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
             season_id: seasonId,
             home_team_id: homeTeamId,
@@ -63,9 +80,7 @@ export const updateGame = async (
 ) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
             season_id: seasonId,
             home_team_id: homeTeamId,
@@ -97,9 +112,7 @@ export const completeGame = async (
 ) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
             season_id: seasonId,
             home_team_id: homeTeamId,
@@ -124,6 +137,7 @@ export const completeGame = async (
 export const deleteGame = async (id: string) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
     })
 
     if (!res.ok) {
@@ -135,6 +149,7 @@ export const deleteGame = async (id: string) => {
 /*================ Stats ================*/
 
 export const uploadStats = async (gameId: string, file: File) => {
+
     const formData = new FormData();
     formData.append('game_id', gameId);
     formData.append('file', file);
@@ -144,6 +159,7 @@ export const uploadStats = async (gameId: string, file: File) => {
     // Node backend connection
     const res = await fetch(`${ANALYTICS_API_URL}/uploads`, {
         method: 'POST',
+        headers: getAuthUploadHeaders(),
         body: formData,
     });
 
@@ -162,9 +178,7 @@ export const processStats = async (uploadId: string) => {
     // Node backend connection
     const res = await fetch(`${ANALYTICS_API_URL}/analytics/process`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({upload_id: uploadId}),
     });
 
@@ -256,9 +270,7 @@ export const createPlayer = async (
 ): Promise<Player> => {
     const res = await fetch(`${MANAGEMENT_API_URL}/players`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
     })
 
@@ -319,9 +331,7 @@ export const updatePlayer = async (
 ): Promise<Player> => {
     const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
     })
 
@@ -336,6 +346,7 @@ export const updatePlayer = async (
 export const deletePlayer = async (id: string): Promise<void> => {
     const res = await fetch(`${MANAGEMENT_API_URL}/players/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
     })
 
     if (!res.ok) {
@@ -374,9 +385,7 @@ export const createTeam = async (payload: CreateTeamPayload) => {
     // Node backend connection
     const res = await fetch(`${MANAGEMENT_API_URL}/teams`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
 
         body: JSON.stringify({
             name: payload.name,
@@ -430,9 +439,7 @@ export const updateTeam = async (id: string, payload: CreateTeamPayload) => {
 
     const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
             name: payload.name,
             short_name: shortName,
@@ -453,6 +460,7 @@ export const updateTeam = async (id: string, payload: CreateTeamPayload) => {
 export const deleteTeam = async (id: string) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
     });
 
     if (!res.ok) {
@@ -472,9 +480,7 @@ export const createSeason = async (
     // Node backend connection
     const res = await fetch(`${MANAGEMENT_API_URL}/seasons`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
             team_id: teamId,
             name,
@@ -514,9 +520,7 @@ export const updateSeason = async (
 ) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/seasons/${id}`, {
         method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
             team_id: teamId,
             name,
@@ -538,6 +542,7 @@ export const updateSeason = async (
 export const deleteSeason = async (id: string) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/seasons/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
     })
 
     if (!res.ok) {
