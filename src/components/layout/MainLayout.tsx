@@ -1,15 +1,18 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import {useState} from 'react'
+import {NavLink, Outlet, useNavigate} from 'react-router-dom'
+import ConfirmModal from '../common/ConfirmModal'
 import './MainLayout.css'
 
-    const MainLayout = () => {
+const MainLayout = () => {
     const navigate = useNavigate()
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false)
 
-        const handleLogout = () => {
-            localStorage.removeItem('basket_stats_token')
-            localStorage.removeItem('basket_stats_user')
+    const handleLogout = () => {
+        localStorage.removeItem('basket_stats_token')
+        localStorage.removeItem('basket_stats_user')
 
-            navigate('/login')
-        }
+        navigate('/login')
+    }
 
     return (
         <div className='layout'>
@@ -30,54 +33,57 @@ import './MainLayout.css'
                     </NavLink>
                     <NavLink
                         to='/teams'
-                        className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >
                         Teams
                     </NavLink>
                     <NavLink
                         to='/players'
-                        className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >
                         Players
                     </NavLink>
                     <NavLink
                         to='/games'
-                        className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >
                         Games
                     </NavLink>
                     <NavLink
                         to='/analytics'
-                        className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >
                         Analytics
                     </NavLink>
                     <NavLink
                         to='/seasons'
-                        className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >
                         Seasons
                     </NavLink>
                     <NavLink
                         to='/upload-stats'
-                        className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >
                         Upload
                     </NavLink>
                     <NavLink
                         to='/rankings'
-                        className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >
                         Rankings
                     </NavLink>
                     <NavLink
                         to='/compare'
-                        className={({ isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
                     >
                         Compare
                     </NavLink>
                 </nav>
-                <button className='logout-button' onClick={handleLogout}>
+                <button
+                    className='logout-button'
+                    onClick={() => setIsLogoutModalOpen(true)}
+                >
                     Logout
                 </button>
             </aside>
@@ -85,9 +91,18 @@ import './MainLayout.css'
             {/* Content */}
             <div className='content-shell'>
                 <main className='content'>
-                    <Outlet />
+                    <Outlet/>
                 </main>
             </div>
+            <ConfirmModal
+                isOpen={isLogoutModalOpen}
+                title='Log out'
+                message='Are you sure you want to log out?'
+                confirmLabel='Logout'
+                cancelLabel='Cancel'
+                onConfirm={handleLogout}
+                onCancel={() => setIsLogoutModalOpen(false)}
+            />
         </div>
     )
 }
