@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
-import PageHeader from '../../common/PageHeader.tsx'
-import SectionCard from '../../common/SectionCard.tsx'
-import GameModal from '../../games/GameModal.tsx'
-import BasketballLoader from '../../common/BasketballLoader.tsx'
+import PageHeader from '../../common/PageHeader'
+import SectionCard from '../../common/SectionCard'
+import GameModal from '../../games/GameModal'
+import BasketballLoader from '../../common/BasketballLoader'
+import ConfirmModal from '../../common/ConfirmModal'
+import type { Team } from '../../types/team'
+import type { Season } from '../../types/season'
+import type { Game } from '../../types/game'
 import {
     createGame,
     deleteGame,
@@ -10,10 +14,7 @@ import {
     getSeasons,
     getTeams,
     updateGame,
-} from '../../services/api.ts'
-import type { Team } from '../../types/team.ts'
-import type { Season } from '../../types/season.ts'
-import type { Game } from '../../types/game.ts'
+} from '../../services/api'
 import '../teams/TeamsPage.css'
 import '../../common/PageLayout.css'
 
@@ -26,6 +27,7 @@ const GamesPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [gameToEdit, setGameToEdit] = useState<Game | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [gameToDelete, setGameToDelete] = useState<Game | null>(null)
 
     const loadData = async () => {
         const [teamsData, seasonsData, gamesData] = await Promise.all([
@@ -94,15 +96,15 @@ const GamesPage = () => {
         setIsModalOpen(false)
     }
 
-    const handleDeleteGame = async (gameId: string) => {
-        const confirmed = window.confirm(
-            'Are you sure you want to delete this game?',
-        )
-
-        if (!confirmed) return
+    const handleConfirmDeleteGame = async () => {
+        if (!gameToDelete) {
+            return
+        }
 
         try {
-            await deleteGame(gameId)
+            await deleteGame(gameToDelete.id)
+
+            setGameToDelete(null)
             await loadData()
         } catch (error) {
             console.error(error)
@@ -137,7 +139,6 @@ const GamesPage = () => {
                 title='Games'
                 subtitle='Track and manage your matches'
             />
-
             <SectionCard
                 title='Games'
                 actionLabel='New game'
@@ -157,14 +158,11 @@ const GamesPage = () => {
                                         {getTeamName(game.home_team_id)} vs{' '}
                                         {getTeamName(game.away_team_id)}
                                     </strong>
-
                                     <div>
                                         Season: {getSeasonName(game.season_id)}
                                     </div>
-
                                     <div>Status: {game.status}</div>
                                 </div>
-
                                 <div className='data-list__actions'>
                                     <button
                                         type='button'
@@ -173,13 +171,10 @@ const GamesPage = () => {
                                     >
                                         Edit
                                     </button>
-
                                     <button
                                         type='button'
                                         className='danger-button'
-                                        onClick={() =>
-                                            handleDeleteGame(game.id)
-                                        }
+                                        onClick={() => setGameToDelete(game)}
                                     >
                                         Delete
                                     </button>
@@ -189,7 +184,6 @@ const GamesPage = () => {
                     </ul>
                 )}
             </SectionCard>
-
             <GameModal
                 key={isModalOpen ? gameToEdit?.id ?? 'new' : 'closed'}
                 isOpen={isModalOpen}
@@ -198,6 +192,15 @@ const GamesPage = () => {
                 gameToEdit={gameToEdit}
                 onClose={handleCloseModal}
                 onSubmit={handleSubmitGame}
+            />
+            <ConfirmModal
+                isOpen={!!gameToDelete}
+                title='Delete game'
+                message={`Are you sure you want to delete ${getTeamName(gameToDelete?.home_team_id || '')} vs ${getTeamName(gameToDelete?.away_team_id || '')}?`}
+                confirmLabel='Delete'
+                cancelLabel='Cancel'
+                onConfirm={handleConfirmDeleteGame}
+                onCancel={() => setGameToDelete(null)}
             />
         </div>
     )
