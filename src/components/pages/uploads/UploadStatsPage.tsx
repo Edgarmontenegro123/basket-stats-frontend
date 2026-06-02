@@ -92,6 +92,22 @@ const UploadStatsPage = () => {
                     normaliseText(selectedGame.away_team_name),
             )
 
+            console.log('Selected game:', {
+                home: selectedGame.home_team_name,
+                away: selectedGame.away_team_name,
+                normalisedHome: normaliseText(selectedGame.home_team_name),
+                normalisedAway: normaliseText(selectedGame.away_team_name),
+            })
+
+            console.log(
+                'Team stats:',
+                teamStats.map((team) => ({
+                    original: team.team_name,
+                    normalised: normaliseText(team.team_name),
+                    points: team.points,
+                })),
+            )
+
             if (!homeTeamStat || !awayTeamStat) {
                 setErrorMessage('Could not match processed team stats with selected game teams.')
                 return
