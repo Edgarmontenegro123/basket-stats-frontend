@@ -1,10 +1,16 @@
 import * as React from 'react'
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import {createPlayer, getPlayers, updatePlayer, deletePlayer, getTeams} from '../../services/api.ts'
-import type {CreatePlayerPayload, Player} from '../../types/player.ts'
-import type {Team} from '../../types/team.ts'
-import BasketballLoader from '../../common/BasketballLoader.tsx'
+import BasketballLoader from '../../common/BasketballLoader'
+import ConfirmModal from '../../common/ConfirmModal'
+import type {Team} from '../../types/team'
+import type {CreatePlayerPayload, Player} from '../../types/player'
+import {
+    createPlayer,
+    getPlayers,
+    updatePlayer,
+    deletePlayer,
+    getTeams} from '../../services/api'
 import './PlayersPage.css'
 
 
@@ -17,6 +23,7 @@ import './PlayersPage.css'
     const [selectedTeamId, setSelectedTeamId] = useState('')
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState('')
+    const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null)
 
     const navigate = useNavigate()
 
@@ -121,20 +128,22 @@ import './PlayersPage.css'
         setShowForm(true)
     }
 
-    const handleDeletePlayer = async (id: string) => {
-        const confirmDelete = window.confirm(
-            'Are you sure you want to delete this player?',
-        )
+        const handleConfirmDeletePlayer = async () => {
+            if (!playerToDelete) {
+                return
+            }
 
-        if (!confirmDelete) {
-            return
+            try {
+                await deletePlayer(playerToDelete.id)
+
+                const updatedPlayers = await getPlayers()
+                setPlayers(updatedPlayers)
+
+                setPlayerToDelete(null)
+            } catch (error) {
+                console.error(error)
+            }
         }
-
-        await deletePlayer(id)
-
-        const updatedPlayers = await getPlayers()
-        setPlayers(updatedPlayers)
-    }
 
     const filteredPlayers = players.filter((player) => {
         const fullName = `${player.first_name} ${player.last_name}`.toLowerCase()
@@ -177,7 +186,6 @@ import './PlayersPage.css'
                     Add Player
                 </button>
             </div>
-
             <div className='players-summary'>
                 <div className='summary-card'>
                     <h3>{players.length}</h3>
@@ -188,11 +196,9 @@ import './PlayersPage.css'
                     <p>Total teams</p>
                 </div>
             </div>
-
             {showForm && (
                 <div className='players-form-card'>
                     <h2>{editingPlayer ? 'Edit Player' : 'Add Player'}</h2>
-
                     <form onSubmit={handleCreatePlayer}>
                         <select
                             value={form.team_id}
@@ -207,7 +213,6 @@ import './PlayersPage.css'
                                 </option>
                             ))}
                         </select>
-
                         <input
                             type='text'
                             placeholder='First name'
@@ -216,7 +221,6 @@ import './PlayersPage.css'
                                 setForm({...form, first_name: e.target.value})
                             }
                         />
-
                         <input
                             type='text'
                             placeholder='Last name'
@@ -225,7 +229,6 @@ import './PlayersPage.css'
                                 setForm({...form, last_name: e.target.value})
                             }
                         />
-
                         <input
                             type='number'
                             placeholder='Number'
@@ -234,7 +237,6 @@ import './PlayersPage.css'
                                 setForm({...form, number: Number(e.target.value)})
                             }
                         />
-
                         <select
                             value={form.position || ''}
                             onChange={(e) =>
@@ -248,7 +250,6 @@ import './PlayersPage.css'
                             <option value='PF'>PF</option>
                             <option value='C'>C</option>
                         </select>
-
                         <input
                             type='number'
                             placeholder='Height cm'
@@ -262,7 +263,6 @@ import './PlayersPage.css'
                                 })
                             }
                         />
-
                         <input
                             type='number'
                             placeholder='Weight kg'
@@ -276,7 +276,6 @@ import './PlayersPage.css'
                                 })
                             }
                         />
-
                         <input
                             type='date'
                             value={form.birth_date || ''}
@@ -284,7 +283,6 @@ import './PlayersPage.css'
                                 setForm({...form, birth_date: e.target.value})
                             }
                         />
-
                         <input
                             type='text'
                             placeholder='Photo URL'
@@ -293,7 +291,6 @@ import './PlayersPage.css'
                                 setForm({...form, photo_url: e.target.value})
                             }
                         />
-
                         <button type='button' onClick={() => setShowForm(false)}>
                             Cancel
                         </button>
@@ -304,13 +301,11 @@ import './PlayersPage.css'
                     </form>
                 </div>
             )}
-
             {error && (
                 <div className='players-error'>
                     {error}
                 </div>
             )}
-
             {isLoading ? (
                 <div className='loading-overlay'>
                     <div className='loading-box'>
@@ -328,14 +323,12 @@ import './PlayersPage.css'
                             onChange={(event) => setSearchTerm(event.target.value)}
                             className='players-search'
                         />
-
                         <select
                             value={selectedTeamId}
                             onChange={(event) => setSelectedTeamId(event.target.value)}
                             className='players-filter'
                         >
                             <option value=''>All teams</option>
-
                             {teams.map((team) => (
                                 <option key={team.id} value={team.id}>
                                     {team.name}
@@ -357,7 +350,6 @@ import './PlayersPage.css'
                                 <th>Actions</th>
                             </tr>
                             </thead>
-
                             <tbody>
                             {filteredPlayers.length === 0 ? (
                                 <tr>
@@ -416,12 +408,11 @@ import './PlayersPage.css'
                                                     >
                                                         Edit
                                                     </button>
-
                                                     <button
                                                         className='players-delete-button'
                                                         onClick={(event) => {
                                                             event.stopPropagation()
-                                                            void handleDeletePlayer(player.id)
+                                                            setPlayerToDelete(player)
                                                         }}
                                                     >
                                                         Delete
@@ -439,7 +430,6 @@ import './PlayersPage.css'
                                 const team = teams.find(
                                     (team) => team.id === player.team_id,
                                 )
-
                                 return (
                                     <div
                                         key={player.id}
@@ -458,12 +448,10 @@ import './PlayersPage.css'
                                                     {player.first_name.charAt(0)}
                                                 </div>
                                             )}
-
                                             <div>
                                                 <h3>
                                                     {player.first_name} {player.last_name}
                                                 </h3>
-
                                                 <p>
                                                     #{player.number}
                                                     {' · '}
@@ -471,14 +459,12 @@ import './PlayersPage.css'
                                                 </p>
                                             </div>
                                         </div>
-
                                         <div className='player-mobile-info'>
                                             <p>
                                                 <strong>Team:</strong>
                                                 {' '}
                                                 {team?.name || 'Unknown team'}
                                             </p>
-
                                             <p>
                                                 <strong>Height:</strong>
                                                 {' '}
@@ -486,7 +472,6 @@ import './PlayersPage.css'
                                                     ? `${player.height_cm} cm`
                                                     : '-'}
                                             </p>
-
                                             <p>
                                                 <strong>Weight:</strong>
                                                 {' '}
@@ -495,7 +480,6 @@ import './PlayersPage.css'
                                                     : '-'}
                                             </p>
                                         </div>
-
                                         <div className='player-mobile-actions'>
                                             <button
                                                 className='players-edit-button'
@@ -506,12 +490,11 @@ import './PlayersPage.css'
                                             >
                                                 Edit
                                             </button>
-
                                             <button
                                                 className='players-delete-button'
                                                 onClick={(event) => {
                                                     event.stopPropagation()
-                                                    void handleDeletePlayer(player.id)
+                                                    setPlayerToDelete(player)
                                                 }}
                                             >
                                                 Delete
@@ -524,6 +507,15 @@ import './PlayersPage.css'
                     </div>
                 </div>
             )}
+            <ConfirmModal
+                isOpen={!!playerToDelete}
+                title='Delete player'
+                message={`Are you sure you want to delete ${playerToDelete?.first_name} ${playerToDelete?.last_name}?`}
+                confirmLabel='Delete'
+                cancelLabel='Cancel'
+                onConfirm={handleConfirmDeletePlayer}
+                onCancel={() => setPlayerToDelete(null)}
+            />
         </div>
     )
 }
