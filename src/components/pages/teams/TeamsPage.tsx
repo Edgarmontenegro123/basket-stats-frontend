@@ -8,6 +8,7 @@ import {getTeams, createTeam, updateTeam, deleteTeam} from '../../services/api'
 import type {Team, CreateTeamPayload} from '../../types/team'
 import './TeamsPage.css'
 import '../../common/PageLayout.css'
+import ConfirmModal from "../../common/ConfirmModal.tsx";
 
 
 const TeamsPage = () => {
@@ -15,6 +16,7 @@ const TeamsPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [teamToEdit, setTeamToEdit] = useState<Team | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [teamToDelete, setTeamToDelete] = useState<Team | null>(null)
 
     const navigate = useNavigate()
 
@@ -100,15 +102,19 @@ const TeamsPage = () => {
         setIsModalOpen(false)
     }
 
-    const handleDeleteTeam = async (teamId: string) => {
-        const confirmed = window.confirm('Are you sure you want to delete this team?')
-
-        if (!confirmed) return
+    const handleConfirmDeleteTeam = async () => {
+        if (!teamToDelete) {
+            return
+        }
 
         try {
-            await deleteTeam(teamId)
+            await deleteTeam(teamToDelete.id)
 
-            setTeams((prev) => prev.filter((team) => team.id !== teamId))
+            setTeams((prev) =>
+                prev.filter((team) => team.id !== teamToDelete.id),
+            )
+
+            setTeamToDelete(null)
         } catch (error) {
             console.error(error)
         }
@@ -178,7 +184,7 @@ const TeamsPage = () => {
                                         className='danger-button'
                                         onClick={(event) => {
                                             event.stopPropagation()
-                                            handleDeleteTeam(team.id)
+                                            setTeamToDelete(team)
                                         }}
                                     >
                                         Delete
@@ -195,6 +201,15 @@ const TeamsPage = () => {
                 onClose={handleCloseModal}
                 onSubmit={handleSubmitTeam}
                 />
+            <ConfirmModal
+                isOpen={!!teamToDelete}
+                title='Delete team'
+                message={`Are you sure you want to delete ${teamToDelete?.name}?`}
+                confirmLabel='Delete'
+                cancelLabel='Cancel'
+                onConfirm={handleConfirmDeleteTeam}
+                onCancel={() => setTeamToDelete(null)}
+            />
         </div>
     )
 }
