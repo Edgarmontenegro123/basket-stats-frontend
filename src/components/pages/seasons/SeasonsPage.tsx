@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
-import PageHeader from '../../common/PageHeader.tsx'
-import SectionCard from '../../common/SectionCard.tsx'
-import SeasonModal from './SeasonModal.tsx'
-import BasketballLoader from '../../common/BasketballLoader.tsx'
+import PageHeader from '../../common/PageHeader'
+import SectionCard from '../../common/SectionCard'
+import SeasonModal from './SeasonModal'
+import BasketballLoader from '../../common/BasketballLoader'
+import ConfirmModal from '../../common/ConfirmModal'
 import {
     getTeams,
     getSeasons,
     createSeason,
     updateSeason,
     deleteSeason,
-} from '../../services/api.ts'
-import type { Team } from '../../types/team.ts'
-import type { Season } from '../../types/season.ts'
+} from '../../services/api'
+import type { Team } from '../../types/team'
+import type { Season } from '../../types/season'
 import '../teams/TeamsPage.css'
 import '../../common/PageLayout.css'
 
@@ -23,6 +24,7 @@ const SeasonsPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [seasonToEdit, setSeasonToEdit] = useState<Season | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [seasonToDelete, setSeasonToDelete] = useState<Season | null>(null)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -95,22 +97,16 @@ const SeasonsPage = () => {
         setIsModalOpen(false)
     }
 
-    const handleDeleteSeason = async (seasonId: string) => {
-        const confirmed = window.confirm(
-            'Are you sure you want to delete this season?',
+    const handleConfirmDeleteSeason = async () => {
+        if (!seasonToDelete) return
+
+        await deleteSeason(seasonToDelete.id)
+
+        setSeasons((prev) =>
+            prev.filter((season) => season.id !== seasonToDelete.id),
         )
 
-        if (!confirmed) return
-
-        try {
-            await deleteSeason(seasonId)
-
-            setSeasons((prev) =>
-                prev.filter((season) => season.id !== seasonId),
-            )
-        } catch (error) {
-            console.error(error)
-        }
+        setSeasonToDelete(null)
     }
 
     if (isLoading) {
@@ -130,7 +126,6 @@ const SeasonsPage = () => {
                 title='Seasons'
                 subtitle='Manage seasons by team'
             />
-
             <SectionCard
                 title='Seasons'
                 actionLabel='New season'
@@ -154,7 +149,6 @@ const SeasonsPage = () => {
                                         {season.name} -{' '}
                                         {team ? team.name : 'Unknown Team'}
                                     </span>
-
                                     <div className='data-list__actions'>
                                         <button
                                             type='button'
@@ -169,9 +163,7 @@ const SeasonsPage = () => {
                                         <button
                                             type='button'
                                             className='danger-button'
-                                            onClick={() =>
-                                                handleDeleteSeason(season.id)
-                                            }
+                                            onClick={() => setSeasonToDelete(season)}
                                         >
                                             Delete
                                         </button>
@@ -182,7 +174,6 @@ const SeasonsPage = () => {
                     </ul>
                 )}
             </SectionCard>
-
             <SeasonModal
                 key={isModalOpen ? seasonToEdit?.id ?? 'new' : 'closed'}
                 isOpen={isModalOpen}
@@ -190,6 +181,15 @@ const SeasonsPage = () => {
                 seasonToEdit={seasonToEdit}
                 onClose={handleCloseModal}
                 onSubmit={handleSubmitSeason}
+            />
+            <ConfirmModal
+                isOpen={!!seasonToDelete}
+                title='Delete season'
+                message={`Are you sure you want to delete ${seasonToDelete?.name}?`}
+                confirmLabel='Delete'
+                cancelLabel='Cancel'
+                onConfirm={handleConfirmDeleteSeason}
+                onCancel={() => setSeasonToDelete(null)}
             />
         </div>
     )
