@@ -5,6 +5,7 @@ import type {PlayerStats} from '../../types/player'
 import type {Game} from '../../types/game'
 import type {TeamStat} from '../../types/analytics'
 import BasketballLoader from '../../common/BasketballLoader'
+import { normaliseText } from '../../helpers/normaliseText'
 import {
     uploadStats,
     processStats,
@@ -80,11 +81,15 @@ const UploadStatsPage = () => {
             }
 
             const homeTeamStat = teamStats.find(
-                (team) => team.team_name === selectedGame.home_team_name,
+                (team) =>
+                    normaliseText(team.team_name) ===
+                    normaliseText(selectedGame.home_team_name),
             )
 
             const awayTeamStat = teamStats.find(
-                (team) => team.team_name === selectedGame.away_team_name,
+                (team) =>
+                    normaliseText(team.team_name) ===
+                    normaliseText(selectedGame.away_team_name),
             )
 
             if (!homeTeamStat || !awayTeamStat) {
