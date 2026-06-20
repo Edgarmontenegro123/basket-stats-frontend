@@ -14,6 +14,7 @@ type GameModalProps = {
         seasonId: string,
         homeTeamId: string,
         awayTeamId: string,
+        videoUrl: string,
     ) => Promise<void>
 }
 
@@ -28,6 +29,7 @@ const GameModal = ({
     const [seasonId, setSeasonId] = useState(gameToEdit?.season_id ?? '')
     const [homeTeamId, setHomeTeamId] = useState(gameToEdit?.home_team_id ?? '')
     const [awayTeamId, setAwayTeamId] = useState(gameToEdit?.away_team_id ?? '')
+    const [videoUrl, setVideoUrl] = useState(gameToEdit?.video_url ?? '')
     const [error, setError] = useState('')
 
     if (!isOpen) return null
@@ -45,11 +47,12 @@ const GameModal = ({
             return
         }
 
-        await onSubmit(seasonId, homeTeamId, awayTeamId)
+        await onSubmit(seasonId, homeTeamId, awayTeamId, videoUrl)
 
         setSeasonId('')
         setHomeTeamId('')
         setAwayTeamId('')
+        setVideoUrl('')
         onClose()
     }
 
@@ -110,6 +113,14 @@ const GameModal = ({
                             </option>
                         ))}
                     </select>
+
+                    <input
+                        className='form-input'
+                        type='url'
+                        value={videoUrl}
+                        onChange={(event) => setVideoUrl(event.target.value)}
+                        placeholder='Video URL'
+                    />
 
                     {error && <p className='modal-error'>{error}</p>}
                 </div>

@@ -29,6 +29,7 @@ export const createGame = async (
     seasonId: string,
     homeTeamId: string,
     awayTeamId: string,
+    videoUrl: string,
 ) => {
     // Go backend connection
     // const res = await fetch('http://localhost:8080/games', {
@@ -43,6 +44,7 @@ export const createGame = async (
             away_team_id: awayTeamId,
             game_date: new Date().toISOString(),
             location: null,
+            video_url: videoUrl || null,
             is_friendly: false,
             home_score: null,
             away_score: null,
@@ -77,6 +79,7 @@ export const updateGame = async (
     seasonId: string,
     homeTeamId: string,
     awayTeamId: string,
+    videoUrl: string,
 ) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
         method: 'PUT',
@@ -87,6 +90,7 @@ export const updateGame = async (
             away_team_id: awayTeamId,
             game_date: new Date().toISOString(),
             location: null,
+            video_url: videoUrl || null,
             is_friendly: false,
             home_score: null,
             away_score: null,

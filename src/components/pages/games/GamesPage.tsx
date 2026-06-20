@@ -60,6 +60,7 @@ const GamesPage = () => {
         seasonId: string,
         homeTeamId: string,
         awayTeamId: string,
+        videoUrl: string,
     ) => {
         try {
             if (gameToEdit) {
@@ -68,9 +69,10 @@ const GamesPage = () => {
                     seasonId,
                     homeTeamId,
                     awayTeamId,
+                    videoUrl,
                 )
             } else {
-                await createGame(seasonId, homeTeamId, awayTeamId)
+                await createGame(seasonId, homeTeamId, awayTeamId, videoUrl)
             }
 
             setGameToEdit(null)
@@ -164,6 +166,16 @@ const GamesPage = () => {
                                     <div>Status: {game.status}</div>
                                 </div>
                                 <div className='data-list__actions'>
+                                    {game.video_url && (
+                                        <a
+                                            className='secondary-button'
+                                            href={game.video_url}
+                                            target='_blank'
+                                            rel='noreferrer'
+                                        >
+                                            Watch video
+                                        </a>
+                                    )}
                                     <button
                                         type='button'
                                         className='secondary-button'

@@ -8,6 +8,7 @@ export interface Game {
     status: string
     game_date: string
     location: string | null
+    video_url: string | null
     is_friendly: boolean
     home_score: number | null
     away_score: number | null
