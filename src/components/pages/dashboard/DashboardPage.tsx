@@ -1,9 +1,9 @@
 import {useEffect, useState} from 'react'
+import type {AggregatedPlayerRanking} from '../../types/player.ts'
 import PageHeader from '../../common/PageHeader.tsx'
 import SectionCard from '../../common/SectionCard.tsx'
 import StatCard from '../../common/StatCard.tsx'
 import type {Game} from '../../types/game.ts'
-import type {PlayerStats} from '../../types/player.ts'
 import {
     getTeams,
     getGames,
@@ -19,7 +19,7 @@ const DashboardPage = () => {
     const [completedGamesCount, setCompletedGamesCount] = useState<number>(0)
     const [scheduledGamesCount, setScheduledGamesCount] = useState<number>(0)
     const [recentGames, setRecentGames] = useState<Game[]>([])
-    const [topScorers, setTopScorers] = useState<PlayerStats[]>([])
+    const [topScorers, setTopScorers] = useState<AggregatedPlayerRanking[]>([])
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
@@ -36,8 +36,20 @@ const DashboardPage = () => {
                     (game: Game) => game.status === 'scheduled',
                 )
 
-                const scorers = await getTopScorers(5)
-                setTopScorers(scorers)
+                const scorers = await getTopScorers(10)
+
+                const uniqueScorers = scorers
+                    .filter((player: AggregatedPlayerRanking,
+                             index: number,
+                             array: AggregatedPlayerRanking[],) => (
+                        index === array.findIndex((item: AggregatedPlayerRanking) => (
+                            item.player_name === player.player_name
+                            && item.team_name === player.team_name
+                        ))
+                    ))
+                    .slice(0, 5)
+
+                setTopScorers(uniqueScorers)
 
                 setTeamsCount(teams.length)
                 setGamesCount(games.length)
@@ -112,13 +124,15 @@ const DashboardPage = () => {
                         <p>No player stats available yet.</p>
                     ) : (
                         <ul className='dashboard-list'>
-                            {topScorers.map((player) => (
-                                <li key={player.id} className='dashboard-list__item'>
+                            {topScorers.map((player, index) => (
+                                <li
+                                    key={`${player.player_name}-${player.team_name}-${index}`}
+                                >
                     <span>
                         {player.player_name} · {player.team_name}
                     </span>
                                     <small>
-                                        {player.points} PTS · {player.rebounds} REB · {player.assists} AST
+                                        {player.total} PTS · {player.average} AVG · {player.games_played} games
                                     </small>
                                 </li>
                             ))}

@@ -50,28 +50,28 @@ export const createGame = async (
             away_score: null,
             status: 'scheduled',
         }),
-    });
+    })
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 };
 
 export const getGames = async () => {
     // Go backend connection
-    // const res = await fetch('http://localhost:8080/games');
+    // const res = await fetch('http://localhost:8080/games')
     // Node backend connection
-    const res = await fetch(`${MANAGEMENT_API_URL}/games`);
+    const res = await fetch(`${MANAGEMENT_API_URL}/games`)
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 }
 
 export const updateGame = async (
@@ -154,9 +154,9 @@ export const deleteGame = async (id: string) => {
 
 export const uploadStats = async (gameId: string, file: File) => {
 
-    const formData = new FormData();
-    formData.append('game_id', gameId);
-    formData.append('file', file);
+    const formData = new FormData()
+    formData.append('game_id', gameId)
+    formData.append('file', file)
 
     // Go backend connection
     // const res = await fetch('http://localhost:8081/uploads', {
@@ -165,14 +165,14 @@ export const uploadStats = async (gameId: string, file: File) => {
         method: 'POST',
         headers: getAuthUploadHeaders(),
         body: formData,
-    });
+    })
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 }
 
 export const processStats = async (uploadId: string) => {
@@ -184,7 +184,7 @@ export const processStats = async (uploadId: string) => {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({upload_id: uploadId}),
-    });
+    })
 
     const data = await res.json()
 
@@ -192,26 +192,26 @@ export const processStats = async (uploadId: string) => {
         throw new Error(data.error || 'Error processing stats')
     }
 
-    return data;
+    return data
 }
 
 export const getPlayerStatsByGameId = async (gameId: string) => {
-    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`);
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`)
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 };
 
 export const getTeamStatsByGameId = async (gameId: string) => {
-    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/teams`);
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/teams`)
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
     return res.json();
@@ -221,16 +221,16 @@ export const getTopScorers = async (
     limit: number = 5,
 ) => {
     const res = await fetch(
-        `${ANALYTICS_API_URL}/analytics/players/rankings?stat=points&limit=${limit}`,
-    );
+        `${ANALYTICS_API_URL}/analytics/players/aggregated-rankings?stat=points&limit=${limit}`,
+    )
 
     if (!res.ok) {
-        const text = await res.text();
+        const text = await res.text()
 
-        throw new Error(text);
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 };
 
 export const getPlayerRankings = async (
@@ -248,7 +248,7 @@ export const getPlayerRankings = async (
     }
 
     return res.json()
-};
+}
 
 export const getAggregatedPlayerRankings = async (
     stat: string,
@@ -265,7 +265,7 @@ export const getAggregatedPlayerRankings = async (
     }
 
     return res.json()
-};
+}
 
 /*================ Players ================*/
 
@@ -311,9 +311,9 @@ export const getPlayerStats = async (gameId: string) => {
     // Go backend connection
     // const res = await fetch(`http://localhost:8081/analytics/games/${gameId}/players`);
     // Node backend connection
-    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`);
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`)
 
-    return res.json();
+    return res.json()
 }
 
 export const getPlayersByTeam = async (
@@ -382,7 +382,7 @@ export const createTeam = async (payload: CreateTeamPayload) => {
         .map(word => word[0])
         .join('')
         .toUpperCase()
-        .slice(0, 3);
+        .slice(0, 3)
 
     // Go backend connection
     // const res = await fetch('http://localhost:8080/teams', {
@@ -401,25 +401,25 @@ export const createTeam = async (payload: CreateTeamPayload) => {
     })
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 }
 
 export const getTeams = async () => {
     // Go backend connection
     // const res = await fetch('http://localhost:8080/teams');
     // Node backend connection
-    const res = await fetch(`${MANAGEMENT_API_URL}/teams`);
+    const res = await fetch(`${MANAGEMENT_API_URL}/teams`)
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 }
 
 export const getTeamById = async (id: string): Promise<Team> => {
@@ -439,7 +439,7 @@ export const updateTeam = async (id: string, payload: CreateTeamPayload) => {
         .map(word => word[0])
         .join('')
         .toUpperCase()
-        .slice(0, 3);
+        .slice(0, 3)
 
     const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
         method: 'PUT',
@@ -454,24 +454,24 @@ export const updateTeam = async (id: string, payload: CreateTeamPayload) => {
     })
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 };
 
 export const deleteTeam = async (id: string) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
-    });
+    })
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
-};
+}
 
 /*================ Seasons ================*/
 
@@ -493,28 +493,28 @@ export const createSeason = async (
             end_date: '2026-12-31',
             is_active: true,
         }),
-    });
+    })
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 }
 
 export const getSeasons = async () => {
     // Go backend connection
     // const res = await fetch('http://localhost:8080/seasons');
     // Node backend connection
-    const res = await fetch(`${MANAGEMENT_API_URL}/seasons`);
+    const res = await fetch(`${MANAGEMENT_API_URL}/seasons`)
 
     if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text);
+        const text = await res.text()
+        throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 }
 
 export const updateSeason = async (
