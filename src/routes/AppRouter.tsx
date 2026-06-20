@@ -1,6 +1,7 @@
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
 import LoginPage from '../components/pages/login/LoginPage'
 import ProtectedRoute from './ProtectedRoute'
+import RegisterPage from '../components/pages/register/RegisterPage'
 import MainLayout from '../components/layout/MainLayout.tsx'
 import DashboardPage from '../components/pages/dashboard/DashboardPage.tsx'
 import TeamsPage from '../components/pages/teams/TeamsPage.tsx'
@@ -19,6 +20,7 @@ export const AppRouter = () => {
         <BrowserRouter>
             <Routes>
                 <Route path='/login' element={<LoginPage/>}/>
+                <Route path='/register' element={<RegisterPage/>}/>
 
                 <Route element={<ProtectedRoute/>}>
 

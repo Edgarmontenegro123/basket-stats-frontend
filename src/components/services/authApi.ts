@@ -29,3 +29,28 @@ export const login = async (
 
     return res.json()
 }
+
+export const register = async (
+    name: string,
+    email: string,
+    password: string
+): Promise<{ message: string }> => {
+    const res = await fetch(`${MANAGEMENT_API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            name,
+            email,
+            password,
+        }),
+    })
+
+    if (!res.ok) {
+        const data = await res.json().catch(() => null)
+        throw new Error(data?.message || 'Error registering user')
+    }
+
+    return res.json()
+}

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../../services/authApi'
 import './LoginPage.css'
 
@@ -67,6 +67,9 @@ const LoginPage = () => {
                         {isLoading ? 'Signing in...' : 'Sign in'}
                     </button>
                 </form>
+                <p className='login-card__footer'>
+                    Don't have an account? <Link to='/register'>Create account</Link>
+                </p>
             </section>
         </main>
     )
