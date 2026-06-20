@@ -20,8 +20,8 @@
 
 .sidebar-brand {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    gap: 12px;
     margin-bottom: 28px;
     padding: 10px 12px;
     border-radius: 16px;
@@ -38,6 +38,13 @@
 .sidebar-subtitle {
     font-size: 0.85rem;
     color: var(--text-soft);
+}
+
+.sidebar-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .nav {

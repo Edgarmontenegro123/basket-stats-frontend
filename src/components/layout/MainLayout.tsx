@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {NavLink, Outlet, useNavigate} from 'react-router-dom'
 import ConfirmModal from '../common/ConfirmModal'
+import logo from '../../assets/logo.png'
 import './MainLayout.css'
 
 const MainLayout = () => {
@@ -16,12 +17,17 @@ const MainLayout = () => {
 
     return (
         <div className='layout'>
-
-            {/* Sidebar */}
             <aside className='sidebar'>
                 <div className='sidebar-brand'>
-                    <h2 className='sedebar-title'>Basket Stats</h2>
-                    <p className='sedebar-subtitle'>Analytics dashboard</p>
+                    <img
+                        src={logo}
+                        alt='Basket Stats logo'
+                        className='sidebar-logo'
+                    />
+                    <div>
+                        <h2 className='sidebar-title'>Basket Stats</h2>
+                        <p className='sidebar-subtitle'>Analytics dashboard</p>
+                    </div>
                 </div>
 
                 <nav className='nav'>
