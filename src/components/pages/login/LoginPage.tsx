@@ -1,11 +1,13 @@
 import * as React from 'react'
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { login } from '../../services/authApi'
 import './LoginPage.css'
 
 const LoginPage = () => {
     const navigate = useNavigate()
+    const location = useLocation()
+    const successMessage = location.state?.message
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -60,6 +62,10 @@ const LoginPage = () => {
                             placeholder='••••••••'
                         />
                     </label>
+
+                    {successMessage && (
+                        <p className='login-form__success'>{successMessage}</p>
+                    )}
 
                     {error && <p className='login-form__error'>{error}</p>}
 

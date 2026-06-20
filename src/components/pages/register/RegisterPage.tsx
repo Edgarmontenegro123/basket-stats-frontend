@@ -52,7 +52,11 @@ const RegisterPage = () => {
 
         try {
             await register(name, email, password)
-            navigate('/login')
+            navigate('/login', {
+                state: {
+                    message: 'Account created successfully. Please sign in.'
+                }
+            })
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Error registering user')
         } finally {
