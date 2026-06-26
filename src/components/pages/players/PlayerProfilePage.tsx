@@ -1,9 +1,10 @@
 import {useEffect, useState} from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
-import {getPlayerById, getTeams, getPlayerSummaryByName} from '../../services/api.ts'
-import type {Player, PlayerSummary} from '../../types/player.ts'
-import type {Team} from '../../types/team.ts'
-import BasketballLoader from '../../common/BasketballLoader.tsx'
+import { getPlayerPositionLabel } from '../../helpers/playerHelpers'
+import {getPlayerById, getTeams, getPlayerSummaryByName} from '../../services/api'
+import type {Player, PlayerSummary} from '../../types/player'
+import type {Team} from '../../types/team'
+import BasketballLoader from '../../common/BasketballLoader'
 import './PlayerProfilePage.css'
 import '../../layout/MainLayout.css'
 
@@ -122,7 +123,7 @@ import '../../layout/MainLayout.css'
 
                     <div className='player-profile-badges'>
                         <span>#{player.number}</span>
-                        <span>{player.position || 'No position'}</span>
+                        <span>{getPlayerPositionLabel(player.position)}</span>
                     </div>
                 </div>
             </section>
