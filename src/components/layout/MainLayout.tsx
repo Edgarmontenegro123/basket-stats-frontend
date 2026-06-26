@@ -8,6 +8,16 @@ const MainLayout = () => {
     const navigate = useNavigate()
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState<boolean>(false)
 
+    const storedUser = localStorage.getItem('basket_stats_user')
+    const currentUser = storedUser ? JSON.parse(storedUser) : null
+
+    const roleLabel =
+        currentUser?.role === 'admin'
+            ? 'Administrator'
+            : currentUser?.role === 'coach'
+                ? 'Coach'
+                : 'Player'
+
     const handleLogout = () => {
         localStorage.removeItem('basket_stats_token')
         localStorage.removeItem('basket_stats_user')
@@ -86,6 +96,13 @@ const MainLayout = () => {
                         Compare
                     </NavLink>
                 </nav>
+                {currentUser && (
+                    <div className='sidebar-user-card'>
+                        <span className='sidebar-user-label'>Signed in as</span>
+                        <strong>{currentUser.name || currentUser.email}</strong>
+                        <span className='sidebar-user-role'>{roleLabel}</span>
+                    </div>
+                )}
                 <button
                     className='logout-button'
                     onClick={() => setIsLogoutModalOpen(true)}
