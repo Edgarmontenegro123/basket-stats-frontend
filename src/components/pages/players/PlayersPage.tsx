@@ -239,10 +239,15 @@ import './PlayersPage.css'
                         />
                         <input
                             type='number'
-                            placeholder='Number'
-                            value={form.number}
+                            min='0'
+                            max='99'
+                            placeholder='Jersey number'
+                            value={form.number === 0 ? '' : form.number}
                             onChange={(e) =>
-                                setForm({...form, number: Number(e.target.value)})
+                                setForm({
+                                    ...form,
+                                    number: e.target.value === '' ? 0 : Number(e.target.value),
+                                })
                             }
                         />
                         <select
@@ -284,13 +289,17 @@ import './PlayersPage.css'
                                 })
                             }
                         />
-                        <input
-                            type='date'
-                            value={form.birth_date || ''}
-                            onChange={(e) =>
-                                setForm({...form, birth_date: e.target.value})
-                            }
-                        />
+                        <div className='players-form-field'>
+                            <label htmlFor='birth_date'>Birth date</label>
+                            <input
+                                id='birth_date'
+                                type='date'
+                                value={form.birth_date || ''}
+                                onChange={(e) =>
+                                    setForm({...form, birth_date: e.target.value})
+                                }
+                            />
+                        </div>
                         <input
                             type='text'
                             placeholder='Photo URL'
@@ -299,13 +308,22 @@ import './PlayersPage.css'
                                 setForm({...form, photo_url: e.target.value})
                             }
                         />
-                        <button type='button' onClick={() => setShowForm(false)}>
-                            Cancel
-                        </button>
+                        <div className='players-form-actions'>
+                            <button
+                                type='button'
+                                className='players-form-cancel'
+                                onClick={() => setShowForm(false)}
+                            >
+                                Cancel
+                            </button>
 
-                        <button type='submit'>
-                            Save Player
-                        </button>
+                            <button
+                                type='submit'
+                                className='players-form-submit'
+                            >
+                                Save Player
+                            </button>
+                        </div>
                     </form>
                 </div>
             )}

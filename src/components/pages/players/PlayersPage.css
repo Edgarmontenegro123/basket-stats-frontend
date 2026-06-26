@@ -182,10 +182,10 @@
 /*================ Form ================*/
 
 .players-form-card {
-     padding: 24px;
-     border: 1px solid var(--border);
-     border-radius: 20px;
-     background: var(--bg-soft);
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--bg-soft);
 }
 
 .players-form-card h2 {
@@ -194,7 +194,7 @@
 
 .players-form-card form {
     display: grid;
-    grid-template-columns: repeat(4, 1fr) auto;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -206,6 +206,62 @@
     border: 1px solid var(--border);
     padding: 0 12px;
 }
+
+.players-form-card input,
+.players-form-card select {
+    width: 100%;
+}
+
+.players-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.players-form-field label {
+    color: var(--text-soft);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.players-form-field input {
+    width: 100%;
+}
+
+.players-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    grid-column: 1 / -1;
+    margin-top: 4px;
+}
+
+.players-form-actions button {
+    min-width: 140px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.players-form-cancel {
+    background: transparent;
+    color: var(--title);
+}
+
+.players-form-cancel:hover {
+    background: rgba(148, 163, 184, 0.12);
+}
+
+.players-form-submit {
+    background: var(--accent-soft);
+    color: var(--title);
+    border-color: rgba(59, 130, 246, 0.55);
+}
+
+.players-form-submit:hover {
+    background: var(--accent);
+}
+
+/*================ Avatar ================*/
 
 .player-avatar,
 .player-avatar-placeholder {
@@ -333,6 +389,10 @@
         padding: 16px;
     }
 
+    .players-form-card {
+        overflow: hidden;
+    }
+
     .players-form-card form {
         grid-template-columns: 1fr;
     }
@@ -343,8 +403,12 @@
         width: 100%;
     }
 
-    .players-form-card {
-        overflow: hidden;
+    .players-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .players-form-actions button {
+        width: 100%;
     }
 
     .summary-card {
@@ -376,4 +440,3 @@
         gap: 16px;
     }
 }
-
