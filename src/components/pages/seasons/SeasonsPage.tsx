@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { canManageTeams } from '../../../auth/permissions'
 import PageHeader from '../../common/PageHeader'
 import SectionCard from '../../common/SectionCard'
 import SeasonModal from './SeasonModal'
@@ -25,6 +26,10 @@ const SeasonsPage = () => {
     const [seasonToEdit, setSeasonToEdit] = useState<Season | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [seasonToDelete, setSeasonToDelete] = useState<Season | null>(null)
+
+    const storedUser = localStorage.getItem('basket_stats_user')
+    const currentUser = storedUser ? JSON.parse(storedUser) : null
+    const canEditSeasons = canManageTeams(currentUser?.role)
 
     useEffect(() => {
         const fetchData = async () => {
@@ -128,8 +133,8 @@ const SeasonsPage = () => {
             />
             <SectionCard
                 title='Seasons'
-                actionLabel='New season'
-                onAction={handleOpenCreateModal}
+                actionLabel={canEditSeasons ? 'New season' : undefined}
+                onAction={canEditSeasons ? handleOpenCreateModal : undefined}
             >
                 {seasons.length === 0 ? (
                     <p>No seasons available yet.</p>
@@ -149,25 +154,27 @@ const SeasonsPage = () => {
                                         {season.name} -{' '}
                                         {team ? team.name : 'Unknown Team'}
                                     </span>
-                                    <div className='data-list__actions'>
-                                        <button
-                                            type='button'
-                                            className='secondary-button'
-                                            onClick={() =>
-                                                handleOpenEditModal(season)
-                                            }
-                                        >
-                                            Edit
-                                        </button>
+                                    {canEditSeasons && (
+                                        <div className='data-list__actions'>
+                                            <button
+                                                type='button'
+                                                className='secondary-button'
+                                                onClick={() =>
+                                                    handleOpenEditModal(season)
+                                                }
+                                            >
+                                                Edit
+                                            </button>
 
-                                        <button
-                                            type='button'
-                                            className='danger-button'
-                                            onClick={() => setSeasonToDelete(season)}
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
+                                            <button
+                                                type='button'
+                                                className='danger-button'
+                                                onClick={() => setSeasonToDelete(season)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    )}
                                 </li>
                             )
                         })}
