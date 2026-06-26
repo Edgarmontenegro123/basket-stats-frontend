@@ -4,6 +4,7 @@ import {useNavigate} from 'react-router-dom'
 import { canManagePlayers } from '../../../auth/permissions'
 import BasketballLoader from '../../common/BasketballLoader'
 import ConfirmModal from '../../common/ConfirmModal'
+import { getPlayerPositionLabel } from '../../helpers/playerHelpers.ts'
 import type {Team} from '../../types/team'
 import type {CreatePlayerPayload, Player} from '../../types/player'
 import {
@@ -393,7 +394,7 @@ import './PlayersPage.css'
                                                 {player.first_name} {player.last_name}
                                             </td>
                                             <td>{team?.name || 'Unknown team'}</td>
-                                            <td>{player.position || '-'}</td>
+                                            <td>{getPlayerPositionLabel(player.position)}</td>
                                             <td>
                                                 {player.height_cm
                                                     ? `${player.height_cm} cm`
@@ -464,7 +465,7 @@ import './PlayersPage.css'
                                                 <p>
                                                     #{player.number}
                                                     {' · '}
-                                                    {player.position || 'No position'}
+                                                    {getPlayerPositionLabel(player.position)}
                                                 </p>
                                             </div>
                                         </div>
