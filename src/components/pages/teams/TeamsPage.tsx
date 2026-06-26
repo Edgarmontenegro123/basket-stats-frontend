@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
+import { canManageTeams } from '../../../auth/permissions'
 import PageHeader from '../../common/PageHeader'
 import SectionCard from '../../common/SectionCard'
 import TeamModal from '../../teams/TeamModal'
@@ -19,6 +20,10 @@ const TeamsPage = () => {
     const [teamToDelete, setTeamToDelete] = useState<Team | null>(null)
 
     const navigate = useNavigate()
+
+    const storedUser = localStorage.getItem('basket_stats_user')
+    const currentUser = storedUser ? JSON.parse(storedUser) : null
+    const canEditTeams = canManageTeams(currentUser?.role)
 
     useEffect(() => {
         const fetchTeams = async () => {
@@ -140,8 +145,8 @@ const TeamsPage = () => {
 
             <SectionCard
                 title='Teams'
-                actionLabel='New team'
-                onAction={handleOpenCreateModal}
+                actionLabel={canEditTeams ? 'New team' : undefined}
+                onAction={canEditTeams ? handleOpenCreateModal : undefined}
             >
                 {teams.length === 0 ? (
                     <p>No teams available yet.</p>
@@ -168,28 +173,30 @@ const TeamsPage = () => {
 
                                     <span>{team.name}</span>
                                 </div>
-                                <div className='data-list__actions'>
-                                    <button
-                                        type='button'
-                                        className='secondary-button'
-                                        onClick={(event) => {
-                                            event.stopPropagation()
-                                            handleOpenEditModal(team)
-                                        }}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        type='button'
-                                        className='danger-button'
-                                        onClick={(event) => {
-                                            event.stopPropagation()
-                                            setTeamToDelete(team)
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
+                                {canEditTeams && (
+                                    <div className='data-list__actions'>
+                                        <button
+                                            type='button'
+                                            className='secondary-button'
+                                            onClick={(event) => {
+                                                event.stopPropagation()
+                                                handleOpenEditModal(team)
+                                            }}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            type='button'
+                                            className='danger-button'
+                                            onClick={(event) => {
+                                                event.stopPropagation()
+                                                setTeamToDelete(team)
+                                            }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                )}
                             </li>
                         ))}
                     </ul>
