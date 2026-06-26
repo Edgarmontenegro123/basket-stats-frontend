@@ -31,6 +31,9 @@ const SeasonsPage = () => {
     const currentUser = storedUser ? JSON.parse(storedUser) : null
     const canEditSeasons = canManageTeams(currentUser?.role)
 
+    console.log('Current user:', currentUser)
+    console.log('Can edit seasons:', canEditSeasons)
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -165,7 +168,6 @@ const SeasonsPage = () => {
                                             >
                                                 Edit
                                             </button>
-
                                             <button
                                                 type='button'
                                                 className='danger-button'
