@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { canManageGames } from '../../../auth/permissions'
 import PageHeader from '../../common/PageHeader'
 import SectionCard from '../../common/SectionCard'
 import GameModal from '../../games/GameModal'
@@ -28,6 +29,10 @@ const GamesPage = () => {
     const [gameToEdit, setGameToEdit] = useState<Game | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [gameToDelete, setGameToDelete] = useState<Game | null>(null)
+
+    const storedUser = localStorage.getItem('basket_stats_user')
+    const currentUser = storedUser ? JSON.parse(storedUser) : null
+    const canEditGames = canManageGames(currentUser?.role)
 
     const loadData = async () => {
         const [teamsData, seasonsData, gamesData] = await Promise.all([
@@ -143,8 +148,8 @@ const GamesPage = () => {
             />
             <SectionCard
                 title='Games'
-                actionLabel='New game'
-                onAction={handleOpenCreateModal}
+                actionLabel={canEditGames ? 'New game' : undefined}
+                onAction={canEditGames ? handleOpenCreateModal : undefined}
             >
                 {games.length === 0 ? (
                     <p>No games recorded yet.</p>
@@ -176,20 +181,25 @@ const GamesPage = () => {
                                             Watch video
                                         </a>
                                     )}
-                                    <button
-                                        type='button'
-                                        className='secondary-button'
-                                        onClick={() => handleOpenEditModal(game)}
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        type='button'
-                                        className='danger-button'
-                                        onClick={() => setGameToDelete(game)}
-                                    >
-                                        Delete
-                                    </button>
+                                    { canEditGames &&
+                                        (<>
+                                            <button
+                                                type='button'
+                                                className='secondary-button'
+                                                onClick={() => handleOpenEditModal(game)}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                type='button'
+                                                className='danger-button'
+                                                onClick={() => setGameToDelete(game)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </>)
+                                    }
+
                                 </div>
                             </li>
                         ))}
