@@ -7,6 +7,7 @@ import {
     getTeamById,
 } from '../../services/api'
 import buildTeamAnalyticsSummary from '../../services/teamAnalytics'
+import { getPlayerPositionLabel } from '../../helpers/playerHelpers'
 import type {Game} from '../../types/game'
 import type {Player} from '../../types/player'
 import type {Team} from '../../types/team'
@@ -284,7 +285,7 @@ const TeamProfilePage = () => {
                                     <p>
                                         #{player.number}
                                         {' · '}
-                                        {player.position || 'No position'}
+                                        {getPlayerPositionLabel(player.position)}
                                     </p>
                                 </div>
                             </article>
