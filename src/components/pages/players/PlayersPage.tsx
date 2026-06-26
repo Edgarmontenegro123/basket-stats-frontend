@@ -1,6 +1,7 @@
 import * as React from 'react'
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
+import { canManagePlayers } from '../../../auth/permissions'
 import BasketballLoader from '../../common/BasketballLoader'
 import ConfirmModal from '../../common/ConfirmModal'
 import type {Team} from '../../types/team'
@@ -26,6 +27,10 @@ import './PlayersPage.css'
     const [playerToDelete, setPlayerToDelete] = useState<Player | null>(null)
 
     const navigate = useNavigate()
+
+    const storedUser = localStorage.getItem('basket_stats_user')
+    const currentUser = storedUser ? JSON.parse(storedUser) : null
+    const canEditPlayers = canManagePlayers(currentUser?.role)
 
     const [form, setForm] = useState<CreatePlayerPayload>({
         team_id: '',
@@ -165,26 +170,28 @@ import './PlayersPage.css'
                         Manage team rosters and player information.
                     </p>
                 </div>
-                <button
-                    className='players-add-button'
-                    onClick={() => {
-                        setEditingPlayer(null)
-                        setForm({
-                            team_id: '',
-                            first_name: '',
-                            last_name: '',
-                            number: 0,
-                            position: '',
-                            height_cm: undefined,
-                            weight_kg: undefined,
-                            birth_date: '',
-                            photo_url: '',
-                        })
-                        setShowForm(true)
-                    }}
-                >
-                    Add Player
-                </button>
+                {canEditPlayers && (
+                    <button
+                        className='players-add-button'
+                        onClick={() => {
+                            setEditingPlayer(null)
+                            setForm({
+                                team_id: '',
+                                first_name: '',
+                                last_name: '',
+                                number: 0,
+                                position: '',
+                                height_cm: undefined,
+                                weight_kg: undefined,
+                                birth_date: '',
+                                photo_url: '',
+                            })
+                            setShowForm(true)
+                        }}
+                    >
+                        Add Player
+                    </button>
+                )}
             </div>
             <div className='players-summary'>
                 <div className='summary-card'>
@@ -398,26 +405,28 @@ import './PlayersPage.css'
                                                     : '-'}
                                             </td>
                                             <td>
-                                                <div className='players-actions'>
-                                                    <button
-                                                        className='players-edit-button'
-                                                        onClick={(event) => {
-                                                            event.stopPropagation()
-                                                            handleEditPlayer(player)
-                                                        }}
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        className='players-delete-button'
-                                                        onClick={(event) => {
-                                                            event.stopPropagation()
-                                                            setPlayerToDelete(player)
-                                                        }}
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
+                                                {canEditPlayers && (
+                                                    <div className='players-actions'>
+                                                        <button
+                                                            className='players-edit-button'
+                                                            onClick={(event) => {
+                                                                event.stopPropagation()
+                                                                handleEditPlayer(player)
+                                                            }}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                        <button
+                                                            className='players-delete-button'
+                                                            onClick={(event) => {
+                                                                event.stopPropagation()
+                                                                setPlayerToDelete(player)
+                                                            }}
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </td>
                                         </tr>
                                     )
@@ -480,26 +489,28 @@ import './PlayersPage.css'
                                                     : '-'}
                                             </p>
                                         </div>
-                                        <div className='player-mobile-actions'>
-                                            <button
-                                                className='players-edit-button'
-                                                onClick={(event) => {
-                                                    event.stopPropagation()
-                                                    handleEditPlayer(player)
-                                                }}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                className='players-delete-button'
-                                                onClick={(event) => {
-                                                    event.stopPropagation()
-                                                    setPlayerToDelete(player)
-                                                }}
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
+                                        {canEditPlayers && (
+                                            <div className='player-mobile-actions'>
+                                                <button
+                                                    className='players-edit-button'
+                                                    onClick={(event) => {
+                                                        event.stopPropagation()
+                                                        handleEditPlayer(player)
+                                                    }}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className='players-delete-button'
+                                                    onClick={(event) => {
+                                                        event.stopPropagation()
+                                                        setPlayerToDelete(player)
+                                                    }}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )
                             })}

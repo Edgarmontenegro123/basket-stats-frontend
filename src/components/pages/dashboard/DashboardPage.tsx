@@ -126,7 +126,7 @@ const DashboardPage = () => {
                         <ul className='dashboard-list'>
                             {topScorers.map((player, index) => (
                                 <li
-                                    key={`${player.player_name}-${player.team_name}-${index}`}
+                                    key={`${player.player_name}-${player.team_name}-${index} `}
                                 >
                     <span>
                         {player.player_name} · {player.team_name}
