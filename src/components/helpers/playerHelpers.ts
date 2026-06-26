@@ -1,4 +1,6 @@
-export const getPlayerPositionLabel = (position?: string | null) => {
+export const getPlayerPositionLabel = (
+    position?: string | null,
+) => {
     const positions: Record<string, string> = {
         PG: 'Point Guard',
         SG: 'Shooting Guard',
@@ -8,4 +10,10 @@ export const getPlayerPositionLabel = (position?: string | null) => {
     }
 
     return position ? positions[position] || position : '-'
+}
+
+export const getPlayerPositionAbbreviation = (
+    position?: string | null,
+) => {
+    return position || '-'
 }

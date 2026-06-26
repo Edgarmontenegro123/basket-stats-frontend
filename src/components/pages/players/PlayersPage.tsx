@@ -1,10 +1,10 @@
 import * as React from 'react'
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import { canManagePlayers } from '../../../auth/permissions'
+import {canManagePlayers} from '../../../auth/permissions'
 import BasketballLoader from '../../common/BasketballLoader'
 import ConfirmModal from '../../common/ConfirmModal'
-import { getPlayerPositionLabel } from '../../helpers/playerHelpers.ts'
+import {getPlayerPositionAbbreviation, getPlayerPositionLabel} from '../../helpers/playerHelpers'
 import type {Team} from '../../types/team'
 import type {CreatePlayerPayload, Player} from '../../types/player'
 import {
@@ -394,7 +394,9 @@ import './PlayersPage.css'
                                                 {player.first_name} {player.last_name}
                                             </td>
                                             <td>{team?.name || 'Unknown team'}</td>
-                                            <td>{getPlayerPositionLabel(player.position)}</td>
+                                            <td title={getPlayerPositionLabel(player.position)}>
+                                                {getPlayerPositionAbbreviation(player.position)}
+                                            </td>
                                             <td>
                                                 {player.height_cm
                                                     ? `${player.height_cm} cm`
