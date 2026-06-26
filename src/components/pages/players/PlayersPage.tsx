@@ -252,11 +252,11 @@ import './PlayersPage.css'
                             }
                         >
                             <option value=''>Select position</option>
-                            <option value='PG'>PG</option>
-                            <option value='SG'>SG</option>
-                            <option value='SF'>SF</option>
-                            <option value='PF'>PF</option>
-                            <option value='C'>C</option>
+                            <option value='PG'>Point Guard (PG)</option>
+                            <option value='SG'>Shooting Guard (SG)</option>
+                            <option value='SF'>Small Forward (SF)</option>
+                            <option value='PF'>Power Forward (PF)</option>
+                            <option value='C'>Centre (C)</option>
                         </select>
                         <input
                             type='number'
@@ -361,7 +361,7 @@ import './PlayersPage.css'
                             <tbody>
                             {filteredPlayers.length === 0 ? (
                                 <tr>
-                                    <td colSpan={8} className='players-empty'>
+                                    <td colSpan={canEditPlayers ? 8 : 7}>
                                         No players found.
                                     </td>
                                 </tr>
@@ -405,8 +405,8 @@ import './PlayersPage.css'
                                                     ? `${player.weight_kg} kg`
                                                     : '-'}
                                             </td>
-                                            <td>
-                                                {canEditPlayers && (
+                                            {canEditPlayers && (
+                                                <td>
                                                     <div className='players-actions'>
                                                         <button
                                                             className='players-edit-button'
@@ -427,8 +427,8 @@ import './PlayersPage.css'
                                                             Delete
                                                         </button>
                                                     </div>
-                                                )}
-                                            </td>
+                                                </td>
+                                            )}
                                         </tr>
                                     )
                                 })

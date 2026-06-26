@@ -1,10 +1,10 @@
 export const getPlayerPositionLabel = (position?: string | null) => {
     const positions: Record<string, string> = {
-        PG: 'Point Guard (PG)',
-        SG: 'Shooting Guard (SG)',
-        SF: 'Small Forward (SF)',
-        PF: 'Power Forward (PF)',
-        C: 'Centre (C)',
+        PG: 'Point Guard',
+        SG: 'Shooting Guard',
+        SF: 'Small Forward',
+        PF: 'Power Forward',
+        C: 'Centre',
     }
 
     return position ? positions[position] || position : '-'
