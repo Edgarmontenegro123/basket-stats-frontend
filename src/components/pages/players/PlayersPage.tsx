@@ -355,7 +355,7 @@ import './PlayersPage.css'
                                 <th>Position</th>
                                 <th>Height</th>
                                 <th>Weight</th>
-                                <th>Actions</th>
+                                {canEditPlayers && (<th>Actions</th>)}
                             </tr>
                             </thead>
                             <tbody>
