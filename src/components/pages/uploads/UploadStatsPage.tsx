@@ -21,22 +21,18 @@ const getUploadErrorMessage = (error: unknown) => {
     if (!(error instanceof Error)) {
         return 'Something went wrong while processing the file. Please try again.'
     }
-
     if (error.message.includes('Error getting game details from Management API')) {
         return 'We could not process the stats because the selected game could not be verified. Please try again or select another game.'
     }
-
     if (error.message.includes('Could not match processed team stats with selected game teams')) {
         return 'The uploaded file was processed, but its teams do not match the selected game. Please check that you selected the correct game.'
     }
-
     if (error.message.includes('Failed to fetch')) {
         return 'We could not connect to the server. Please check if the API is running and try again.'
     }
 
     return error.message
 }
-
 
 const UploadStatsPage = () => {
     const [file, setFile] = useState<File | null>(null)
@@ -47,51 +43,49 @@ const UploadStatsPage = () => {
     const [errorMessage, setErrorMessage] = useState<string>('')
     const [isLoadingUploads, setIsLoadingUploads] = useState(true)
 
-
     useEffect(() => {
         const fetchGames = async () => {
             try {
-                const data = await getGames();
-                setGames(data);
+                const data = await getGames()
+                setGames(data)
             } catch (error) {
-                console.error(error);
+                console.error(error)
             } finally {
                 setIsLoadingUploads(false)
             }
-        };
+        }
 
-        void fetchGames();
-    }, []);
+        void fetchGames()
+    }, [])
 
     const handleUpload = async () => {
         if (!file) {
-            setErrorMessage('Please select a file');
-            return;
+            setErrorMessage('Please select a file')
+            return
         }
-
         if (!selectedGameId) {
-            setErrorMessage('Select a game first');
-            return;
+            setErrorMessage('Select a game first')
+            return
         }
 
         try {
-            setIsProcessing(true);
-            setPlayers([]);
-            setErrorMessage('');
+            setIsProcessing(true)
+            setPlayers([])
+            setErrorMessage('')
 
-            await new Promise((resolve) => setTimeout(resolve, 3000));
+            await new Promise((resolve) => setTimeout(resolve, 3000))
 
             // 1. Subir pdf
-            const upload = await uploadStats(selectedGameId, file);
+            const upload = await uploadStats(selectedGameId, file)
 
             // 2. Procesar
-            await processStats(upload.id);
+            await processStats(upload.id)
 
             // 3. Obtener stats
             const [playersData, teamStats] = await Promise.all([
                 getPlayerStats(selectedGameId),
                 getTeamStatsByGameId(selectedGameId),
-            ]) as [PlayerStats[], TeamStat[]];
+            ]) as [PlayerStats[], TeamStat[]]
 
             const selectedGame = games.find((game) => game.id === selectedGameId)
 
@@ -127,7 +121,6 @@ const UploadStatsPage = () => {
                     points: team.points,
                 })),
             )
-
             if (!homeTeamStat || !awayTeamStat) {
                 setErrorMessage('Could not match processed team stats with selected game teams.')
                 return
@@ -176,7 +169,6 @@ const UploadStatsPage = () => {
                 title='Upload Stats'
                 subtitle='Upload match statistics files'
             />
-
             <SectionCard title='Upload File'>
                 <div className='form-group'>
                     <div className='form-row'>
@@ -186,7 +178,6 @@ const UploadStatsPage = () => {
                             onChange={(e) => setSelectedGameId(e.target.value)}
                         >
                             <option value=''>Select Game</option>
-
                             {games.map((game) => (
                                 <option key={game.id} value={game.id}>
                                     {game.home_team_name} vs {game.away_team_name}
@@ -201,12 +192,10 @@ const UploadStatsPage = () => {
                             onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
                             />
                     </div>
-
                     <button
                         className='primary-button'
                         onClick={handleUpload}
                         disabled={isProcessing || !file || !selectedGameId}
-
                     >Upload & Process</button>
                     {errorMessage && (
                         <div className='error-message'>
@@ -214,9 +203,7 @@ const UploadStatsPage = () => {
                         </div>
                     )}
                 </div>
-
             </SectionCard>
-
             {players.length > 0 && (
                 <SectionCard title='Player Stats'>
                     <div className='table-wrapper upload-table-wrapper'>
@@ -251,13 +238,11 @@ const UploadStatsPage = () => {
                             </tbody>
                         </table>
                     </div>
-
                     <div className='upload-mobile-list'>
                         {players.map((player, index) => (
                             <div key={index} className='upload-mobile-card'>
                                 <h3>{player.player_name}</h3>
                                 <p className='upload-mobile-subtitle'>{player.team_name}</p>
-
                                 <div className='upload-mobile-stats-grid'>
                                     <p><span>PTS</span><strong>{player.points}</strong></p>
                                     <p><span>REB</span><strong>{player.rebounds}</strong></p>
