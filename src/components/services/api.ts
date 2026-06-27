@@ -1,5 +1,6 @@
 import type { CreatePlayerPayload, Player } from '../types/player'
 import type {Team, CreateTeamPayload} from '../types/team'
+import type {RankingStat} from '../types/ranking'
 
 const MANAGEMENT_API_URL = import.meta.env.VITE_MANAGEMENT_API_URL
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL
@@ -58,7 +59,7 @@ export const createGame = async (
     }
 
     return res.json()
-};
+}
 
 export const getGames = async () => {
     // Go backend connection
@@ -195,7 +196,7 @@ export const getPlayerStatsByGameId = async (gameId: string) => {
     }
 
     return res.json()
-};
+}
 
 export const getTeamStatsByGameId = async (gameId: string) => {
     const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/teams`)
@@ -205,24 +206,14 @@ export const getTeamStatsByGameId = async (gameId: string) => {
         throw new Error(text)
     }
 
-    return res.json();
+    return res.json()
 };
 
 export const getTopScorers = async (
     limit: number = 5,
 ) => {
-    const res = await fetch(
-        `${ANALYTICS_API_URL}/analytics/players/aggregated-rankings?stat=points&limit=${limit}`,
-    )
-
-    if (!res.ok) {
-        const text = await res.text()
-
-        throw new Error(text)
-    }
-
-    return res.json()
-};
+    return getAggregatedPlayerRankings('points', limit)
+}
 
 export const getPlayerRankings = async (
     stat: string,
@@ -242,7 +233,7 @@ export const getPlayerRankings = async (
 }
 
 export const getAggregatedPlayerRankings = async (
-    stat: string,
+    stat: RankingStat,
     limit: number = 10,
 ) => {
     const res = await fetch(
@@ -450,7 +441,7 @@ export const updateTeam = async (id: string, payload: CreateTeamPayload) => {
     }
 
     return res.json()
-};
+}
 
 export const deleteTeam = async (id: string) => {
     const res = await fetch(`${MANAGEMENT_API_URL}/teams/${id}`, {

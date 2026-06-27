@@ -1,0 +1,1 @@
+export type RankingStat = 'points' | 'rebounds' | 'assists' | 'steals' | 'blocks'
