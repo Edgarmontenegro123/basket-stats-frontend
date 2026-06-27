@@ -11,7 +11,7 @@
 
 .analytics-header p {
     margin: 8px 0 0;
-    color: #94a3b8;
+    color: var(--text-soft);
 }
 
 .analytics-error {
@@ -25,15 +25,15 @@
 .analytics-controls,
 .analytics-card {
     padding: 24px;
-    border: 1px solid #1e293b;
+    border: 1px solid var(--border);
     border-radius: 20px;
-    background: #0f172a;
+    background: var(--card-soft);
 }
 
 .analytics-controls label {
     display: block;
     margin-bottom: 8px;
-    color: #cbd5e1;
+    color: var(--text);
 }
 
 .analytics-control-row {
@@ -46,20 +46,20 @@
 .analytics-control-row button {
     min-height: 40px;
     border-radius: 10px;
-    border: 1px solid #334155;
+    border: 1px solid var(--border);
     padding: 0 12px;
     font-size: 14px;
 }
 
 .analytics-control-row select {
     min-width: 320px;
-    background: #020617;
-    color: #f8fafc;
+    background: var(--input-bg);
+    color: var(--text);
 }
 
 .analytics-control-row button {
     cursor: pointer;
-    background: #2563eb;
+    background: var(--accent);
     color: white;
     font-weight: 600;
 }
@@ -82,20 +82,20 @@
 .table-wrapper th,
 .table-wrapper td {
     padding: 12px 14px;
-    border-bottom: 1px solid #1e293b;
+    border-bottom: 1px solid var(--border);
     text-align: left;
     white-space: nowrap;
 }
 
 .table-wrapper th {
-    color: #cbd5e1;
+    color: var(--text-soft);
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
 .table-wrapper td {
-    color: #f8fafc;
+    color: var(--title);
 }
 
 .analytics-mobile-list {
@@ -104,19 +104,19 @@
 
 .analytics-mobile-card {
     padding: 16px;
-    border: 1px solid #1e293b;
+    border: 1px solid var(--border);
     border-radius: 18px;
-    background: #0f172a;
+    background: var(--card-soft);
 }
 
 .analytics-mobile-card h3 {
     margin: 0;
-    color: #f8fafc;
+    color: var(--title);
 }
 
 .analytics-mobile-subtitle {
     margin: 6px 0 16px;
-    color: #94a3b8;
+    color: var(--text-soft);
 }
 
 .analytics-mobile-stats-grid {
@@ -129,21 +129,21 @@
 .analytics-mobile-stats-grid p {
     margin: 0;
     padding: 12px;
-    border: 1px solid #1e293b;
+    border: 1px solid var(--border);
     border-radius: 12px;
-    background: #020617;
+    background: var(--card);
 }
 
 .analytics-mobile-stats-grid span {
     display: block;
-    color: #94a3b8;
+    color: var(--text-soft);
     font-size: 12px;
 }
 
 .analytics-mobile-stats-grid strong {
     display: block;
     margin-top: 4px;
-    color: #f8fafc;
+    color: var(--title);
     font-size: 20px;
 }
 
@@ -153,21 +153,21 @@
     align-items: center;
     gap: 12px;
     padding: 32px;
-    border: 1px dashed #334155;
+    border: 1px dashed var(--border);
     border-radius: 20px;
-    background: #0f172a;
-    color: #cbd5e1;
+    background: var(--card-soft);
+    color: var(--text);
     text-align: center;
 }
 
 .analytics-state-card strong {
-    color: #f8fafc;
+    color: var(--title);
     font-size: 20px;
 }
 
 .analytics-state-card p {
     margin: 0;
-    color: #94a3b8;
+    color: var(--text-soft);
 }
 
 .analytics-control-row button:disabled {

@@ -1,7 +1,7 @@
 .section-card {
     padding: 20px;
     border-radius: 20px;
-    background: var(--panel-strong);
+    background: var(--card);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
 }
@@ -10,12 +10,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     margin-bottom: 14px;
 }
 
 .section-card__title {
     font-size: 1.1rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--title);
 }
 
@@ -27,10 +28,12 @@
     background: var(--accent-soft);
     color: var(--title);
     cursor: pointer;
+    font-weight: 600;
 }
 
 .section-card__action:hover {
-    opacity: 0.85;
+    border-color: var(--accent);
+    background: var(--accent-soft);
 }
 
 .section-card__content {

@@ -11,7 +11,7 @@
     padding: 24px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: var(--panel-strong);
+    background: var(--card);
 }
 
 .team-profile-eyebrow {
@@ -39,7 +39,7 @@
     padding: 24px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: var(--panel-strong);
+    background: var(--card);
 }
 
 .team-profile-section__header {
@@ -110,7 +110,7 @@
     padding: 18px;
     border: 1px solid var(--border);
     border-radius: 14px;
-    background: rgba(15, 23, 42, 0.55);
+    background: var(--card-soft);
 }
 
 .team-analytics-card span {
@@ -136,7 +136,7 @@
     padding: 14px;
     border: 1px solid var(--border);
     border-radius: 14px;
-    background: rgba(15, 23, 42, 0.55);
+    background: var(--card-soft);
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
@@ -194,7 +194,7 @@
     padding: 14px;
     border: 1px solid var(--border);
     border-radius: 14px;
-    background: rgba(15, 23, 42, 0.55);
+    background: var(--card-soft);
 }
 
 .team-games-item span {
@@ -229,7 +229,7 @@
     padding: 18px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: var(--panel-strong);
+    background: var(--card);
 }
 
 .team-summary-card span {

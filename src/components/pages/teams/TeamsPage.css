@@ -19,7 +19,7 @@
     padding: 14px 16px;
     border-radius: 14px;
     border: 1px solid var(--border);
-    background: rgba(15, 23, 42, 0.45);
+    background: var(--row);
     color: var(--title);
 }
 
@@ -31,11 +31,13 @@
 
 .team-list-item {
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    transition:
+            background-color 0.2s ease,
+            transform 0.2s ease;
 }
 
 .team-list-item:hover {
-    background: rgba(148, 163, 184, 0.08);
+    background: var(--row-hover);
     transform: translateX(2px);
 }
 
@@ -78,6 +80,7 @@
 
 .team-action-button:hover {
     border-color: var(--accent);
+    background: var(--accent-soft);
 }
 
 .secondary-button,
@@ -95,23 +98,24 @@
 }
 
 .secondary-button {
-    background: rgba(148, 163, 184, 0.12);
+    background: var(--card-soft);
     color: var(--title);
 }
 
 .secondary-button:hover {
-    background: rgba(148, 163, 184, 0.2);
+    background: var(--row-hover);
     transform: translateY(-1px);
 }
 
 .danger-button {
-    background: rgba(239, 68, 68, 0.12);
-    color: #fecaca;
-    border-color: rgba(239, 68, 68, 0.35);
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger-border);
 }
 
 .danger-button:hover {
-    background: rgba(239, 68, 68, 0.22);
+    background: var(--danger-bg);
+    border-color: var(--danger-text);
     transform: translateY(-1px);
 }
 

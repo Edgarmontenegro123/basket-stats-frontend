@@ -15,7 +15,7 @@
     max-width: 440px;
     padding: 24px;
     border-radius: 20px;
-    background: var(--panel);
+    background: var(--card);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
 }
@@ -55,4 +55,11 @@
 
 .modal .form-input {
     width: 100%;
+}
+
+.modal .form-input,
+.modal .form-select {
+    background: var(--input-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
 }

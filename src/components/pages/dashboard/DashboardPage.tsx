@@ -1,16 +1,16 @@
 import {useEffect, useState} from 'react'
-import type {AggregatedPlayerRanking} from '../../types/player.ts'
-import PageHeader from '../../common/PageHeader.tsx'
-import SectionCard from '../../common/SectionCard.tsx'
-import StatCard from '../../common/StatCard.tsx'
-import type {Game} from '../../types/game.ts'
+import type {AggregatedPlayerRanking} from '../../types/player'
+import PageHeader from '../../common/PageHeader'
+import SectionCard from '../../common/SectionCard'
+import StatCard from '../../common/StatCard'
+import type {Game} from '../../types/game'
 import {
     getTeams,
     getGames,
     getTopScorers,
-} from '../../services/api.ts'
+} from '../../services/api'
 
-import BasketballLoader from '../../common/BasketballLoader.tsx'
+import BasketballLoader from '../../common/BasketballLoader'
 import './DashboardPage.css'
 
 const DashboardPage = () => {
@@ -85,14 +85,12 @@ const DashboardPage = () => {
                 title='Dashboard'
                 subtitle='General overview of your basketball stats platform'
             />
-
             <section className='dashboard-page__stats'>
                 <StatCard label='Teams' value={String(teamsCount)}/>
                 <StatCard label='Games' value={String(gamesCount)}/>
                 <StatCard label='Completed' value={String(completedGamesCount)}/>
                 <StatCard label='Scheduled' value={String(scheduledGamesCount)}/>
             </section>
-
             <section className='dashboard-page__grid'>
                 <SectionCard title='Current State'>
                     {recentGames.length === 0 ? (
@@ -101,15 +99,15 @@ const DashboardPage = () => {
                         <ul className='dashboard-list'>
                             {recentGames.map((game) => (
                                 <li key={game.id} className='dashboard-list__item'>
-                    <span>
-                        {game.home_team_name}
-                        {' '}
-                        {game.home_score !== null ? game.home_score : '-'}
-                        <strong>{' Vs '}</strong>
-                        {game.away_score !== null ? game.away_score : '-'}
-                        {' '}
-                        {game.away_team_name}
-                    </span>
+                                    <span>
+                                        {game.home_team_name}
+                                        {' '}
+                                        {game.home_score !== null ? game.home_score : '-'}
+                                        <strong>{' Vs '}</strong>
+                                        {game.away_score !== null ? game.away_score : '-'}
+                                        {' '}
+                                        {game.away_team_name}
+                                    </span>
                                     <small>
                                         {new Date(game.game_date).toLocaleDateString()} · {game.status}
                                     </small>
@@ -118,7 +116,6 @@ const DashboardPage = () => {
                         </ul>
                     )}
                 </SectionCard>
-
                 <SectionCard title='Top Scorers'>
                     {topScorers.length === 0 ? (
                         <p>No player stats available yet.</p>
@@ -126,12 +123,16 @@ const DashboardPage = () => {
                         <ul className='dashboard-list'>
                             {topScorers.map((player, index) => (
                                 <li
-                                    key={`${player.player_name}-${player.team_name}-${index} `}
+                                    className='dashboard-list__item'
+                                    key={`${player.player_name}-${player.team_name}-${index}`}
                                 >
-                    <span>
-                        {player.player_name} · {player.team_name}
-                    </span>
-                                    <small>
+                                    <span className='dashboard-list__player'>
+                                        {player.player_name}
+                                    </span>
+                                    <span className='dashboard-list__team'>
+                                        {player.team_name}
+                                    </span>
+                                    <small className='dashboard-list__stats'>
                                         {player.total} PTS · {player.average} AVG · {player.games_played} games
                                     </small>
                                 </li>

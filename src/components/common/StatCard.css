@@ -1,15 +1,19 @@
 .stat-card {
     padding: 18px;
     border-radius: 18px;
-    background: var(--panel-strong);
+    background: var(--card);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease,
+            background 0.25s ease,
+            border-color 0.25s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 35px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--shadow);
 }
 
 .stat-card__value {

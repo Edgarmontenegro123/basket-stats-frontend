@@ -66,13 +66,13 @@
 }
 
 .confirm-modal__button--primary {
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    background: rgba(239, 68, 68, 0.12);
-    color: #fca5a5;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-color: var(--danger-border);
 }
 
 .confirm-modal__button--primary:hover {
-    border-color: rgba(239, 68, 68, 0.7);
-    background: rgba(239, 68, 68, 0.2);
-    color: #fecaca;
+    background: var(--danger-bg);
+    border-color: var(--danger-text);
+    transform: translateY(-1px);
 }

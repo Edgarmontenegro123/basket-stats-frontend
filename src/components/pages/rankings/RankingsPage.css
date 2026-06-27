@@ -9,7 +9,7 @@
     padding: 10px 14px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    background: var(--panel);
+    background: var(--card-soft);
     color: var(--text);
     cursor: pointer;
     transition: 0.2s ease;
@@ -79,7 +79,7 @@
     padding: 10px 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
-    background: var(--panel);
+    background: var(--input-bg);
     color: var(--text);
 }
 
@@ -91,7 +91,7 @@
     padding: 16px;
     border: 1px solid var(--border);
     border-radius: 18px;
-    background: var(--bg-soft);
+    background: var(--card-soft);
 }
 
 .ranking-mobile-header {
