@@ -128,9 +128,6 @@ const UploadStatsPage = () => {
 
             await completeGame(
                 selectedGame.id,
-                selectedGame.season_id,
-                selectedGame.home_team_id,
-                selectedGame.away_team_id,
                 homeTeamStat.points,
                 awayTeamStat.points,
             )

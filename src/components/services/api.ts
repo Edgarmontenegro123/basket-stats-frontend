@@ -108,22 +108,13 @@ export const updateGame = async (
 
 export const completeGame = async (
     id: string,
-    seasonId: string,
-    homeTeamId: string,
-    awayTeamId: string,
     homeScore: number,
     awayScore: number,
 ) => {
-    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
-        method: 'PUT',
+    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}/result`, {
+        method: 'PATCH',
         headers: getAuthHeaders(),
         body: JSON.stringify({
-            season_id: seasonId,
-            home_team_id: homeTeamId,
-            away_team_id: awayTeamId,
-            game_date: new Date().toISOString(),
-            location: null,
-            is_friendly: false,
             home_score: homeScore,
             away_score: awayScore,
             status: 'completed',
