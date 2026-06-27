@@ -17,6 +17,26 @@ import {
 import './UploadStatsPage.css'
 import '../../common/PageLayout.css'
 
+const getUploadErrorMessage = (error: unknown) => {
+    if (!(error instanceof Error)) {
+        return 'Something went wrong while processing the file. Please try again.'
+    }
+
+    if (error.message.includes('Error getting game details from Management API')) {
+        return 'We could not process the stats because the selected game could not be verified. Please try again or select another game.'
+    }
+
+    if (error.message.includes('Could not match processed team stats with selected game teams')) {
+        return 'The uploaded file was processed, but its teams do not match the selected game. Please check that you selected the correct game.'
+    }
+
+    if (error.message.includes('Failed to fetch')) {
+        return 'We could not connect to the server. Please check if the API is running and try again.'
+    }
+
+    return error.message
+}
+
 
 const UploadStatsPage = () => {
     const [file, setFile] = useState<File | null>(null)
@@ -124,14 +144,8 @@ const UploadStatsPage = () => {
 
             setPlayers(playersData);
         } catch (error) {
-            console.error(error);
-
-            if (error instanceof Error) {
-                setErrorMessage(error.message);
-                return;
-            }
-
-            setErrorMessage('Error processing file');
+            console.error(error)
+            setErrorMessage(getUploadErrorMessage(error))
         } finally {
             setIsProcessing(false);
         }
