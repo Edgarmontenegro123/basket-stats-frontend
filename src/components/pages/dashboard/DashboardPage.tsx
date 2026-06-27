@@ -4,6 +4,7 @@ import PageHeader from '../../common/PageHeader'
 import SectionCard from '../../common/SectionCard'
 import StatCard from '../../common/StatCard'
 import TopScorersChart from '../../common/TopScorersChart'
+import GamesStatusChart from '../../common/GamesStatusChart'
 import type {Game} from '../../types/game'
 import type {RankingStat} from '../../types/ranking'
 import {
@@ -109,7 +110,11 @@ const DashboardPage = () => {
                 <StatCard label='Scheduled' value={String(scheduledGamesCount)}/>
             </section>
             <section className='dashboard-page__grid'>
-                <SectionCard title='Current State'>
+                <SectionCard title='Games Overview'>
+                    <GamesStatusChart
+                        completed={completedGamesCount}
+                        scheduled={scheduledGamesCount}
+                    />
                     {recentGames.length === 0 ? (
                         <p>No games registered yet.</p>
                     ) : (

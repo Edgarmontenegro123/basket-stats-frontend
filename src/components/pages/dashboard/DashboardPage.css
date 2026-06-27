@@ -5,6 +5,8 @@
     --chart-muted: #64748b;
     --chart-tooltip-bg: #ffffff;
     --chart-tooltip-cursor: rgba(37, 99, 235, 0.08);
+    --chart-success: #22c55e;
+    --chart-warning: #f59e0b;
 }
 
 [data-theme='dark'] {
@@ -14,6 +16,8 @@
     --chart-muted: #94a3b8;
     --chart-tooltip-bg: #111827;
     --chart-tooltip-cursor: rgba(96, 165, 250, 0.12);
+    --chart-success: #4ade80;
+    --chart-warning: #fbbf24;
 }
 
 .dashboard-page {
@@ -106,6 +110,36 @@
     background: var(--chart-bar);
     border-color: var(--chart-bar);
     color: #ffffff;
+}
+
+.games-status-chart {
+    width: 100%;
+}
+
+.games-status-chart__legend {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.games-status-chart__legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--chart-text);
+    font-size: 0.9rem;
+}
+
+.games-status-chart__dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+
+.games-status-chart__legend-item span:nth-child(2) {
+    flex: 1;
 }
 
 @media (max-width: 1100px) {
