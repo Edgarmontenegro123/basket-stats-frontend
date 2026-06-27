@@ -3,6 +3,7 @@ import type {AggregatedPlayerRanking} from '../../types/player'
 import PageHeader from '../../common/PageHeader'
 import SectionCard from '../../common/SectionCard'
 import StatCard from '../../common/StatCard'
+import TopScorersChart from '../../common/TopScorersChart'
 import type {Game} from '../../types/game'
 import {
     getTeams,
@@ -120,24 +121,28 @@ const DashboardPage = () => {
                     {topScorers.length === 0 ? (
                         <p>No player stats available yet.</p>
                     ) : (
-                        <ul className='dashboard-list'>
-                            {topScorers.map((player, index) => (
-                                <li
-                                    className='dashboard-list__item'
-                                    key={`${player.player_name}-${player.team_name}-${index}`}
-                                >
+                        <>
+                            <TopScorersChart players={topScorers}/>
+                            <ul className='dashboard-list'>
+                                {topScorers.map((player, index) => (
+                                    <li
+                                        className='dashboard-list__item'
+                                        key={`${player.player_name}-${player.team_name}-${index}`}
+                                    >
                                     <span className='dashboard-list__player'>
                                         {player.player_name}
                                     </span>
-                                    <span className='dashboard-list__team'>
+                                        <span className='dashboard-list__team'>
                                         {player.team_name}
                                     </span>
-                                    <small className='dashboard-list__stats'>
-                                        {player.total} PTS · {player.average} AVG · {player.games_played} games
-                                    </small>
-                                </li>
-                            ))}
-                        </ul>
+                                        <small className='dashboard-list__stats'>
+                                            {player.total} PTS · {player.average} AVG · {player.games_played} games
+                                        </small>
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+
                     )}
                 </SectionCard>
             </section>

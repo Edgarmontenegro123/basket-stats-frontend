@@ -1,3 +1,21 @@
+:root {
+    --chart-bar: #2563eb;
+    --chart-grid: rgba(15, 23, 42, 0.14);
+    --chart-text: #0f172a;
+    --chart-muted: #64748b;
+    --chart-tooltip-bg: #ffffff;
+    --chart-tooltip-cursor: rgba(37, 99, 235, 0.08);
+}
+
+[data-theme='dark'] {
+    --chart-bar: #60a5fa;
+    --chart-grid: rgba(226, 232, 240, 0.2);
+    --chart-text: #e5e7eb;
+    --chart-muted: #94a3b8;
+    --chart-tooltip-bg: #111827;
+    --chart-tooltip-cursor: rgba(96, 165, 250, 0.12);
+}
+
 .dashboard-page {
     display: flex;
     flex-direction: column;
@@ -51,6 +69,11 @@
 .dashboard-list__stats {
     margin-top: 4px;
     color: var(--text-soft);
+}
+
+.top-scorers-chart {
+    width: 100%;
+    margin-bottom: 1.5rem;
 }
 
 @media (max-width: 1100px) {
