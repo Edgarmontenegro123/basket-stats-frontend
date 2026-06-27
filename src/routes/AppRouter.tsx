@@ -2,20 +2,41 @@ import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
 import LoginPage from '../components/pages/login/LoginPage'
 import ProtectedRoute from './ProtectedRoute'
 import RegisterPage from '../components/pages/register/RegisterPage'
-import MainLayout from '../components/layout/MainLayout.tsx'
-import DashboardPage from '../components/pages/dashboard/DashboardPage.tsx'
-import TeamsPage from '../components/pages/teams/TeamsPage.tsx'
+import { canUploadStats } from '../auth/permissions'
+import MainLayout from '../components/layout/MainLayout'
+import DashboardPage from '../components/pages/dashboard/DashboardPage'
+import TeamsPage from '../components/pages/teams/TeamsPage'
 import TeamProfilePage from '../components/pages/teams/TeamProfilePage'
-import GamesPage from '../components/pages/games/GamesPage.tsx'
-import UploadStatsPage from '../components/pages/uploads/UploadStatsPage.tsx'
-import RankingsPage from '../components/pages/rankings/RankingsPage.tsx'
-import ComparePage from '../components/pages/compare/ComparePage.tsx'
-import SeasonsPage from '../components/pages/seasons/SeasonsPage.tsx'
-import GameAnalyticsPage from '../components/pages/games/GameAnalyticsPage.tsx'
-import PlayersPage from '../components/pages/players/PlayersPage.tsx'
-import PlayerProfilePage from '../components/pages/players/PlayerProfilePage.tsx'
+import GamesPage from '../components/pages/games/GamesPage'
+import UploadStatsPage from '../components/pages/uploads/UploadStatsPage'
+import RankingsPage from '../components/pages/rankings/RankingsPage'
+import ComparePage from '../components/pages/compare/ComparePage'
+import SeasonsPage from '../components/pages/seasons/SeasonsPage'
+import GameAnalyticsPage from '../components/pages/games/GameAnalyticsPage'
+import PlayersPage from '../components/pages/players/PlayersPage'
+import PlayerProfilePage from '../components/pages/players/PlayerProfilePage'
 
 export const AppRouter = () => {
+    const getCurrentUser = () => {
+        const storedUser = localStorage.getItem('basket_stats_user')
+
+        if (!storedUser) {
+            return null
+        }
+        try {
+            return JSON.parse(storedUser)
+        } catch {
+            localStorage.removeItem('basket_stats_user')
+            return null
+        }
+    }
+
+    const currentUser = getCurrentUser()
+
+    const uploadStatsElement = canUploadStats(currentUser?.role)
+        ? <UploadStatsPage />
+        : <Navigate to='/dashboard' replace />
+
     return (
         <BrowserRouter>
             <Routes>
@@ -32,7 +53,7 @@ export const AppRouter = () => {
                         <Route path='/players' element={<PlayersPage/>}/>
                         <Route path='/players/:id' element={<PlayerProfilePage/>}/>
                         <Route path='/games' element={<GamesPage/>}/>
-                        <Route path='/upload-stats' element={<UploadStatsPage/>}/>
+                        <Route path='/upload-stats' element={uploadStatsElement}/>
                         <Route path='/rankings' element={<RankingsPage/>}/>
                         <Route path='/compare' element={<ComparePage/>}/>
                         <Route path='/seasons' element={<SeasonsPage/>}/>

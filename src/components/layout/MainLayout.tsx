@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react'
 import {NavLink, Outlet, useNavigate} from 'react-router-dom'
+import { canUploadStats } from '../../auth/permissions'
 import ConfirmModal from '../common/ConfirmModal'
 import logo from '../../assets/logo.png'
 import './MainLayout.css'
@@ -93,12 +94,13 @@ const MainLayout = () => {
                     >
                         Seasons
                     </NavLink>
-                    <NavLink
-                        to='/upload-stats'
-                        className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
-                    >
-                        Upload
-                    </NavLink>
+                    {canUploadStats(currentUser?.role) && (
+                        <NavLink to='/upload-stats'
+                                 className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
+                        >
+                            Upload
+                        </NavLink>
+                    )}
                     <NavLink
                         to='/rankings'
                         className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}
