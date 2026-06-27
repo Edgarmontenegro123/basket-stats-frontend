@@ -189,7 +189,7 @@ const UploadStatsPage = () => {
 
                             {games.map((game) => (
                                 <option key={game.id} value={game.id}>
-                                    {game.home_team_name} vs {game.away_team_name} - {new Date(game.game_date).toLocaleDateString()}
+                                    {game.home_team_name} vs {game.away_team_name}
                                 </option>
                             ))}
                         </select>
