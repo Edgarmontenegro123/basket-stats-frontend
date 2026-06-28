@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { canManageTeams } from '../../../auth/permissions'
+import { canManageSeasons } from '../../../auth/permissions'
 import PageHeader from '../../common/PageHeader'
 import SectionCard from '../../common/SectionCard'
 import SeasonModal from './SeasonModal'
@@ -29,7 +29,7 @@ const SeasonsPage = () => {
 
     const storedUser = localStorage.getItem('basket_stats_user')
     const currentUser = storedUser ? JSON.parse(storedUser) : null
-    const canEditSeasons = canManageTeams(currentUser?.role)
+    const canEditSeasons = canManageSeasons(currentUser?.role)
 
     useEffect(() => {
         const fetchData = async () => {

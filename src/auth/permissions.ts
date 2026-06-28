@@ -29,7 +29,7 @@ export const canManageGames = (role?: string) => {
 }
 
 export const canManageSeasons = (role?: string) => {
-    return role === 'admin' || role === 'coach' || role === 'dt'
+    return role === 'admin'
 }
 
 export const canUploadStats = (role?: string) => {
