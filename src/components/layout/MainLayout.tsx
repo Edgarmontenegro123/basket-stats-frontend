@@ -36,11 +36,13 @@ const MainLayout = () => {
         <div className='layout'>
             <aside className='sidebar'>
                 <div className='sidebar-brand'>
-                    <img
-                        src={logo}
-                        alt='Basket Stats logo'
-                        className='sidebar-logo'
-                    />
+                    <div className='sidebar-logo-wrapper'>
+                        <img
+                            src={logo}
+                            alt='Basket Stats logo'
+                            className='sidebar-logo'
+                        />
+                    </div>
                     <div>
                         <h2 className='sidebar-title'>Basket Stats</h2>
                         <p className='sidebar-subtitle'>Analytics dashboard</p>
