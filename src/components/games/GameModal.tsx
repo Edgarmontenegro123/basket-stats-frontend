@@ -61,7 +61,6 @@ const GameModal = ({
             <div className='modal'>
                 <div className='modal__header'>
                     <h2>{gameToEdit ? 'Edit game' : 'Create game'}</h2>
-
                     <button
                         type='button'
                         className='modal__close'
@@ -70,50 +69,60 @@ const GameModal = ({
                         ×
                     </button>
                 </div>
-
                 <div className='modal__content game-modal__content'>
                     <select
                         className='form-select'
                         value={seasonId}
-                        onChange={(event) => setSeasonId(event.target.value)}
+                        onChange={(event) => {
+                            setSeasonId(event.target.value)
+                            setError('')
+                        }}
                     >
                         <option value=''>Select season</option>
-
                         {seasons.map((season) => (
                             <option key={season.id} value={season.id}>
                                 {season.name}
                             </option>
                         ))}
                     </select>
-
                     <select
                         className='form-select'
                         value={homeTeamId}
-                        onChange={(event) => setHomeTeamId(event.target.value)}
+                        onChange={(event) => {
+                            setHomeTeamId(event.target.value)
+                            setError('')
+                        }}
                     >
                         <option value=''>Home team</option>
-
                         {teams.map((team) => (
-                            <option key={team.id} value={team.id}>
+                            <option
+                                key={team.id}
+                                value={team.id}
+                                disabled={team.id === awayTeamId}
+                            >
                                 {team.name}
                             </option>
                         ))}
                     </select>
-
                     <select
                         className='form-select'
                         value={awayTeamId}
-                        onChange={(event) => setAwayTeamId(event.target.value)}
+                        onChange={(event) => {
+                            setAwayTeamId(event.target.value)
+                            setError('')
+                        }}
                     >
                         <option value=''>Away team</option>
-
                         {teams.map((team) => (
-                            <option key={team.id} value={team.id}>
+                            <option
+                                key={team.id}
+                                value={team.id}
+                                disabled={team.id === homeTeamId}
+                            >
                                 {team.name}
                             </option>
                         ))}
                     </select>
-
                     <input
                         className='form-input'
                         type='url'
@@ -124,7 +133,6 @@ const GameModal = ({
 
                     {error && <p className='modal-error'>{error}</p>}
                 </div>
-
                 <div className='modal__actions'>
                     <button
                         type='button'
@@ -133,7 +141,6 @@ const GameModal = ({
                     >
                         Cancel
                     </button>
-
                     <button
                         type='button'
                         className='primary-button'
