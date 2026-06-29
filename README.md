@@ -1,73 +1,260 @@
-# React + TypeScript + Vite
+# Basket Stats
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Basket Stats is a cloud-based web application for managing basketball teams, players, seasons, games and post-game statistics.
 
-Currently, two official plugins are available:
+The project was developed as an MVP for **PP3 - Desarrollo e implementación de sistemas en la nube**, focusing on a functional microservices architecture, real database persistence, authentication, role-based permissions and PDF statistics processing.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Preview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Dashboard
 
-## Expanding the ESLint configuration
+![Dashboard](src/assets/readme/images/Dashboard.png)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Teams
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+![Teams](src/assets/readme/images/Teams.png)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Team Profile
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+![Team Profile](src/assets/readme/images/Teams_Profile.png)
+
+### Players
+
+![Players](src/assets/readme/images/Players.png)
+
+### Upload Stats
+
+![Upload Stats](src/assets/readme/images/Uploads.png)
+
+### Rankings
+
+![Rankings](src/assets/readme/images/Rankings.png)
+
+### Compare
+
+![Compare](src/assets/readme/images/Compare.png)
+
+---
+
+## Main Features
+
+* User authentication with JWT.
+* Public registration with default `player` role.
+* Role-based permissions for `admin`, `coach`, `dt` and `player`.
+* Team management.
+* Player management.
+* Season management.
+* Game management.
+* PDF upload and statistics processing.
+* Automatic game result update after processing stats.
+* Dashboard with real metrics and charts.
+* Game analytics.
+* Player rankings.
+* Team comparison.
+* Player profile.
+* Team profile.
+* Light and dark mode.
+
+---
+
+## Architecture
+
+Basket Stats is divided into three main services:
+
+```txt
+Frontend
+│
+├── Management API
+│   └── Management Database
+│
+└── Analytics API
+    └── Analytics Database
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Frontend
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The frontend is responsible for the user interface, private routes, role-based visual restrictions, API consumption, charts and user interaction.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Management API
+
+The Management API handles authentication, users, roles, teams, players, seasons and games.
+
+### Analytics API
+
+The Analytics API handles PDF uploads, statistics processing, rankings, player summaries, team stats and communication with the Management API to complete game results.
+
+---
+
+## Technologies
+
+### Frontend
+
+* React
+* TypeScript
+* Vite
+* React Router
+* Recharts
+* CSS
+* LocalStorage
+* Vercel
+
+### Backend
+
+* Node.js
+* Express
+* TypeScript
+* PostgreSQL
+* Supabase
+* JWT
+* bcrypt
+* multer
+* PDF parsing
+* Render
+
+---
+
+## User Roles
+
+| Role           | Permissions                                                                    |
+| -------------- | ------------------------------------------------------------------------------ |
+| `admin`        | Full access to teams, players, seasons, games, uploads, analytics and rankings |
+| `coach` / `dt` | Can manage teams and players, upload stats and view analytics                  |
+| `player`       | Read-only access                                                               |
+
+---
+
+## Main Flow
+
+```txt
+1. User logs in or registers.
+2. Teams are created.
+3. Players are assigned to teams.
+4. Seasons are created.
+5. Games are scheduled.
+6. A post-game PDF is uploaded.
+7. The Analytics API processes the PDF.
+8. Player and team stats are saved.
+9. The game result is completed automatically.
+10. Data becomes available in Dashboard, Rankings, Compare and Profiles.
 ```
+
+---
+
+## API Overview
+
+### Management API
+
+```txt
+POST   /auth/register
+POST   /auth/login
+
+GET    /teams
+POST   /teams
+PUT    /teams/:id
+DELETE /teams/:id
+
+GET    /players
+POST   /players
+PUT    /players/:id
+DELETE /players/:id
+
+GET    /seasons
+POST   /seasons
+PUT    /seasons/:id
+DELETE /seasons/:id
+
+GET    /games
+POST   /games
+PUT    /games/:id
+PATCH  /games/:id/result
+DELETE /games/:id
+```
+
+### Analytics API
+
+```txt
+POST /uploads
+GET  /uploads/:id
+
+POST /analytics/process
+
+GET  /analytics/games/:id/players
+GET  /analytics/games/:id/teams
+
+GET  /analytics/players/rankings
+GET  /analytics/players/aggregated-rankings
+GET  /analytics/players/:playerName/summary
+```
+
+---
+
+## Environment Variables
+
+### Frontend
+
+```env
+VITE_MANAGEMENT_API_URL=
+VITE_ANALYTICS_API_URL=
+```
+
+### Management API
+
+```env
+DATABASE_URL=
+JWT_SECRET=
+JWT_EXPIRES_IN=
+FRONTEND_URL=
+```
+
+### Analytics API
+
+```env
+DATABASE_URL=
+JWT_SECRET=
+JWT_EXPIRES_IN=
+FRONTEND_URL=
+MANAGEMENT_API_URL=
+```
+
+---
+
+## How to Run Locally
+
+### Frontend
+
+```bash
+npm install
+npm run dev
+```
+
+### Backend services
+
+```bash
+npm install
+npm run dev
+```
+
+Each backend service requires its own environment variables.
+
+---
+
+## Future Improvements
+
+* Add user management for admins.
+* Allow admins to change user roles from the app.
+* Add AI-assisted PDF processing.
+* Support CSV and Excel uploads.
+* Improve game detail views.
+* Add more dashboard filters.
+* Add season and team filters to rankings.
+* Improve data synchronisation between Management API and Analytics API.
+* Allow coaches to create controlled friendly games.
+* Add internationalisation support.
+
+---
+
+## Author
+
+Developed by **Edgar Montenegro**.
