@@ -18,6 +18,7 @@ const TeamsPage = () => {
     const [teamToEdit, setTeamToEdit] = useState<Team | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [teamToDelete, setTeamToDelete] = useState<Team | null>(null)
+    const [deleteError, setDeleteError] = useState('')
 
     const navigate = useNavigate()
 
@@ -119,9 +120,15 @@ const TeamsPage = () => {
                 prev.filter((team) => team.id !== teamToDelete.id),
             )
 
+            setDeleteError('')
             setTeamToDelete(null)
         } catch (error) {
-            console.error(error)
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : 'Team could not be deleted.'
+
+            setDeleteError(message)
         }
     }
 
@@ -190,6 +197,7 @@ const TeamsPage = () => {
                                             className='danger-button'
                                             onClick={(event) => {
                                                 event.stopPropagation()
+                                                setDeleteError('')
                                                 setTeamToDelete(team)
                                             }}
                                         >
@@ -202,20 +210,29 @@ const TeamsPage = () => {
                     </ul>
                 )}
             </SectionCard>
-            <TeamModal
-                isOpen={isModalOpen}
-                teamToEdit={teamToEdit}
-                onClose={handleCloseModal}
-                onSubmit={handleSubmitTeam}
-                />
+            {isModalOpen && (
+                <TeamModal
+                    isOpen={isModalOpen}
+                    teamToEdit={teamToEdit}
+                    onClose={handleCloseModal}
+                    onSubmit={handleSubmitTeam}
+                    />
+            )}
             <ConfirmModal
                 isOpen={!!teamToDelete}
                 title='Delete team'
-                message={`Are you sure you want to delete ${teamToDelete?.name}?`}
+                message={
+                    deleteError
+                        ? deleteError
+                        : `Are you sure you want to delete ${teamToDelete?.name}?`
+                }
                 confirmLabel='Delete'
                 cancelLabel='Cancel'
                 onConfirm={handleConfirmDeleteTeam}
-                onCancel={() => setTeamToDelete(null)}
+                onCancel={() => {
+                    setDeleteError('')
+                    setTeamToDelete(null)
+                }}
             />
         </div>
     )

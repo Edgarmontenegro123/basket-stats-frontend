@@ -63,3 +63,13 @@
     color: var(--text);
     border: 1px solid var(--border);
 }
+
+.form-error {
+    margin: 0 0 0.75rem;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--danger-border);
+    border-radius: 12px;
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    font-size: 0.875rem;
+}

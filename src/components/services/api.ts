@@ -450,8 +450,11 @@ export const deleteTeam = async (id: string) => {
     })
 
     if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text)
+        const errorData = await res.json().catch(() => null)
+
+        throw new Error(
+            errorData?.message || 'Team could not be deleted.',
+        )
     }
 }
 
