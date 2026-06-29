@@ -16,26 +16,29 @@ import GameAnalyticsPage from '../components/pages/games/GameAnalyticsPage'
 import PlayersPage from '../components/pages/players/PlayersPage'
 import PlayerProfilePage from '../components/pages/players/PlayerProfilePage'
 
-export const AppRouter = () => {
-    const getCurrentUser = () => {
-        const storedUser = localStorage.getItem('basket_stats_user')
+const UploadStatsRoute = () => {
+    const storedUser = localStorage.getItem('basket_stats_user')
 
-        if (!storedUser) {
-            return null
-        }
-        try {
-            return JSON.parse(storedUser)
-        } catch {
-            localStorage.removeItem('basket_stats_user')
-            return null
-        }
+    if (!storedUser) {
+        return <Navigate to='/login' replace />
     }
 
-    const currentUser = getCurrentUser()
+    let currentUser = null
 
-    const uploadStatsElement = canUploadStats(currentUser?.role)
-        ? <UploadStatsPage />
-        : <Navigate to='/dashboard' replace />
+    try {
+        currentUser = JSON.parse(storedUser)
+    } catch {
+        localStorage.removeItem('basket_stats_user')
+        localStorage.removeItem('basket_stats_token')
+        return <Navigate to='/login' replace />
+    }
+    if (!canUploadStats(currentUser?.role)) {
+        return <Navigate to='/dashboard' replace />
+    }
+    return <UploadStatsPage />
+}
+
+export const AppRouter = () => {
 
     return (
         <BrowserRouter>
@@ -53,7 +56,7 @@ export const AppRouter = () => {
                         <Route path='/players' element={<PlayersPage/>}/>
                         <Route path='/players/:id' element={<PlayerProfilePage/>}/>
                         <Route path='/games' element={<GamesPage/>}/>
-                        <Route path='/upload-stats' element={uploadStatsElement}/>
+                        <Route path='/upload-stats' element={<UploadStatsRoute />}/>
                         <Route path='/rankings' element={<RankingsPage/>}/>
                         <Route path='/compare' element={<ComparePage/>}/>
                         <Route path='/seasons' element={<SeasonsPage/>}/>
