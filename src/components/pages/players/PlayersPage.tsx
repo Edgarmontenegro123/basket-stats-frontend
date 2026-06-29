@@ -86,6 +86,11 @@ import './PlayersPage.css'
             return
         }
 
+        if (!form.birth_date) {
+            alert('Birth date is required.')
+            return
+        }
+
         if (form.number < 0 || form.number > 99) {
             alert('Player number must be between 0 and 99.')
             return
@@ -295,6 +300,7 @@ import './PlayersPage.css'
                                 id='birth_date'
                                 type='date'
                                 value={form.birth_date || ''}
+                                required
                                 onChange={(e) =>
                                     setForm({...form, birth_date: e.target.value})
                                 }
@@ -316,7 +322,6 @@ import './PlayersPage.css'
                             >
                                 Cancel
                             </button>
-
                             <button
                                 type='submit'
                                 className='players-form-submit'
