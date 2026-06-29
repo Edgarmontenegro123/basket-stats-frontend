@@ -71,31 +71,44 @@ import './PlayersPage.css'
     const handleCreatePlayer = async (e: React.BaseSyntheticEvent) => {
         e.preventDefault()
 
+        const heightCm = form.height_cm
+        const weightKg = form.weight_kg
+
+        const hasHeight = heightCm !== undefined && heightCm !== null
+        const hasWeight = weightKg !== undefined && weightKg !== null
+
         if (!form.team_id) {
             alert('Please select a team.')
             return
         }
-
         if (form.first_name.trim().length < 2) {
             alert('First name must contain at least 2 characters.')
             return
         }
-
         if (form.last_name.trim().length < 2) {
             alert('Last name must contain at least 2 characters.')
             return
         }
-
         if (!form.birth_date) {
             alert('Birth date is required.')
             return
         }
-
         if (form.number < 0 || form.number > 99) {
             alert('Player number must be between 0 and 99.')
             return
         }
-
+        if (!form.position) {
+            alert('Please select a position.')
+            return
+        }
+        if (hasHeight && (heightCm < 120 || heightCm > 250)) {
+            alert('Height must be between 120 and 250 cm.')
+            return
+        }
+        if (hasWeight && (weightKg < 30 || weightKg > 200)) {
+            alert('Weight must be between 30 and 200 kg.')
+            return
+        }
         if (editingPlayer) {
             await updatePlayer(editingPlayer.id, form)
         } else {
@@ -257,6 +270,7 @@ import './PlayersPage.css'
                         />
                         <select
                             value={form.position || ''}
+                            required
                             onChange={(e) =>
                                 setForm({...form, position: e.target.value})
                             }
@@ -270,6 +284,8 @@ import './PlayersPage.css'
                         </select>
                         <input
                             type='number'
+                            min='120'
+                            max='250'
                             placeholder='Height cm'
                             value={form.height_cm || ''}
                             onChange={(e) =>
@@ -283,6 +299,8 @@ import './PlayersPage.css'
                         />
                         <input
                             type='number'
+                            min='30'
+                            max='200'
                             placeholder='Weight kg'
                             value={form.weight_kg || ''}
                             onChange={(e) =>
