@@ -88,7 +88,6 @@ import '../../layout/MainLayout.css'
             >
                 ← Back to Players
             </button>
-
             <section className='player-profile-card'>
                 {player.photo_url ? (
                     <img
@@ -101,7 +100,6 @@ import '../../layout/MainLayout.css'
                         {player.first_name.charAt(0)}
                     </div>
                 )}
-
                 <div className='player-profile-main'>
                     {team ? (
                         <button
@@ -116,21 +114,17 @@ import '../../layout/MainLayout.css'
                             Unknown team
                         </p>
                     )}
-
                     <h1>
                         {player.first_name} {player.last_name}
                     </h1>
-
                     <div className='player-profile-badges'>
                         <span>#{player.number}</span>
                         <span>{getPlayerPositionLabel(player.position)}</span>
                     </div>
                 </div>
             </section>
-
             <section>
                 <h2 className='player-section-title'>Personal Details</h2>
-
                 <div className='player-details-grid'>
                     <div className='player-detail-card'>
                         <span>Height</span>
@@ -138,29 +132,24 @@ import '../../layout/MainLayout.css'
                             {player.height_cm ? `${player.height_cm} cm` : '-'}
                         </strong>
                     </div>
-
                     <div className='player-detail-card'>
                         <span>Weight</span>
                         <strong>
                             {player.weight_kg ? `${player.weight_kg} kg` : '-'}
                         </strong>
                     </div>
-
                     <div className='player-detail-card'>
                         <span>Birth date</span>
                         <strong>{formatBirthDate(player.birth_date)}</strong>
                     </div>
                 </div>
             </section>
-
             <section>
                 <h2 className='player-section-title'>Performance Summary</h2>
-
                 {playerSummary ? (
                     <div className='player-performance-layout'>
                         <div>
                             <h3 className='player-section-subtitle'>Overview</h3>
-
                             <div className='player-details-grid'>
                                 <div className='player-detail-card'>
                                     <span>Games played</span>
@@ -168,72 +157,58 @@ import '../../layout/MainLayout.css'
                                 </div>
                             </div>
                         </div>
-
                         <div>
                             <h3 className='player-section-subtitle'>Totals</h3>
-
                             <div className='player-details-grid'>
                                 <div className='player-detail-card'>
                                     <span>Total points</span>
                                     <strong>{playerSummary.total_points}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>Total rebounds</span>
                                     <strong>{playerSummary.total_rebounds}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>Total assists</span>
                                     <strong>{playerSummary.total_assists}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>Steals</span>
                                     <strong>{playerSummary.total_steals}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>Blocks</span>
                                     <strong>{playerSummary.total_blocks}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>Turnovers</span>
                                     <strong>{playerSummary.total_turnovers}</strong>
                                 </div>
                             </div>
                         </div>
-
                         <div>
                             <h3 className='player-section-subtitle'>Averages</h3>
-
                             <div className='player-details-grid'>
                                 <div className='player-detail-card'>
                                     <span>AVG points</span>
                                     <strong>{playerSummary.average_points}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>AVG rebounds</span>
                                     <strong>{playerSummary.average_rebounds}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>AVG assists</span>
                                     <strong>{playerSummary.average_assists}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>AVG steals</span>
                                     <strong>{playerSummary.average_steals}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>AVG blocks</span>
                                     <strong>{playerSummary.average_blocks}</strong>
                                 </div>
-
                                 <div className='player-detail-card'>
                                     <span>AVG turnovers</span>
                                     <strong>{playerSummary.average_turnovers}</strong>
