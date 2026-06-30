@@ -574,8 +574,6 @@ Vista de comparación estadística entre dos equipos.
 
 ## 10. Repositorios y despliegues
 
-## 10. Repositorios y despliegues
-
 El proyecto se encuentra alojado en GitHub y sus componentes principales están desplegados en servicios cloud accesibles desde Internet.
 
 La aplicación está dividida en tres componentes principales:
