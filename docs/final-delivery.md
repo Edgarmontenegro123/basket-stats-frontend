@@ -444,6 +444,7 @@ Las siguientes historias de usuario representan los casos de uso principales del
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
+sequenceDiagram
     actor User as Usuario
     participant FE as Frontend
     participant API as Management API
@@ -463,6 +464,7 @@ Las siguientes historias de usuario representan los casos de uso principales del
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
+sequenceDiagram
     actor User as Visitante
     participant FE as Frontend
     participant API as Management API
@@ -483,6 +485,7 @@ Las siguientes historias de usuario representan los casos de uso principales del
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
+sequenceDiagram
     actor Admin as Administrador
     participant FE as Frontend
     participant API as Management API
