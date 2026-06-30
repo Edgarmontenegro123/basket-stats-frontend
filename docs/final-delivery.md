@@ -440,190 +440,54 @@ Las siguientes historias de usuario representan los casos de uso principales del
 
 ## 8. Diagramas de secuencia
 
+Los siguientes diagramas de secuencia representan los flujos principales del MVP.  
+Cada diagrama corresponde a una historia de usuario definida previamente.
+
 ### Diagrama 1 – Inicio de sesión
 
-```mermaid
-%%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
-sequenceDiagram
-    actor User as Usuario
-    participant FE as Frontend
-    participant API as Management API
-    participant DB as Management DB
+![Diagrama de secuencia - Inicio de sesión](./diagrams/sequence-login.png)
 
-    User->>FE: Ingresa email y contraseña
-    FE->>API: POST /auth/login
-    API->>DB: Busca usuario por email
-    DB-->>API: Devuelve usuario
-    API->>API: Valida password y genera JWT
-    API-->>FE: Devuelve token y datos del usuario
-    FE->>FE: Guarda token y user en localStorage
-    FE-->>User: Redirige al dashboard
-```
+---
 
 ### Diagrama 2 – Registro de usuario
 
-```mermaid
-%%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
-sequenceDiagram
-    actor User as Visitante
-    participant FE as Frontend
-    participant API as Management API
-    participant DB as Management DB
+![Diagrama de secuencia - Registro de usuario](./diagrams/sequence-register.png)
 
-    User->>FE: Completa formulario de registro
-    FE->>API: POST /auth/register
-    API->>DB: Verifica si el email ya existe
-    DB-->>API: Resultado de búsqueda
-    API->>API: Hashea password y asigna rol player
-    API->>DB: Inserta nuevo usuario
-    DB-->>API: Usuario creado
-    API-->>FE: Confirma registro
-    FE-->>User: Muestra mensaje y permite iniciar sesión
-```
+---
 
 ### Diagrama 3 – Gestión de equipos
 
-```mermaid
-%%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
-sequenceDiagram
-    actor Admin as Administrador
-    participant FE as Frontend
-    participant API as Management API
-    participant DB as Management DB
+![Diagrama de secuencia - Gestión de equipos](./diagrams/sequence-teams.png)
 
-    Admin->>FE: Completa formulario de equipo
-    FE->>FE: Valida datos básicos
-    FE->>API: POST /teams con JWT
-    API->>API: Valida token y permisos
-    API->>DB: Inserta equipo
-    DB-->>API: Equipo creado
-    API-->>FE: Devuelve equipo creado
-    FE-->>Admin: Actualiza listado de equipos
-```
+---
 
 ### Diagrama 4 – Gestión de jugadores
 
-```mermaid
-%%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
-sequenceDiagram
-    actor User as Admin / Coach
-    participant FE as Frontend
-    participant API as Management API
-    participant DB as Management DB
+![Diagrama de secuencia - Gestión de jugadores](./diagrams/sequence-players.png)
 
-    User->>FE: Completa formulario de jugador
-    FE->>FE: Valida equipo, nombre, número y posición
-    FE->>API: POST /players con JWT
-    API->>API: Valida token y rol autorizado
-    API->>DB: Inserta jugador asociado a un equipo
-    DB-->>API: Jugador creado
-    API-->>FE: Devuelve jugador creado
-    FE-->>User: Actualiza listado de jugadores
-```
+---
 
 ### Diagrama 5 – Creación de partido
 
-```mermaid
-%%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
-sequenceDiagram
-    actor Admin as Administrador
-    participant FE as Frontend
-    participant API as Management API
-    participant DB as Management DB
+![Diagrama de secuencia - Creación de partido](./diagrams/sequence-games.png)
 
-    Admin->>FE: Completa formulario de partido
-    FE->>FE: Valida temporada, local y visitante
-    FE->>FE: Verifica que los equipos sean diferentes
-    FE->>API: POST /games con JWT
-    API->>API: Valida token y rol admin
-    API->>DB: Inserta partido con estado scheduled
-    DB-->>API: Partido creado
-    API-->>FE: Devuelve partido creado
-    FE-->>Admin: Actualiza listado de partidos
-```
+---
 
 ### Diagrama 6 – Carga y procesamiento de PDF
 
-```mermaid
-%%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
-sequenceDiagram
-    actor User as Admin / Coach
-    participant FE as Frontend
-    participant AAPI as Analytics API
-    participant ADB as Analytics DB
-    participant MAPI as Management API
-    participant MDB as Management DB
+![Diagrama de secuencia - Carga y procesamiento de PDF](./diagrams/sequence-upload-process.png)
 
-    User->>FE: Selecciona partido y archivo PDF
-    FE->>AAPI: POST /uploads con PDF y JWT
-    AAPI->>AAPI: Valida archivo y permisos
-    AAPI->>ADB: Guarda registro del upload
-    ADB-->>AAPI: Upload creado
-    AAPI-->>FE: Devuelve upload_id
-
-    FE->>AAPI: POST /analytics/process
-    AAPI->>MAPI: GET /games/:id
-    MAPI->>MDB: Busca datos del partido
-    MDB-->>MAPI: Devuelve partido con equipos
-    MAPI-->>AAPI: Devuelve datos del partido
-
-    AAPI->>AAPI: Procesa PDF y normaliza nombres
-    AAPI->>ADB: Guarda player_stats y team_stats
-    ADB-->>AAPI: Estadísticas guardadas
-
-    AAPI->>MAPI: PATCH /games/:id/result
-    MAPI->>MDB: Actualiza resultado y estado completed
-    MDB-->>MAPI: Partido actualizado
-    MAPI-->>AAPI: Confirma actualización
-
-    AAPI-->>FE: Devuelve estadísticas procesadas
-    FE-->>User: Muestra resultado del procesamiento
-```
+---
 
 ### Diagrama 7 – Consulta de rankings
 
-```mermaid
-%%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
-sequenceDiagram
-    actor User as Usuario
-    participant FE as Frontend
-    participant AAPI as Analytics API
-    participant ADB as Analytics DB
+![Diagrama de secuencia - Consulta de rankings](./diagrams/sequence-rankings.png)
 
-    User->>FE: Selecciona estadística del ranking
-    FE->>AAPI: GET /analytics/players/aggregated-rankings
-    AAPI->>AAPI: Valida parámetros de consulta
-    AAPI->>ADB: Consulta estadísticas agregadas
-    ADB-->>AAPI: Devuelve ranking de jugadores
-    AAPI-->>FE: Devuelve ranking procesado
-    FE-->>User: Muestra tabla y gráfico de ranking
-```
+---
 
 ### Diagrama 8 – Comparación de equipos
 
-```mermaid
-%%{init: {'theme': 'base', 'themeCSS': 'svg { background: #ffffff; }', 'themeVariables': { 'actorBkg': '#ede9fe', 'actorBorder': '#7c3aed', 'actorTextColor': '#4c1d95', 'participantBkg': '#dbeafe', 'participantBorder': '#2563eb', 'participantTextColor': '#1e3a8a', 'signalColor': '#111827', 'signalTextColor': '#111827', 'labelTextColor': '#111827', 'noteBkgColor': '#fef3c7', 'noteTextColor': '#78350f' }}}%%
-sequenceDiagram
-    actor User as Usuario
-    participant FE as Frontend
-    participant MAPI as Management API
-    participant MDB as Management DB
-    participant AAPI as Analytics API
-    participant ADB as Analytics DB
-
-    User->>FE: Selecciona dos equipos
-    FE->>FE: Valida que los equipos sean diferentes
-    FE->>MAPI: GET /teams
-    MAPI->>MDB: Consulta equipos disponibles
-    MDB-->>MAPI: Devuelve equipos
-    MAPI-->>FE: Devuelve listado de equipos
-
-    FE->>AAPI: GET estadísticas por equipos
-    AAPI->>ADB: Consulta team_stats
-    ADB-->>AAPI: Devuelve estadísticas comparativas
-    AAPI-->>FE: Devuelve datos de comparación
-    FE-->>User: Muestra comparación lado a lado
-```
+![Diagrama de secuencia - Comparación de equipos](./diagrams/sequence-compare.png)
 ---
 
 ## 9. Mockups funcionales
