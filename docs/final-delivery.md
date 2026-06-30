@@ -490,13 +490,15 @@ Cada diagrama corresponde a una historia de usuario definida previamente.
 ![Diagrama de secuencia - Comparación de equipos](./diagrams/sequence-compare.png)
 ---
 
-## 9. Mockups funcionales
+## 9. Wireframes / Mockups funcionales
 
-Los mockups funcionales del sistema se representan mediante capturas reales del MVP implementado.
+Los wireframes y mockups funcionales del sistema se documentan mediante capturas reales del MVP implementado.
 
-Estas pantallas permiten comprender la navegación principal de la aplicación, las interacciones disponibles y el flujo completo del usuario dentro del sistema.
+A diferencia de un prototipo estático o una maqueta navegable, estas pantallas corresponden a vistas funcionales desarrolladas en la aplicación final, por lo que permiten validar tanto la estructura visual como la navegación real del sistema.
 
-El conjunto de mockups cubre más del 80% del sistema, incluyendo autenticación, dashboard, gestión deportiva, carga de estadísticas, análisis, rankings, comparación y perfiles.
+El conjunto de pantallas cubre más del 80% del sistema, incluyendo autenticación, dashboard, gestión deportiva, carga de estadísticas, análisis, rankings, comparación y perfiles.
+
+Estas vistas permiten comprender el flujo completo del usuario dentro de Basket Stats, desde el acceso inicial hasta la consulta y análisis de estadísticas procesadas.
 
 ### Login
 
