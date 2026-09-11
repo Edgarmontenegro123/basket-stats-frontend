@@ -172,7 +172,7 @@ export const processStats = async (uploadId: string) => {
     // Go backend connection
     // const res = await fetch('http://localhost:8081/analytics/process', {
     // Node backend connection
-    const res = await fetch(`${ANALYTICS_API_URL}/process`, {
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/process`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({upload_id: uploadId}),
@@ -188,7 +188,7 @@ export const processStats = async (uploadId: string) => {
 }
 
 export const getPlayerStatsByGameId = async (gameId: string) => {
-    const res = await fetch(`${ANALYTICS_API_URL}/games/${gameId}/players`)
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/players`)
 
     if (!res.ok) {
         const text = await res.text()
@@ -199,7 +199,7 @@ export const getPlayerStatsByGameId = async (gameId: string) => {
 }
 
 export const getTeamStatsByGameId = async (gameId: string) => {
-    const res = await fetch(`${ANALYTICS_API_URL}/games/${gameId}/teams`)
+    const res = await fetch(`${ANALYTICS_API_URL}/analytics/games/${gameId}/teams`)
 
     if (!res.ok) {
         const text = await res.text()
@@ -220,7 +220,7 @@ export const getPlayerRankings = async (
     limit: number = 10,
 ) => {
     const res = await fetch(
-        `${ANALYTICS_API_URL}/players/rankings?stat=${stat}&limit=${limit}`,
+        `${ANALYTICS_API_URL}/analytics/players/rankings?stat=${stat}&limit=${limit}`,
     )
 
     if (!res.ok) {
@@ -237,7 +237,7 @@ export const getAggregatedPlayerRankings = async (
     limit: number = 10,
 ) => {
     const res = await fetch(
-        `${ANALYTICS_API_URL}/players/aggregated-rankings?stat=${stat}&limit=${limit}`,
+        `${ANALYTICS_API_URL}/analytics/players/aggregated-rankings?stat=${stat}&limit=${limit}`,
     )
 
     if (!res.ok) {
@@ -345,7 +345,7 @@ export const getPlayerSummaryByName = async (
     playerName: string,
 ) => {
     const res = await fetch(
-        `${ANALYTICS_API_URL}/players/${encodeURIComponent(playerName)}/summary`,
+        `${ANALYTICS_API_URL}/analytics/players/${encodeURIComponent(playerName)}/summary`,
     )
 
     if (!res.ok) {
