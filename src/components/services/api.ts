@@ -131,32 +131,13 @@ export const completeGame = async (
 }
 
 export const deleteGame = async (id: string) => {
-    /*const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
+    const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
     })
 
     if (!res.ok) {
         const text = await res.text()
-        throw new Error(text)
-    }*/
-    const analyticsRes = await fetch(`${ANALYTICS_API_URL}/games/${id}/stats`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-    })
-
-    if (!analyticsRes.ok) {
-        const text = await analyticsRes.text()
-        throw new Error(text || 'Failed to delete game stats')
-    }
-
-    const managementRes = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-    })
-
-    if (!managementRes.ok) {
-        const text = await managementRes.text()
         throw new Error(text || 'Failed to delete game')
     }
 }
