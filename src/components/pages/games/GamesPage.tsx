@@ -29,6 +29,7 @@ const GamesPage = () => {
     const [gameToEdit, setGameToEdit] = useState<Game | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [gameToDelete, setGameToDelete] = useState<Game | null>(null)
+    const [feedbackMessage, setFeedbackMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
     const storedUser = localStorage.getItem('basket_stats_user')
     const currentUser = storedUser ? JSON.parse(storedUser) : null
@@ -53,6 +54,7 @@ const GamesPage = () => {
                 await loadData()
             } catch (error) {
                 console.error(error)
+                setFeedbackMessage({ type: 'error', text: 'Error loading initial data.' })
             } finally {
                 setIsLoading(false)
             }
@@ -76,8 +78,10 @@ const GamesPage = () => {
                     awayTeamId,
                     videoUrl,
                 )
+                setFeedbackMessage({ type: 'success', text: 'Game updated successfully.' })
             } else {
                 await createGame(seasonId, homeTeamId, awayTeamId, videoUrl)
+                setFeedbackMessage({ type: 'success', text: 'Game created successfully.' })
             }
 
             setGameToEdit(null)
@@ -85,6 +89,7 @@ const GamesPage = () => {
             await loadData()
         } catch (error) {
             console.error(error)
+            setFeedbackMessage({ type: 'error', text: 'Error saving game.' })
         }
     }
 
@@ -111,10 +116,16 @@ const GamesPage = () => {
         try {
             await deleteGame(gameToDelete.id)
 
+            setFeedbackMessage({ type: 'success', text: 'Game deleted successfully.' })
             setGameToDelete(null)
             await loadData()
         } catch (error) {
             console.error(error)
+            const errorMsg = error instanceof Error ? error.message : 'Error deleting game.'
+            setFeedbackMessage({ type: 'error', text: errorMsg })
+        }
+        finally {
+            setGameToDelete(null)
         }
     }
 
@@ -146,6 +157,31 @@ const GamesPage = () => {
                 title='Games'
                 subtitle='Track and manage your matches'
             />
+            {feedbackMessage && (
+                <div
+                    className={`feedback-banner ${feedbackMessage.type}`}
+                    style={{
+                        padding: '12px 16px',
+                        marginBottom: '16px',
+                        borderRadius: '6px',
+                        backgroundColor: feedbackMessage.type === 'success' ? '#d4edda' : '#f8d7da',
+                        color: feedbackMessage.type === 'success' ? '#155724' : '#721c24',
+                        border: `1px solid ${feedbackMessage.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}
+                >
+                    <span>{feedbackMessage.text}</span>
+                    <button
+                        type="button"
+                        onClick={() => setFeedbackMessage(null)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                        ✕
+                    </button>
+                </div>
+            )}
             <SectionCard
                 title='Games'
                 actionLabel={canEditGames ? 'New game' : undefined}
@@ -199,7 +235,6 @@ const GamesPage = () => {
                                             </button>
                                         </>)
                                     }
-
                                 </div>
                             </li>
                         ))}
