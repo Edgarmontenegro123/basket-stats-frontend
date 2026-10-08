@@ -19,10 +19,21 @@ const GameAnalyticsPage = () => {
     const [hasTriedToLoadAnalytics, setHasTriedToLoadAnalytics] = useState(false)
 
     const selectedGameId = filters.gameId
+    const selectedPlayerIds = filters.playerIds
 
-    // Derivamos los datos de las estadísticas según si hay o no un partido seleccionado
-    const playerStats = selectedGameId ? fetchedPlayerStats : []
+    // 1. Team Stats
     const teamStats = selectedGameId ? fetchedTeamStats : []
+
+    // 2. Player Stats filtradas si hay jugadores seleccionados
+    const playerStats = selectedGameId
+        ? fetchedPlayerStats.filter((stat) => {
+            if (selectedPlayerIds && selectedPlayerIds.length > 0) {
+                return selectedPlayerIds.includes(stat.id)
+            }
+            return true
+        })
+        : []
+
     const hasLoadedAnalytics = playerStats.length > 0 || teamStats.length > 0
 
     useEffect(() => {
