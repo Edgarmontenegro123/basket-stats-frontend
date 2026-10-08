@@ -3,30 +3,63 @@ import BasketballLoader from '../../common/BasketballLoader'
 import {AnalyticsFilterBar} from '../../analytics/AnalyticsFilterBar'
 import {useAnalyticsFilters} from '../../hooks/useAnalyticsFilters'
 import {
+    getTeams,
     getPlayerStatsByGameId,
     getTeamStatsByGameId,
 } from '../../services/api'
 import type {PlayerStats} from '../../types/player'
 import type {TeamStat} from '../../types/analytics'
+import type {Team} from '../../types/team'
 import './GameAnalyticsPage.css'
 
 const GameAnalyticsPage = () => {
     const {filters, updateFilters, resetFilters} = useAnalyticsFilters()
     const [fetchedPlayerStats, setFetchedPlayerStats] = useState<PlayerStats[]>([])
     const [fetchedTeamStats, setFetchedTeamStats] = useState<TeamStat[]>([])
+    const [teams, setTeams] = useState<Team[]>([])
     const [error, setError] = useState('')
     const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false)
     const [hasTriedToLoadAnalytics, setHasTriedToLoadAnalytics] = useState(false)
 
     const selectedGameId = filters.gameId
+    const selectedTeamId = filters.teamId
     const selectedPlayerIds = filters.playerIds
 
-    // 1. Team Stats
-    const teamStats = selectedGameId ? fetchedTeamStats : []
+    // Obtener catálogo de equipos para resolver el nombre del equipo seleccionado
+    useEffect(() => {
+        let isMounted = true
+        const loadTeams = async () => {
+            try {
+                const data = await getTeams()
+                if (isMounted) {
+                    setTeams(data)
+                }
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        void loadTeams()
+        return () => {
+            isMounted = false
+        }
+    }, [])
 
-    // 2. Player Stats filtradas si hay jugadores seleccionados
+    const selectedTeam = teams.find((t) => t.id === selectedTeamId)
+
+    // 1. Filtrado de Team Stats por equipo
+    const teamStats = selectedGameId
+        ? fetchedTeamStats.filter((stat) => {
+            if (!selectedTeam) return true
+            return stat.team_name.toLowerCase() === selectedTeam.name.toLowerCase()
+        })
+        : []
+
+    // 2. Filtrado de Player Stats por equipo y/o jugador
     const playerStats = selectedGameId
         ? fetchedPlayerStats.filter((stat) => {
+            if (selectedTeam && stat.team_name.toLowerCase() !== selectedTeam.name.toLowerCase()) {
+                return false
+            }
             if (selectedPlayerIds && selectedPlayerIds.length > 0) {
                 return selectedPlayerIds.includes(stat.id)
             }
@@ -49,14 +82,14 @@ const GameAnalyticsPage = () => {
                 setIsLoadingAnalytics(true)
                 setHasTriedToLoadAnalytics(true)
 
-                const [players, teams] = await Promise.all([
+                const [players, teamsData] = await Promise.all([
                     getPlayerStatsByGameId(selectedGameId),
                     getTeamStatsByGameId(selectedGameId),
                 ])
 
                 if (isMounted) {
                     setFetchedPlayerStats(players)
-                    setFetchedTeamStats(teams)
+                    setFetchedTeamStats(teamsData)
                 }
             } catch (err) {
                 console.error(err)
