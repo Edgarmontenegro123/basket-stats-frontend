@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import BasketballLoader from '../../common/BasketballLoader'
 import {AnalyticsFilterBar} from '../../analytics/AnalyticsFilterBar'
 import {useAnalyticsFilters} from '../../hooks/useAnalyticsFilters'
+import {STAT_LABELS, STATS_LEGEND_TEXT} from '../../helpers/statsLegend'
 import {
     getTeams,
     getPlayerStatsByGameId,
@@ -25,7 +26,6 @@ const GameAnalyticsPage = () => {
     const selectedTeamId = filters.teamId
     const selectedPlayerIds = filters.playerIds
 
-    // Obtener catálogo de equipos para resolver el nombre del equipo seleccionado
     useEffect(() => {
         let isMounted = true
         const loadTeams = async () => {
@@ -46,7 +46,6 @@ const GameAnalyticsPage = () => {
 
     const selectedTeam = teams.find((t) => t.id === selectedTeamId)
 
-    // 1. Filtrado de Team Stats por equipo
     const teamStats = selectedGameId
         ? fetchedTeamStats.filter((stat) => {
             if (!selectedTeam) return true
@@ -54,7 +53,6 @@ const GameAnalyticsPage = () => {
         })
         : []
 
-    // 2. Filtrado de Player Stats por equipo y/o jugador
     const playerStats = selectedGameId
         ? fetchedPlayerStats.filter((stat) => {
             if (selectedTeam && stat.team_name.toLowerCase() !== selectedTeam.name.toLowerCase()) {
@@ -119,7 +117,6 @@ const GameAnalyticsPage = () => {
 
             {error && <p className='analytics-error'>{error}</p>}
 
-            {/* Componente de Filtros Visuales */}
             <AnalyticsFilterBar
                 filters={filters}
                 onFilterChange={updateFilters}
@@ -151,12 +148,12 @@ const GameAnalyticsPage = () => {
                                 <thead>
                                 <tr>
                                     <th>Team</th>
-                                    <th>PTS</th>
-                                    <th>REB</th>
-                                    <th>AST</th>
-                                    <th>TO</th>
-                                    <th>STL</th>
-                                    <th>BLK</th>
+                                    <th title={STAT_LABELS.PTS}>PTS</th>
+                                    <th title={STAT_LABELS.REB}>REB</th>
+                                    <th title={STAT_LABELS.AST}>AST</th>
+                                    <th title={STAT_LABELS.TO}>TO</th>
+                                    <th title={STAT_LABELS.STL}>STL</th>
+                                    <th title={STAT_LABELS.BLK}>BLK</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -181,16 +178,18 @@ const GameAnalyticsPage = () => {
                                     <h3>{stat.team_name}</h3>
 
                                     <div className='analytics-mobile-stats-grid'>
-                                        <p><span>PTS</span><strong>{stat.points}</strong></p>
-                                        <p><span>REB</span><strong>{stat.rebounds}</strong></p>
-                                        <p><span>AST</span><strong>{stat.assists}</strong></p>
-                                        <p><span>TO</span><strong>{stat.turnovers}</strong></p>
-                                        <p><span>STL</span><strong>{stat.steals}</strong></p>
-                                        <p><span>BLK</span><strong>{stat.blocks}</strong></p>
+                                        <p><span title={STAT_LABELS.PTS}>PTS</span><strong>{stat.points}</strong></p>
+                                        <p><span title={STAT_LABELS.REB}>REB</span><strong>{stat.rebounds}</strong></p>
+                                        <p><span title={STAT_LABELS.AST}>AST</span><strong>{stat.assists}</strong></p>
+                                        <p><span title={STAT_LABELS.TO}>TO</span><strong>{stat.turnovers}</strong></p>
+                                        <p><span title={STAT_LABELS.STL}>STL</span><strong>{stat.steals}</strong></p>
+                                        <p><span title={STAT_LABELS.BLK}>BLK</span><strong>{stat.blocks}</strong></p>
                                     </div>
                                 </div>
                             ))}
                         </div>
+
+                        <p className='analytics-legend'>{STATS_LEGEND_TEXT}</p>
                     </section>
 
                     <section className='analytics-card'>
@@ -202,12 +201,12 @@ const GameAnalyticsPage = () => {
                                     <th>#</th>
                                     <th>Player</th>
                                     <th>Team</th>
-                                    <th>PTS</th>
-                                    <th>REB</th>
-                                    <th>AST</th>
-                                    <th>TO</th>
-                                    <th>STL</th>
-                                    <th>BLK</th>
+                                    <th title={STAT_LABELS.PTS}>PTS</th>
+                                    <th title={STAT_LABELS.REB}>REB</th>
+                                    <th title={STAT_LABELS.AST}>AST</th>
+                                    <th title={STAT_LABELS.TO}>TO</th>
+                                    <th title={STAT_LABELS.STL}>STL</th>
+                                    <th title={STAT_LABELS.BLK}>BLK</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -227,6 +226,7 @@ const GameAnalyticsPage = () => {
                                 </tbody>
                             </table>
                         </div>
+
                         <div className='analytics-mobile-list'>
                             {playerStats.map((stat) => (
                                 <div key={stat.id} className='analytics-mobile-card'>
@@ -236,16 +236,18 @@ const GameAnalyticsPage = () => {
                                     </p>
 
                                     <div className='analytics-mobile-stats-grid'>
-                                        <p><span>PTS</span><strong>{stat.points}</strong></p>
-                                        <p><span>REB</span><strong>{stat.rebounds}</strong></p>
-                                        <p><span>AST</span><strong>{stat.assists}</strong></p>
-                                        <p><span>TO</span><strong>{stat.turnovers}</strong></p>
-                                        <p><span>STL</span><strong>{stat.steals}</strong></p>
-                                        <p><span>BLK</span><strong>{stat.blocks}</strong></p>
+                                        <p><span title={STAT_LABELS.PTS}>PTS</span><strong>{stat.points}</strong></p>
+                                        <p><span title={STAT_LABELS.REB}>REB</span><strong>{stat.rebounds}</strong></p>
+                                        <p><span title={STAT_LABELS.AST}>AST</span><strong>{stat.assists}</strong></p>
+                                        <p><span title={STAT_LABELS.TO}>TO</span><strong>{stat.turnovers}</strong></p>
+                                        <p><span title={STAT_LABELS.STL}>STL</span><strong>{stat.steals}</strong></p>
+                                        <p><span title={STAT_LABELS.BLK}>BLK</span><strong>{stat.blocks}</strong></p>
                                     </div>
                                 </div>
                             ))}
                         </div>
+
+                        <p className='analytics-legend'>{STATS_LEGEND_TEXT}</p>
                     </section>
                 </>
             )}
