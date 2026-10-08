@@ -1,134 +1,94 @@
 import {useEffect, useState} from 'react'
-import {useSearchParams} from 'react-router-dom'
 import BasketballLoader from '../../common/BasketballLoader'
+import {AnalyticsFilterBar} from '../../analytics/AnalyticsFilterBar'
+import {useAnalyticsFilters} from '../../hooks/useAnalyticsFilters'
 import {
-    getGames,
     getPlayerStatsByGameId,
     getTeamStatsByGameId,
 } from '../../services/api'
-import type { Game } from '../../types/game'
-import type { PlayerStats } from '../../types/player'
-import type { TeamStat } from '../../types/analytics'
+import type {PlayerStats} from '../../types/player'
+import type {TeamStat} from '../../types/analytics'
 import './GameAnalyticsPage.css'
 
-
 const GameAnalyticsPage = () => {
-    const [games, setGames] = useState<Game[]>([])
-    const [selectedGameId, setSelectedGameId] = useState('')
-    const [playerStats, setPlayerStats] = useState<PlayerStats[]>([])
-    const [teamStats, setTeamStats] = useState<TeamStat[]>([])
+    const {filters, updateFilters, resetFilters} = useAnalyticsFilters()
+    const [fetchedPlayerStats, setFetchedPlayerStats] = useState<PlayerStats[]>([])
+    const [fetchedTeamStats, setFetchedTeamStats] = useState<TeamStat[]>([])
     const [error, setError] = useState('')
     const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false)
-    const [isLoadingGames, setIsLoadingGames] = useState(true)
-    const hasLoadedAnalytics = playerStats.length > 0 || teamStats.length > 0
     const [hasTriedToLoadAnalytics, setHasTriedToLoadAnalytics] = useState(false)
-    const [searchParams] = useSearchParams()
-    const gameIdFromUrl = searchParams.get('gameId')
+
+    const selectedGameId = filters.gameId
+
+    // Derivamos los datos de las estadísticas según si hay o no un partido seleccionado
+    const playerStats = selectedGameId ? fetchedPlayerStats : []
+    const teamStats = selectedGameId ? fetchedTeamStats : []
+    const hasLoadedAnalytics = playerStats.length > 0 || teamStats.length > 0
 
     useEffect(() => {
-        const loadGames = async () => {
-            try {
-                const data = await getGames()
-                setGames(data)
-
-                if (gameIdFromUrl) {
-                    setSelectedGameId(gameIdFromUrl)
-                }
-            } catch (error) {
-                console.error(error);
-                setError('Error loading games')
-            } finally {
-                setIsLoadingGames(false)
-            }
-        };
-
-        void loadGames()
-    }, [gameIdFromUrl])
-
-    const handleLoadAnalytics = async () => {
         if (!selectedGameId) {
-            setError('Select a game first')
             return
         }
 
-        try {
-            setError('')
-            setIsLoadingAnalytics(true)
-            setHasTriedToLoadAnalytics(true)
-            setPlayerStats([])
-            setTeamStats([])
+        let isMounted = true
 
-            const [players, teams] = await Promise.all([
-                getPlayerStatsByGameId(selectedGameId),
-                getTeamStatsByGameId(selectedGameId)
-            ])
+        const loadAnalytics = async () => {
+            try {
+                setError('')
+                setIsLoadingAnalytics(true)
+                setHasTriedToLoadAnalytics(true)
 
-            setPlayerStats(players)
-            setTeamStats(teams)
-        } catch (error) {
-            console.error(error)
-            setError('Error loading analytics')
-        } finally {
-            setIsLoadingAnalytics(false)
+                const [players, teams] = await Promise.all([
+                    getPlayerStatsByGameId(selectedGameId),
+                    getTeamStatsByGameId(selectedGameId),
+                ])
+
+                if (isMounted) {
+                    setFetchedPlayerStats(players)
+                    setFetchedTeamStats(teams)
+                }
+            } catch (err) {
+                console.error(err)
+                if (isMounted) {
+                    setError('Error loading analytics')
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoadingAnalytics(false)
+                }
+            }
         }
-    }
 
-    if (isLoadingGames) {
-        return (
-            <div className='loading-overlay'>
-                <div className='loading-box'>
-                    <BasketballLoader />
-                    <p>Loading analytics page...</p>
-                </div>
-            </div>
-        )
-    }
+        void loadAnalytics()
+
+        return () => {
+            isMounted = false
+        }
+    }, [selectedGameId])
 
     return (
         <main className='analytics-page'>
             <header className='analytics-header'>
                 <h1>Game Analytics</h1>
-                <p>Review process analytics by game.</p>
+                <p>Review process analytics by game and season filters.</p>
             </header>
+
             {error && <p className='analytics-error'>{error}</p>}
 
-            <section className='analytics-controls'>
-                <label htmlFor='game'>Select game</label>
-                <div className='analytics-control-row'>
-                    <select
-                        id='game'
-                        value={selectedGameId}
-                        onChange={(e) => {
-                            setSelectedGameId(e.target.value)
-                            setHasTriedToLoadAnalytics(false)
-                            setPlayerStats([])
-                            setTeamStats([])
-                        }}
-                    >
-                        <option value=''>Select a game</option>
-
-                        {games.map((game) => (
-                            <option key={game.id} value={game.id}>
-                                {game.home_team_name} vs {game.away_team_name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <button
-                        onClick={handleLoadAnalytics}
-                        disabled={isLoadingAnalytics}
-                    >
-                        {isLoadingAnalytics ? 'Loading...' : 'Load Analytics'}
-                    </button>
-                </div>
-            </section>
+            {/* Componente de Filtros Visuales */}
+            <AnalyticsFilterBar
+                filters={filters}
+                onFilterChange={updateFilters}
+                onResetFilters={resetFilters}
+            />
 
             {isLoadingAnalytics && (
                 <section className='analytics-state-card'>
-                    <BasketballLoader/>
+                    <BasketballLoader />
                     <p>Loading analytics...</p>
                 </section>
             )}
+
             {!isLoadingAnalytics && hasTriedToLoadAnalytics && selectedGameId && !hasLoadedAnalytics && (
                 <section className='analytics-state-card'>
                     <strong>No analytics available yet.</strong>
@@ -137,6 +97,7 @@ const GameAnalyticsPage = () => {
                     </p>
                 </section>
             )}
+
             {!isLoadingAnalytics && hasLoadedAnalytics && (
                 <>
                     <section className='analytics-card'>
@@ -245,7 +206,7 @@ const GameAnalyticsPage = () => {
                 </>
             )}
         </main>
-    );
-};
+    )
+}
 
-export default GameAnalyticsPage;
+export default GameAnalyticsPage
