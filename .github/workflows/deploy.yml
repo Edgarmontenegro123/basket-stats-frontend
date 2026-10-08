@@ -1,0 +1,31 @@
+name: Deploy Frontend to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Execute remote SSH commands to deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/basket-stats-frontend
+            git pull origin main
+            docker build \
+              --build-arg VITE_MANAGEMENT_API_URL=https://147.15.10.181.nip.io/management-api \
+              --build-arg VITE_ANALYTICS_API_URL=https://147.15.10.181.nip.io/analytics-api \
+              -t basket-stats-frontend .
+            docker stop basket-stats-frontend || true
+            docker rm basket-stats-frontend || true
+            docker run -d --name basket-stats-frontend --restart always -p 8080:80 basket-stats-frontend
