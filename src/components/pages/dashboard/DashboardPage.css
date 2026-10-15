@@ -23,13 +23,143 @@
 .dashboard-page {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    --chart-bar: var(--accent);
+    --chart-grid: var(--border);
+    --chart-text: var(--title);
+    --chart-muted: var(--text-soft);
 }
 
-.dashboard-page__stats {
+/* 📱 Acciones Rápidas (Mobile First) */
+.dashboard-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.action-btn {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    min-height: 48px;
+    transition: 0.2s ease;
+    /*box-sizing: border-box;*/
+}
+
+.action-btn.primary {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+}
+
+.action-btn.secondary {
+    background: var(--card);
+    color: var(--title);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+/* 🏀 Tarjeta Destacada: Último Partido */
+.last-game-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow);
+}
+
+.last-game-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+}
+
+.last-game-matchup {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.team-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    gap: 4px;
+}
+
+.team-side .team-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--title);
+    text-align: center;
+}
+
+.team-side .score {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--title);
+}
+
+.vs-divider {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-soft);
+    padding: 0 8px;
+}
+
+.last-game-date {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    text-align: center;
+    margin: 0;
+}
+
+/* 📊 Métricas en formato Píldora */
+.dashboard-metrics-pills {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    gap: 12px;
+}
+
+.metric-pill {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.metric-pill span {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
+.metric-pill strong {
+    font-size: 1.25rem;
+    color: var(--title);
 }
 
 .dashboard-page__grid {
@@ -50,14 +180,30 @@
 .dashboard-list__item {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     padding: 12px;
     border: 1px solid var(--border);
     border-radius: 10px;
+    background: var(--card-soft);
 }
 
-.dashboard-list__item small {
+.dashboard-list__match {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--title);
+}
+
+.dashboard-list__meta {
     opacity: 0.75;
+    font-size: 0.8rem;
+}
+
+.dashboard-list__player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .dashboard-list__player {
@@ -67,12 +213,12 @@
 
 .dashboard-list__team {
     color: var(--text-soft);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .dashboard-list__stats {
-    margin-top: 4px;
     color: var(--text-soft);
+    font-size: 0.85rem;
 }
 
 .top-scorers-chart {
@@ -88,10 +234,10 @@
 }
 
 .dashboard-ranking-tabs__button {
-    border: 1px solid var(--chart-grid);
+    border: 1px solid var(--border);
     border-radius: 999px;
-    background: var(--chart-tooltip-bg);
-    color: var(--chart-text);
+    background: var(--card);
+    color: var(--text);
     padding: 0.45rem 0.85rem;
     font-size: 0.8rem;
     font-weight: 700;
@@ -112,48 +258,6 @@
     color: #ffffff;
 }
 
-.games-status-chart__legend {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    margin-top: 0.75rem;
-}
-
-.games-status-chart__legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--title);
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.games-status-chart__dot {
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 999px;
-    display: inline-block;
-    flex-shrink: 0;
-}
-
-.games-status-chart__legend-item strong {
-    color: var(--text-soft);
-    font-size: 0.85rem;
-    font-weight: 700;
-    margin-left: 0.25rem;
-}
-
-.games-status-chart__dot {
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 999px;
-    flex-shrink: 0;
-}
-
-.games-status-chart__legend-item span:nth-child(2) {
-    flex: 1;
-}
-
 @media (max-width: 1100px) {
     .dashboard-page__stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -165,7 +269,17 @@
 }
 
 @media (max-width: 640px) {
-    .dashboard-page__stats {
-        grid-template-columns: 1fr;
+    .dashboard-metrics-pills {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (hover: hover) {
+    .action-btn:hover {
+        background: var(--accent);
+        color: #ffffff;
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
     }
 }

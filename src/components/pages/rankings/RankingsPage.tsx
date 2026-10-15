@@ -150,10 +150,9 @@ const RankingsPage = () => {
         <div>
             <PageHeader
                 title='Rankings'
-                subtitle='Top performers and statistics leaders'
             />
 
-            <SectionCard title='Rankings'>
+            <SectionCard title=''>
                 <div className='rankings-tabs'>
                     <button
                         className={

@@ -72,7 +72,6 @@ const MainLayout = () => {
                     </div>
                     <div>
                         <h2 className='sidebar-title'>Basket Stats</h2>
-                        <p className='sidebar-subtitle'>Analytics dashboard</p>
                     </div>
                 </div>
                 <div className='sidebar-actions'>
