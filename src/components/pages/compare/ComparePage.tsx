@@ -143,9 +143,10 @@ const ComparePage = () => {
         <div>
             <PageHeader
                 title='Compare Teams'
-                subtitle='Compare statistics between teams'
+                subtitle=''
+                showBack
             />
-            <SectionCard title='Comparison'>
+            <SectionCard title=''>
                 <div className='form-row'>
                     <div className='form-group'>
                         <label>Home Team</label>

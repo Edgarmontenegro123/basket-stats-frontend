@@ -5,6 +5,25 @@
     margin-bottom: 24px;
 }
 
+.page-header__back-button {
+    align-self: flex-start;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--title);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: 0.2s ease;
+}
+
+.page-header__back-button:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+}
+
 .page-header__title {
     font-size: 1.8rem;
     font-weight: 700;

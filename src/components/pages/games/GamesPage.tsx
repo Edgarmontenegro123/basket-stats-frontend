@@ -154,8 +154,9 @@ const GamesPage = () => {
     return (
         <div>
             <PageHeader
-                title='Games'
-                subtitle='Track and manage your matches'
+                title=''
+                subtitle=''
+                showBack
             />
             {feedbackMessage && (
                 <div

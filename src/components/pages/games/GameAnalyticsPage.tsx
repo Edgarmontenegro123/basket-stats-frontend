@@ -3,6 +3,7 @@ import BasketballLoader from '../../common/BasketballLoader'
 import {AnalyticsFilterBar} from '../../analytics/AnalyticsFilterBar'
 import {useAnalyticsFilters} from '../../hooks/useAnalyticsFilters'
 import {STAT_LABELS, STATS_LEGEND_TEXT} from '../../helpers/statsLegend'
+import PageHeader from '../../common/PageHeader'
 import {
     getTeams,
     getPlayerStatsByGameId,
@@ -110,10 +111,11 @@ const GameAnalyticsPage = () => {
 
     return (
         <main className='analytics-page'>
-            <header className='analytics-header'>
-                <h1>Game Analytics</h1>
-                <p>Review process analytics by game and season filters.</p>
-            </header>
+            <PageHeader
+                title='Analytics'
+                subtitle=''
+                showBack
+            />
 
             {error && <p className='analytics-error'>{error}</p>}
 

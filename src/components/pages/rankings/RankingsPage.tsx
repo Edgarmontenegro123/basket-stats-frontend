@@ -150,6 +150,8 @@ const RankingsPage = () => {
         <div>
             <PageHeader
                 title='Rankings'
+                subtitle=''
+                showBack
             />
 
             <SectionCard title=''>

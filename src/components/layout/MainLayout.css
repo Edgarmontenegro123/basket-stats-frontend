@@ -39,6 +39,7 @@
     border-radius: 16px;
     background: var(--accent-soft);
     border: 1px solid rgba(59, 130, 246, 0.22);
+    cursor: pointer;
 }
 
 .sidebar-title {
@@ -243,19 +244,20 @@
     .mobile-brand {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
+        cursor: pointer;
     }
 
     .mobile-logo {
-        width: 36px;
-        height: 36px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
         object-fit: cover;
     }
 
     .mobile-title {
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         color: var(--title);
     }
 

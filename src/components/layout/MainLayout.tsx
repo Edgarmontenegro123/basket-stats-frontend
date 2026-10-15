@@ -46,7 +46,7 @@ const MainLayout = () => {
     return (
         <div className='layout'>
             <header className='mobile-header'>
-                <div className='mobile-brand'>
+                <div className='mobile-brand' onClick={() => navigate('/dashboard')}>
                     <img src={logo} alt='Basket Stats logo' className='mobile-logo' />
                     <span className='mobile-title'>Basket Stats</span>
                 </div>
@@ -62,7 +62,7 @@ const MainLayout = () => {
                 <div className='sidebar-overlay' onClick={closeMobileMenu} />
             )}
             <aside className={`sidebar ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-                <div className='sidebar-brand'>
+                <div className='sidebar-brand' onClick={() => navigate('/dashboard')}>
                     <div className='sidebar-logo-wrapper'>
                         <img
                             src={logo}

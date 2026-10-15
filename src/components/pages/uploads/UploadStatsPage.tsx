@@ -164,7 +164,8 @@ const UploadStatsPage = () => {
             )}
             <PageHeader
                 title='Upload Stats'
-                subtitle='Upload match statistics files'
+                subtitle=''
+                showBack
             />
             <SectionCard title='Upload File'>
                 <div className='form-group'>

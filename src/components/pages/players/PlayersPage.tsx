@@ -4,6 +4,7 @@ import {useNavigate} from 'react-router-dom'
 import {canManagePlayers} from '../../../auth/permissions'
 import BasketballLoader from '../../common/BasketballLoader'
 import ConfirmModal from '../../common/ConfirmModal'
+import PageHeader from '../../common/PageHeader'
 import {getPlayerPositionAbbreviation, getPlayerPositionLabel} from '../../helpers/playerHelpers'
 import type {Team} from '../../types/team'
 import type {CreatePlayerPayload, Player} from '../../types/player'
@@ -182,16 +183,16 @@ import './PlayersPage.css'
 
     return (
         <div className='players-page'>
-            <div className='players-header'>
-                <div>
-                    <h1>Players</h1>
-                    <p className='players-subtitle'>
-                        Manage team rosters and player information.
-                    </p>
-                </div>
+            <PageHeader
+                title='Players'
+                subtitle=''
+                showBack
+            />
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%'}}>
                 {canEditPlayers && (
                     <button
                         className='players-add-button'
+                        style={{marginTop: '4px'}}
                         onClick={() => {
                             setEditingPlayer(null)
                             setForm({

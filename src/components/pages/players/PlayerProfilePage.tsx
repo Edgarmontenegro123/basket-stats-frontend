@@ -7,6 +7,7 @@ import type {Team} from '../../types/team'
 import BasketballLoader from '../../common/BasketballLoader'
 import './PlayerProfilePage.css'
 import '../../layout/MainLayout.css'
+import PageHeader from '../../common/PageHeader';
 
     const PlayerProfilePage = () => {
     const {id} = useParams()
@@ -81,13 +82,11 @@ import '../../layout/MainLayout.css'
 
     return (
         <div className='player-profile-page'>
-            <button
-                type='button'
-                className='back-button'
-                onClick={() => navigate('/players')}
-            >
-                ← Back to Players
-            </button>
+            <PageHeader
+                title='Player Profile'
+                subtitle=''
+                showBack
+            />
             <section className='player-profile-card'>
                 {player.photo_url ? (
                     <img
@@ -218,7 +217,6 @@ import '../../layout/MainLayout.css'
                     </div>
                 ) : (
                     <div className='player-empty-analytics'>
-                        <span>Analytics</span>
                         <strong>No processed stats yet.</strong>
                         <p>
                             Upload and process game stats to generate this player summary.

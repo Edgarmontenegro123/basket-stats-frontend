@@ -147,11 +147,12 @@ const TeamsPage = () => {
         <div>
             <PageHeader
                 title='Teams'
-                subtitle='Manage your teams and opponents'
+                subtitle=''
+                showBack
             />
 
             <SectionCard
-                title='Teams'
+                title=''
                 actionLabel={canEditTeams ? 'New team' : undefined}
                 onAction={canEditTeams ? handleOpenCreateModal : undefined}
             >

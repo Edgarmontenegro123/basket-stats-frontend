@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 import BasketballLoader from '../../common/BasketballLoader'
+import PageHeader from '../../common/PageHeader'
 import {
     getGames,
     getPlayersByTeam,
@@ -153,13 +154,11 @@ const TeamProfilePage = () => {
 
     return (
         <div className='team-profile-page'>
-            <button
-                type='button'
-                className='back-button'
-                onClick={() => navigate('/teams')}
-            >
-                ← Back to Teams
-            </button>
+            <PageHeader
+                title='Team Profile'
+                subtitle=''
+                showBack
+            />
             <section className='team-profile-header'>
                 <div className='team-profile-header__content'>
                     {team.logo_url ? (
@@ -174,11 +173,10 @@ const TeamProfilePage = () => {
                         </div>
                     )}
                     <div>
-                        <span className='team-profile-eyebrow'>Team Profile</span>
                         <h1>{team.name}</h1>
                         <p>
                             {team.short_name
-                                ? `Short name: ${team.short_name}`
+                                ? `${team.short_name}`
                                 : 'No short name available'}
                         </p>
                     </div>
@@ -205,7 +203,6 @@ const TeamProfilePage = () => {
             <section className='team-profile-section'>
                 <div className='team-profile-section__header'>
                     <div>
-                        <span className='team-profile-eyebrow'>Analytics</span>
                         <h2>Team Averages</h2>
                     </div>
                     <span className='team-profile-count'>
@@ -248,7 +245,6 @@ const TeamProfilePage = () => {
             <section className='team-profile-section'>
                 <div className='team-profile-section__header'>
                     <div>
-                        <span className='team-profile-eyebrow'>Roster</span>
                         <h2>Players</h2>
                     </div>
                     <span className='team-profile-count'>
@@ -296,7 +292,6 @@ const TeamProfilePage = () => {
             <section className='team-profile-section'>
                 <div className='team-profile-section__header'>
                     <div>
-                        <span className='team-profile-eyebrow'>Games</span>
                         <h2>Recent Games</h2>
                     </div>
                     <span className='team-profile-count'>

@@ -129,10 +129,11 @@ const SeasonsPage = () => {
         <div>
             <PageHeader
                 title='Seasons'
-                subtitle='Manage seasons by team'
+                subtitle=''
+                showBack
             />
             <SectionCard
-                title='Seasons'
+                title=''
                 actionLabel={canEditSeasons ? 'New season' : undefined}
                 onAction={canEditSeasons ? handleOpenCreateModal : undefined}
             >
