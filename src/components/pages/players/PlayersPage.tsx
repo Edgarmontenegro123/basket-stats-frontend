@@ -6,8 +6,8 @@ import BasketballLoader from '../../common/BasketballLoader'
 import ConfirmModal from '../../common/ConfirmModal'
 import PageHeader from '../../common/PageHeader'
 import {getPlayerPositionAbbreviation, getPlayerPositionLabel} from '../../helpers/playerHelpers'
-import type {Team} from '../../types/team'
-import type {CreatePlayerPayload, Player} from '../../types/player'
+import type {Team} from '../../../types/team'
+import type {CreatePlayerPayload, Player} from '../../../types/player'
 import {
     createPlayer,
     getPlayers,

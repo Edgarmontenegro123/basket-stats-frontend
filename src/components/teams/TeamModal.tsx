@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Team, CreateTeamPayload } from '../types/team'
+import type { Team, CreateTeamPayload } from '../../types/team'
 import './TeamModal.css'
 
 type TeamModalProps = {

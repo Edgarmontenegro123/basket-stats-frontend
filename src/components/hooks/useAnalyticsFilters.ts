@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import type { AnalyticsFilters } from '../types/filter'
+import type { AnalyticsFilters } from '../../types/filter'
 
 export const useAnalyticsFilters = () => {
     const [searchParams, setSearchParams] = useSearchParams()

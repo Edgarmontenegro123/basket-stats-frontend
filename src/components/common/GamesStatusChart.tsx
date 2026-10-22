@@ -4,7 +4,7 @@ import {
     ResponsiveContainer,
     Tooltip,
 } from 'recharts'
-import type {GamesStatusChartProps} from '../types/chart'
+import type {GamesStatusChartProps} from '../../types/chart'
 
 const GamesStatusChart = ({
                               completed,

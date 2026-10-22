@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import type { Team } from '../types/team'
-import type { Season } from '../types/season'
-import type { Game } from '../types/game'
+import type { Team } from '../../types/team'
+import type { Season } from '../../types/season'
+import type { Game } from '../../types/game'
 import './GameModal.css'
 
 type GameModalProps = {

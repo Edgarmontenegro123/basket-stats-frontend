@@ -1,12 +1,12 @@
 import {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
-import type {AggregatedPlayerRanking} from '../../types/player'
+import type {AggregatedPlayerRanking} from '../../../types/player'
 import PageHeader from '../../common/PageHeader'
 import SectionCard from '../../common/SectionCard'
 import TopScorersChart from '../../common/TopScorersChart'
 import GamesStatusChart from '../../common/GamesStatusChart'
-import type {Game} from '../../types/game'
-import type {RankingStat} from '../../types/ranking'
+import type {Game} from '../../../types/game'
+import type {RankingStat} from '../../../types/ranking'
 import {
     getTeams,
     getGames,

@@ -7,7 +7,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts'
-import type {AggregatedPlayerRanking} from '../types/player'
+import type {AggregatedPlayerRanking} from '../../types/player'
 
 type TopScorersChartProps = {
     players: AggregatedPlayerRanking[]

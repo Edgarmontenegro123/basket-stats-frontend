@@ -5,9 +5,9 @@ import SectionCard from '../../common/SectionCard'
 import GameModal from '../../games/GameModal'
 import BasketballLoader from '../../common/BasketballLoader'
 import ConfirmModal from '../../common/ConfirmModal'
-import type { Team } from '../../types/team'
-import type { Season } from '../../types/season'
-import type { Game } from '../../types/game'
+import type { Team } from '../../../types/team'
+import type { Season } from '../../../types/season'
+import type { Game } from '../../../types/game'
 import {
     createGame,
     deleteGame,

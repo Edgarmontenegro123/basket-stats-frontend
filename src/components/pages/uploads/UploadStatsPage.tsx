@@ -1,9 +1,9 @@
 import {useState, useEffect} from 'react'
 import PageHeader from '../../common/PageHeader'
 import SectionCard from '../../common/SectionCard'
-import type {PlayerStats} from '../../types/player'
-import type {Game} from '../../types/game'
-import type {TeamStat} from '../../types/analytics'
+import type {PlayerStats} from '../../../types/player'
+import type {Game} from '../../../types/game'
+import type {TeamStat} from '../../../types/analytics'
 import BasketballLoader from '../../common/BasketballLoader'
 import { normaliseText } from '../../helpers/normaliseText'
 import {

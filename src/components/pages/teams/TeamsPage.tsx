@@ -6,7 +6,7 @@ import SectionCard from '../../common/SectionCard'
 import TeamModal from '../../teams/TeamModal'
 import BasketballLoader from '../../common/BasketballLoader'
 import {getTeams, createTeam, updateTeam, deleteTeam} from '../../../services/api'
-import type {Team, CreateTeamPayload} from '../../types/team'
+import type {Team, CreateTeamPayload} from '../../../types/team'
 import './TeamsPage.css'
 import '../../common/PageLayout.css'
 import ConfirmModal from "../../common/ConfirmModal.tsx";

@@ -9,9 +9,9 @@ import {
     getPlayerStatsByGameId,
     getTeamStatsByGameId,
 } from '../../../services/api'
-import type {PlayerStats} from '../../types/player'
-import type {TeamStat} from '../../types/analytics'
-import type {Team} from '../../types/team'
+import type {PlayerStats} from '../../../types/player'
+import type {TeamStat} from '../../../types/analytics'
+import type {Team} from '../../../types/team'
 import './GameAnalyticsPage.css'
 
 const GameAnalyticsPage = () => {

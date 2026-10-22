@@ -1,4 +1,4 @@
-import type { ConfirmModalProps } from '../types/confirmModal'
+import type { ConfirmModalProps } from '../../types/confirmModal'
 import './ConfirmModal.css'
 
 const ConfirmModal = ({

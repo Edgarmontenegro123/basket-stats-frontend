@@ -1,6 +1,6 @@
 import {getTeamStatsByGameId} from './api.ts'
-import type {Game} from '../components/types/game.ts'
-import type {TeamStat, TeamAnalyticsSummary} from '../components/types/analytics.ts'
+import type {Game} from '../types/game.ts'
+import type {TeamStat, TeamAnalyticsSummary} from '../types/analytics.ts'
 
 const buildTeamAnalyticsSummary = async (
     teamName: string,
