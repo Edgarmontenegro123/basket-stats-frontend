@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react'
 import {NavLink, Outlet, useNavigate} from 'react-router-dom'
 import {canUploadStats} from '../../auth/permissions'
 import ConfirmModal from '../common/ConfirmModal'
+import {ChatWidget} from '../common/ChatWidget'
 import logo from '../../assets/logo.png'
 import './MainLayout.css'
 
@@ -184,6 +185,7 @@ const MainLayout = () => {
                 onConfirm={handleLogout}
                 onCancel={() => setIsLogoutModalOpen(false)}
             />
+            <ChatWidget />
         </div>
     )
 }
