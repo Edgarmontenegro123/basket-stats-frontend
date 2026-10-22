@@ -1,7 +1,7 @@
 import type {ChatMessage} from '../types/chat'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${GEMINI_API_KEY}`
 
 const SYSTEM_INSTRUCTION = `You are Basket Stats AI, a specialized tactical assistant for basketball coaches and analysts.
 Your ONLY domain is basketball, team statistics, player performance, game recaps, and tactical analysis.
@@ -11,7 +11,7 @@ export type {ChatMessage}
 
 export const sendMessageToGemini = async(userMessage: string, contextData?: string): Promise<string> => {
     if (!GEMINI_API_KEY) {
-        return 'Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your .env file.'
+        return 'Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your .env file and restart Vite.'
     }
 
     const promptText = contextData
@@ -38,8 +38,9 @@ export const sendMessageToGemini = async(userMessage: string, contextData?: stri
         })
 
         if (!response.ok) {
-            console.error(`API error status: ${response.status}`)
-            return 'Sorry, the assistant is having trouble connecting to the server right now.'
+            const errorData = await response.json().catch(() => ({}))
+            console.error('Gemini API Error Response:', response.status, errorData)
+            return `API Error (${response.status}): ${errorData?.error?.message || 'Check browser console for details.'}`
         }
 
         const data = await response.json()
@@ -47,6 +48,6 @@ export const sendMessageToGemini = async(userMessage: string, contextData?: stri
         return reply || 'No response received from Basket Stats AI.'
     } catch (error) {
         console.error('Error connecting to Gemini API:', error)
-        return 'Sorry, I could not process your request at this time. Please try again.'
+        return 'Sorry, I could not process your request at this time. Please check your network connection.'
     }
 }
