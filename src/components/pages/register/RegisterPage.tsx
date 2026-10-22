@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { register } from '../../services/authApi'
+import { register } from '../../../services/authApi'
 import './RegisterPage.css'
 
 const RegisterPage = () => {

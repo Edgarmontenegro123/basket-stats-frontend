@@ -13,7 +13,7 @@ import {
     getPlayers,
     updatePlayer,
     deletePlayer,
-    getTeams} from '../../services/api'
+    getTeams} from '../../../services/api'
 import './PlayersPage.css'
 
 

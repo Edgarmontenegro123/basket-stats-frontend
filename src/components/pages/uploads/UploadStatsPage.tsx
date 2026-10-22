@@ -13,7 +13,7 @@ import {
     getGames,
     getTeamStatsByGameId,
     completeGame,
-} from '../../services/api'
+} from '../../../services/api'
 import './UploadStatsPage.css'
 import '../../common/PageLayout.css'
 

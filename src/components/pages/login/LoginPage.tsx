@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { login } from '../../services/authApi'
+import { login } from '../../../services/authApi'
 import './LoginPage.css'
 
 const LoginPage = () => {

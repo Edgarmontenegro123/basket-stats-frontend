@@ -6,8 +6,8 @@ import {
     getGames,
     getPlayersByTeam,
     getTeamById,
-} from '../../services/api'
-import buildTeamAnalyticsSummary from '../../services/teamAnalytics'
+} from '../../../services/api'
+import buildTeamAnalyticsSummary from '../../../services/teamAnalytics'
 import { getPlayerPositionLabel } from '../../helpers/playerHelpers'
 import type {Game} from '../../types/game'
 import type {Player} from '../../types/player'

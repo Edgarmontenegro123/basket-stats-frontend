@@ -7,7 +7,7 @@ import {
     getGames,
     getTeams,
     getPlayerStatsByGameId,
-} from '../../services/api.ts'
+} from '../../../services/api.ts'
 import type { PlayerStats, AggregatedPlayerRanking } from '../../types/player.ts'
 import type { Game } from '../../types/game.ts'
 import type { Team } from '../../types/team.ts'

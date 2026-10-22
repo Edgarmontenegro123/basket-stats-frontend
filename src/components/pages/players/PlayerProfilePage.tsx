@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react'
 import {useParams, useNavigate} from 'react-router-dom'
 import { getPlayerPositionLabel } from '../../helpers/playerHelpers'
-import {getPlayerById, getTeams, getPlayerSummaryByName} from '../../services/api'
+import {getPlayerById, getTeams, getPlayerSummaryByName} from '../../../services/api'
 import type {Player, PlayerSummary} from '../../types/player'
 import type {Team} from '../../types/team'
 import BasketballLoader from '../../common/BasketballLoader'

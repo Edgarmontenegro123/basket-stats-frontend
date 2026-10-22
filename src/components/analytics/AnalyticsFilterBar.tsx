@@ -4,7 +4,7 @@ import type {Season} from '../types/season'
 import type {Team} from '../types/team'
 import type {Game} from '../types/game'
 import type {Player} from '../types/player'
-import {getSeasons, getTeams, getGames, getPlayersByTeam} from '../services/api'
+import {getSeasons, getTeams, getGames, getPlayersByTeam} from '../../services/api'
 import './AnalyticsFilterBar.css'
 
 interface AnalyticsFilterBarProps {

@@ -11,7 +11,7 @@ import {
     getTeams,
     getGames,
     getAggregatedPlayerRankings,
-} from '../../services/api'
+} from '../../../services/api'
 
 import BasketballLoader from '../../common/BasketballLoader'
 import './DashboardPage.css'

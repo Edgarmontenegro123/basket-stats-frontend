@@ -15,7 +15,7 @@ import {
     getSeasons,
     getTeams,
     updateGame,
-} from '../../services/api'
+} from '../../../services/api'
 import '../teams/TeamsPage.css'
 import '../../common/PageLayout.css'
 

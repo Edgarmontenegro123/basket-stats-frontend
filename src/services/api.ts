@@ -1,6 +1,6 @@
-import type { CreatePlayerPayload, Player } from '../types/player'
-import type {Team, CreateTeamPayload} from '../types/team'
-import type {RankingStat} from '../types/ranking'
+import type { CreatePlayerPayload, Player } from '../components/types/player.ts'
+import type {Team, CreateTeamPayload} from '../components/types/team.ts'
+import type {RankingStat} from '../components/types/ranking.ts'
 
 const MANAGEMENT_API_URL = import.meta.env.VITE_MANAGEMENT_API_URL
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL

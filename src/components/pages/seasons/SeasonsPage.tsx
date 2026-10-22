@@ -11,7 +11,7 @@ import {
     createSeason,
     updateSeason,
     deleteSeason,
-} from '../../services/api'
+} from '../../../services/api'
 import type { Team } from '../../types/team'
 import type { Season } from '../../types/season'
 import '../teams/TeamsPage.css'
