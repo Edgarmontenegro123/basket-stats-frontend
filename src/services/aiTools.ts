@@ -26,8 +26,13 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const limit = typeof args?.limit === 'number' ? args.limit : 5
                 return await getTopScorers(limit)
             }
-            default:
-                return {error: `Function ${functionName} not found`}
+            default: {
+                // Fallback en caso de que Gemini pida getPlayerStats u otra función no declarada
+                console.warn(`Tool ${functionName} called, falling back to getGames/getTeams`)
+                const games = await getGames()
+                const teams = await getTeams()
+                return {games, teams}
+            }
         }
     } catch (error) {
         console.error(`Error executing tool ${functionName}:`, error)
