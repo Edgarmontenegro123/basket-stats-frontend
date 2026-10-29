@@ -2,22 +2,34 @@ import {getGames, getTeams, getTopScorers} from './api'
 
 export const aiFunctionDeclarations = [
     {
+        name: 'getMatchSummary',
+        description: 'Retrieves complete match data including recent games, team information, and top scorers in a single request.'
+    },
+    {
         name: 'getGames',
-        description: 'Retrieves the complete list of basketball games, including status, scores, home and away teams, and dates.'
+        description: 'Retrieves the list of basketball games with scores, status, and teams.'
     },
     {
         name: 'getTeams',
-        description: 'Retrieves the list of all registered basketball teams in the management system.'
+        description: 'Retrieves the list of registered basketball teams.'
     },
     {
         name: 'getTopScorers',
-        description: 'Retrieves the top basketball scorers or player rankings based on points, rebounds, or assists.'
+        description: 'Retrieves top player stats rankings for points, rebounds, or assists.'
     }
 ]
 
 export const executeAITool = async(functionName: string, args?: Record<string, unknown>) => {
     try {
         switch (functionName) {
+            case 'getMatchSummary': {
+                const [games, teams, scorers] = await Promise.all([
+                    getGames(),
+                    getTeams(),
+                    getTopScorers(10)
+                ])
+                return {games, teams, topScorers: scorers}
+            }
             case 'getGames':
                 return await getGames()
             case 'getTeams':
@@ -27,10 +39,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 return await getTopScorers(limit)
             }
             default: {
-                // Fallback en caso de que Gemini pida getPlayerStats u otra función no declarada
-                console.warn(`Tool ${functionName} called, falling back to getGames/getTeams`)
-                const games = await getGames()
-                const teams = await getTeams()
+                const [games, teams] = await Promise.all([getGames(), getTeams()])
                 return {games, teams}
             }
         }

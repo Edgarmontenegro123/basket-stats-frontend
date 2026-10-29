@@ -1,12 +1,18 @@
 import {useState, useRef, useEffect} from 'react'
-import {sendMessageToGemini} from '../../services/geminiService'
+import ReactMarkdown from 'react-markdown'
+import {sendMessageToGateway} from '../../services/aiGatewayService'
 import type {ChatMessage} from '../../types/chat'
 import './ChatWidget.css'
 
 export const ChatWidget = () => {
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState<ChatMessage[]>([
-        {sender: 'assistant', text: 'Hello! I am Basket Stats AI. How can I help you with team analytics today?'}
+        {
+            id: 'init-1',
+            sender: 'bot',
+            text: 'Hello! I´m Swish. How can I help you with team analytics today?',
+            timestamp: new Date()
+        }
     ])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -26,21 +32,35 @@ export const ChatWidget = () => {
         if (!input.trim() || isLoading) return
 
         const userText = input.trim()
-        const newMessages: ChatMessage[] = [...messages, {sender: 'user', text: userText}]
+        const userMessage: ChatMessage = {
+            id: Date.now().toString(),
+            sender: 'user',
+            text: userText,
+            timestamp: new Date()
+        }
 
-        setMessages(newMessages)
+        const updatedMessages = [...messages, userMessage]
+        setMessages(updatedMessages)
         setInput('')
         setIsLoading(true)
 
-        const responseText = await sendMessageToGemini(userText)
+        const gatewayResponse = await sendMessageToGateway(userText)
 
-        setMessages([...newMessages, {sender: 'assistant', text: responseText}])
+        const botMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            sender: 'bot',
+            text: gatewayResponse.text,
+            timestamp: new Date(),
+            genUiData: gatewayResponse.genUiData
+        }
+
+        setMessages([...updatedMessages, botMessage])
         setIsLoading(false)
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            handleSend()
+            void handleSend()
         }
     }
 
@@ -50,7 +70,7 @@ export const ChatWidget = () => {
                 <div className='chat-window'>
                     <div className='chat-header'>
                         <div className='chat-header-title'>
-                            <span>🏀 Basket Stats AI</span>
+                            <span>🏀 Swish</span>
                         </div>
                         <button className='chat-close-btn' onClick={() => setIsOpen(false)}>
                             ✕
@@ -58,13 +78,19 @@ export const ChatWidget = () => {
                     </div>
 
                     <div className='chat-messages'>
-                        {messages.map((msg, index) => (
-                            <div key={index} className={`chat-message ${msg.sender}`}>
-                                {msg.text}
+                        {messages.map((msg) => (
+                            <div key={msg.id} className={`chat-message ${msg.sender}`}>
+                                {msg.sender === 'bot' ? (
+                                    <div className='markdown-content'>
+                                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    <span>{msg.text}</span>
+                                )}
                             </div>
                         ))}
                         {isLoading && (
-                            <div className='chat-message assistant'>
+                            <div className='chat-message bot'>
                                 Thinking...
                             </div>
                         )}
@@ -83,7 +109,7 @@ export const ChatWidget = () => {
                         />
                         <button
                             className='chat-send-btn'
-                            onClick={handleSend}
+                            onClick={() => void handleSend()}
                             disabled={isLoading || !input.trim()}
                         >
                             ➔

@@ -95,6 +95,7 @@
     border-bottom-right-radius: 2px;
 }
 
+.chat-message.bot,
 .chat-message.assistant {
     align-self: flex-start;
     background-color: #e9ecef;
@@ -140,4 +141,21 @@
 .chat-send-btn:disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+.markdown-content p {
+    margin: 0 0 8px 0;
+}
+
+.markdown-content p:last-child {
+    margin-bottom: 0;
+}
+
+.markdown-content ul, .markdown-content ol {
+    margin: 4px 0 8px 0;
+    padding-left: 18px;
+}
+
+.markdown-content li {
+    margin-bottom: 4px;
 }
