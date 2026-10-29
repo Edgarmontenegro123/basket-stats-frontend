@@ -1,20 +1,27 @@
-import type {AIGatewayResponse, AIFunctionDeclaration} from '../types/chat'
+import type {AIGatewayResponse, AIFunctionDeclaration, ChatMessage} from '../types/chat'
 import {aiFunctionDeclarations, executeAITool} from './aiTools'
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || ''
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 const MODEL_NAME = 'meta-llama/llama-3.3-70b-instruct'
 
-const SYSTEM_INSTRUCTION = `You are Swish, a specialized tactical assistant for basketball coaches and analysts.
-Your ONLY domain is basketball, team statistics, player performance, game recaps, and tactical analysis.
-If the user asks about any topic outside of basketball, politely inform them that you can only assist with basketball analytics.
+const SYSTEM_INSTRUCTION = `You are Swish, an intelligent basketball tactical assistant.
 
-FORMATTING RULES FOR CHAT WIDGET:
+CORE RULES:
+- Assume capitalized words, proper nouns, or informal names (e.g., 'almendra', 'capitan') refer to basketball teams or players in the system.
+- ALWAYS execute available tools to search for data before declaring that information is missing.
+- Handle accent marks and case variations gracefully (e.g., 'capitan' matches 'Capitán El Espacio').
+- Only refuse queries that are completely unrelated to sports/basketball.
+
+RESPONSE & PRIVACY RULES:
+- NEVER display internal database IDs (UUIDs).
+- NEVER mention internal tool or function names to the user.
+- When giving a team or player summary, display available metrics clearly. If a player is not found, state clearly that the player has no recorded stats.
+
+FORMATTING RULES:
 - Keep answers concise, clean, and minimal.
-- Do NOT use large headers like #, ##, or ###. Use bold text for labels (e.g., **Final Score:**).
-- Do NOT use horizontal dividers (---).
-- Use bullet points (*) or short lines for stats.
-- Keep responses compact for a small chat window.`
+- Do NOT use large headers (#, ##, ###) or horizontal dividers (---).
+- Use bold text for labels and clear bullet points for stats.`
 
 interface OpenRouterMessage {
     role: 'system' | 'user' | 'assistant' | 'tool'
@@ -29,23 +36,35 @@ interface OpenRouterMessage {
     tool_call_id?: string
 }
 
-export const sendMessageToGateway = async(userMessage: string): Promise<AIGatewayResponse> => {
+export const sendMessageToGateway = async(userMessage: string, chatHistory: ChatMessage[] = []): Promise<AIGatewayResponse> => {
     if (!OPENROUTER_API_KEY) {
         return {
             text: 'OpenRouter API Key is missing. Please add VITE_OPENROUTER_API_KEY to your .env file.'
         }
     }
 
+    const recentHistory = chatHistory
+        .filter((msg) => msg.id !== 'init-1')
+        .slice(-6)
+        .map((msg) => ({
+            role: msg.sender === 'user' ? ('user' as const) : ('assistant' as const),
+            content: msg.text
+        }))
+
     const messages: OpenRouterMessage[] = [
         {
             role: 'system',
             content: SYSTEM_INSTRUCTION
         },
-        {
+        ...recentHistory
+    ]
+
+    if (recentHistory.length === 0 || recentHistory[recentHistory.length - 1].content !== userMessage) {
+        messages.push({
             role: 'user',
             content: userMessage
-        }
-    ]
+        })
+    }
 
     const typedDeclarations = aiFunctionDeclarations as unknown as AIFunctionDeclaration[]
 
@@ -76,10 +95,8 @@ export const sendMessageToGateway = async(userMessage: string): Promise<AIGatewa
         })
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}))
-            console.error('OpenRouter API Error:', response.status, errorData)
             return {
-                text: `Error de API (${response.status}): No se pudo conectar con el proveedor alternativo.`
+                text: `Error de API (${response.status}): No se pudo conectar con el servidor.`
             }
         }
 
@@ -88,20 +105,25 @@ export const sendMessageToGateway = async(userMessage: string): Promise<AIGatewa
         const message = choice?.message as OpenRouterMessage
 
         if (message?.tool_calls && message.tool_calls.length > 0) {
-            const toolCall = message.tool_calls[0]
-            const functionName = toolCall.function.name
-            const functionArgs = JSON.parse(toolCall.function.arguments || '{}') as Record<string, unknown>
-
-            console.log(`🤖 OpenRouter requested tool execution: ${functionName}`, functionArgs)
-            const toolResult = await executeAITool(functionName, functionArgs)
-            console.log('📊 Tool execution result:', toolResult)
-
             messages.push(message)
-            messages.push({
-                role: 'tool',
-                tool_call_id: toolCall.id,
-                content: JSON.stringify(toolResult)
-            })
+
+            const combinedResults: Record<string, unknown> = {}
+
+            for (const toolCall of message.tool_calls) {
+                const functionName = toolCall.function.name
+                const functionArgs = JSON.parse(toolCall.function.arguments || '{}') as Record<string, unknown>
+
+                console.log(`🤖 OpenRouter requested tool execution: ${functionName}`, functionArgs)
+                const toolResult = await executeAITool(functionName, functionArgs)
+
+                combinedResults[functionName] = toolResult
+
+                messages.push({
+                    role: 'tool',
+                    tool_call_id: toolCall.id,
+                    content: JSON.stringify(toolResult)
+                })
+            }
 
             const secondResponse = await fetch(API_URL, {
                 method: 'POST',
@@ -118,21 +140,21 @@ export const sendMessageToGateway = async(userMessage: string): Promise<AIGatewa
             })
 
             const secondData = await secondResponse.json()
-            const finalReply = secondData.choices?.[0]?.message?.content || 'Consulta completada.'
+            const finalReply = secondData.choices?.[0]?.message?.content
 
             return {
-                text: finalReply,
-                genUiData: toolResult
+                text: finalReply && finalReply.trim() !== '' ? finalReply : 'Consulta procesada exitosamente.',
+                genUiData: combinedResults
             }
         }
 
         return {
-            text: message?.content || 'No response received from Swish.'
+            text: message?.content || 'No se obtuvo respuesta de Swish.'
         }
     } catch (error) {
         console.error('Error connecting to OpenRouter:', error)
         return {
-            text: 'Error de conexión con el proveedor de IA.'
+            text: 'Error de conexión con el servidor de IA.'
         }
     }
 }

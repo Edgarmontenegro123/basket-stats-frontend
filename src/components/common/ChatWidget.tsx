@@ -44,7 +44,7 @@ export const ChatWidget = () => {
         setInput('')
         setIsLoading(true)
 
-        const gatewayResponse = await sendMessageToGateway(userText)
+        const gatewayResponse = await sendMessageToGateway(userText, updatedMessages)
 
         const botMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),

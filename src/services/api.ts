@@ -220,12 +220,11 @@ export const getPlayerRankings = async (
     limit: number = 10,
 ) => {
     const res = await fetch(
-        `${ANALYTICS_API_URL}/players/rankings?stat=${stat}&limit=${limit}`,
+        `${ANALYTICS_API_URL}/players/aggregated-rankings?stat=${stat}&limit=${limit}`,
     )
 
     if (!res.ok) {
         const text = await res.text()
-
         throw new Error(text)
     }
 
