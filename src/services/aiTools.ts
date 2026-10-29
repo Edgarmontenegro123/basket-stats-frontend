@@ -1,7 +1,7 @@
 import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName} from './api'
 
-const normalizeText = (text: string) =>
-    text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+const normalizeText = (text: unknown) =>
+    typeof text === 'string' ? text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim() : ''
 
 export const aiFunctionDeclarations = [
     {
@@ -129,7 +129,45 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
             }
             case 'getPlayerSummary': {
                 const rawName = typeof args?.playerName === 'string' ? args.playerName : ''
-                return await getPlayerSummaryByName(rawName.trim())
+                const player = (await getPlayerSummaryByName(rawName.trim())) as {
+                    player_name?: string
+                    team_name?: string
+                    average_points?: number
+                    average_rebounds?: number
+                    average_assists?: number
+                    average_steals?: number
+                    total_points?: number
+                    total_rebounds?: number
+                    total_assists?: number
+                    total_steals?: number
+                    error?: string
+                } | null
+
+                if (!player || player.error || !player.player_name) {
+                    return {result: 'Player not found', genUiData: null}
+                }
+
+                const name = player.player_name
+                const team = player.team_name || ''
+                const points = player.average_points ?? player.total_points ?? 0
+                const rebounds = player.average_rebounds ?? player.total_rebounds ?? 0
+                const assists = player.average_assists ?? player.total_assists ?? 0
+                const steals = player.average_steals ?? player.total_steals ?? 0
+
+                return {
+                    result: `Player found: ${name}. Team: ${team}. Points: ${points}, Rebounds: ${rebounds}, Assists: ${assists}, Steals: ${steals}`,
+                    genUiData: {
+                        type: 'player-card',
+                        data: {
+                            name,
+                            team,
+                            points,
+                            rebounds,
+                            assists,
+                            steals
+                        }
+                    }
+                }
             }
             default: {
                 const [games, teams] = await Promise.all([getGames(), getTeams()])

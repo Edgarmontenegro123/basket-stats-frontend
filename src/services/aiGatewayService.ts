@@ -107,6 +107,7 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
         if (message?.tool_calls && message.tool_calls.length > 0) {
             messages.push(message)
 
+            let extractedGenUiData: unknown = undefined
             const combinedResults: Record<string, unknown> = {}
 
             for (const toolCall of message.tool_calls) {
@@ -114,14 +115,26 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 const functionArgs = JSON.parse(toolCall.function.arguments || '{}') as Record<string, unknown>
 
                 console.log(`🤖 OpenRouter requested tool execution: ${functionName}`, functionArgs)
-                const toolResult = await executeAITool(functionName, functionArgs)
+                const toolResult = (await executeAITool(functionName, functionArgs)) as {
+                    result?: string
+                    genUiData?: unknown
+                }
+
+                if (toolResult && typeof toolResult === 'object' && 'genUiData' in toolResult && toolResult.genUiData) {
+                    extractedGenUiData = toolResult.genUiData
+                }
+
+                const toolContent =
+                    toolResult && typeof toolResult === 'object' && 'result' in toolResult
+                        ? toolResult.result
+                        : JSON.stringify(toolResult)
 
                 combinedResults[functionName] = toolResult
 
                 messages.push({
                     role: 'tool',
                     tool_call_id: toolCall.id,
-                    content: JSON.stringify(toolResult)
+                    content: typeof toolContent === 'string' ? toolContent : JSON.stringify(toolContent)
                 })
             }
 
@@ -144,7 +157,7 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
 
             return {
                 text: finalReply && finalReply.trim() !== '' ? finalReply : 'Consulta procesada exitosamente.',
-                genUiData: combinedResults
+                genUiData: extractedGenUiData as ChatMessage['genUiData']
             }
         }
 
