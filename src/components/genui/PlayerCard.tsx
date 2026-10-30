@@ -1,38 +1,53 @@
 import type {PlayerCardData} from '../../types/chat'
+import './PlayerCard.css'
+
+interface ExtendedPlayerCardData extends PlayerCardData {
+    teamBadgeUrl?: string
+    photoUrl?: string
+}
 
 interface PlayerCardProps {
-    data: PlayerCardData
+    data: ExtendedPlayerCardData
 }
 
 export const PlayerCard = ({data}: PlayerCardProps) => {
     return (
-        <div className='bg-slate-900 border border-slate-700 rounded-xl p-4 my-2 text-slate-100 shadow-md max-w-sm'>
-            <div className='flex items-center justify-between border-b border-slate-800 pb-2 mb-3'>
-                <div>
-                    <h4 className='font-bold text-lg text-amber-400'>{data.name}</h4>
-                    {data.team && <span className='text-xs text-slate-400'>{data.team}</span>}
+        <div className='chat-player-card'>
+            <div className='chat-player-header'>
+                {data.photoUrl ? (
+                    <img src={data.photoUrl} alt={data.name} className='chat-player-badge' />
+                ) : (
+                    <div className='chat-player-badge-placeholder'>
+                        {data.name.charAt(0)}
+                    </div>
+                )}
+                <div className='chat-player-info'>
+                    <h4 className='chat-player-name'>{data.name}</h4>
+                    <div className='chat-player-team-row'>
+                        {data.teamBadgeUrl && (
+                            <img src={data.teamBadgeUrl} alt={data.team} className='chat-team-badge' />
+                        )}
+                        <span className='chat-player-team-text'>{data.team || 'Unknown team'}</span>
+                    </div>
                 </div>
-                <span className='bg-amber-500/10 text-amber-400 text-xs px-2 py-1 rounded font-medium'>
-                    Player Summary
-                </span>
             </div>
 
-            <div className='grid grid-cols-4 gap-2 text-center'>
-                <div className='bg-slate-800/60 p-2 rounded-lg'>
-                    <span className='block text-xs text-slate-400'>PTS</span>
-                    <span className='font-bold text-base text-white'>{data.points}</span>
+            <div className='chat-player-stats-grid'>
+                <div className='chat-player-stat-box'>
+                    <span className='chat-player-stat-label'>PTS</span>
+                    <strong className='chat-player-stat-value'>{data.points}</strong>
                 </div>
-                <div className='bg-slate-800/60 p-2 rounded-lg'>
-                    <span className='block text-xs text-slate-400'>REB</span>
-                    <span className='font-bold text-base text-white'>{data.rebounds}</span>
+                <div className='chat-player-stat-box'>
+                    <span className='chat-player-stat-label'>REB</span>
+                    <strong className='chat-player-stat-value'>{data.rebounds}</strong>
                 </div>
-                <div className='bg-slate-800/60 p-2 rounded-lg'>
-                    <span className='block text-xs text-slate-400'>AST</span>
-                    <span className='font-bold text-base text-white'>{data.assists}</span>
+                <div className='chat-player-stat-box'>
+                    <span className='chat-player-stat-label'>AST</span>
+                    <strong className='chat-player-stat-value'>{data.assists}</strong>
                 </div>
-                <div className='bg-slate-800/60 p-2 rounded-lg'>
-                    <span className='block text-xs text-slate-400'>STL</span>
-                    <span className='font-bold text-base text-white'>{data.steals}</span>
+                <div className='chat-player-stat-box'>
+                    <span className='chat-player-stat-label'>STL</span>
+                    <strong className='chat-player-stat-value'>{data.steals}</strong>
                 </div>
             </div>
         </div>

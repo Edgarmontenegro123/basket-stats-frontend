@@ -1,7 +1,8 @@
 import {useState, useRef, useEffect} from 'react'
 import ReactMarkdown from 'react-markdown'
 import {sendMessageToGateway} from '../../services/aiGatewayService'
-import type {ChatMessage} from '../../types/chat'
+import type {ChatMessage, GenUiPayload, PlayerCardData} from '../../types/chat'
+import {PlayerCard} from '../genui/PlayerCard'
 import './ChatWidget.css'
 
 export const ChatWidget = () => {
@@ -17,6 +18,7 @@ export const ChatWidget = () => {
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({behavior: 'smooth'})
@@ -27,6 +29,13 @@ export const ChatWidget = () => {
             scrollToBottom()
         }
     }, [messages, isOpen])
+
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto'
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+        }
+    }, [input])
 
     const handleSend = async() => {
         if (!input.trim() || isLoading) return
@@ -44,6 +53,10 @@ export const ChatWidget = () => {
         setInput('')
         setIsLoading(true)
 
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto'
+        }
+
         const gatewayResponse = await sendMessageToGateway(userText, updatedMessages)
 
         const botMessage: ChatMessage = {
@@ -58,9 +71,19 @@ export const ChatWidget = () => {
         setIsLoading(false)
     }
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
             void handleSend()
+        }
+    }
+
+    const renderGenUiComponent = (genUiData: GenUiPayload) => {
+        switch (genUiData.type) {
+            case 'player-card':
+                return <PlayerCard data={genUiData.data as PlayerCardData & { teamBadgeUrl?: string; photoUrl?: string }} />
+            default:
+                return null
         }
     }
 
@@ -83,6 +106,7 @@ export const ChatWidget = () => {
                                 {msg.sender === 'bot' ? (
                                     <div className='markdown-content'>
                                         <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                        {msg.genUiData && renderGenUiComponent(msg.genUiData)}
                                     </div>
                                 ) : (
                                     <span>{msg.text}</span>
@@ -98,14 +122,15 @@ export const ChatWidget = () => {
                     </div>
 
                     <div className='chat-input-area'>
-                        <input
-                            type='text'
+                        <textarea
+                            ref={textareaRef}
                             className='chat-input'
                             placeholder='Ask about stats or tactics...'
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
                             disabled={isLoading}
+                            rows={1}
                         />
                         <button
                             className='chat-send-btn'

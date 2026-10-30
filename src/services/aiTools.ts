@@ -132,6 +132,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const player = (await getPlayerSummaryByName(rawName.trim())) as {
                     player_name?: string
                     team_name?: string
+                    photo_url?: string
+                    team_badge_url?: string
                     average_points?: number
                     average_rebounds?: number
                     average_assists?: number
@@ -164,7 +166,9 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             points,
                             rebounds,
                             assists,
-                            steals
+                            steals,
+                            photoUrl: player.photo_url || '',
+                            teamBadgeUrl: player.team_badge_url || ''
                         }
                     }
                 }
