@@ -285,18 +285,15 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const rawTeamSearch = typeof args?.teamQuery === 'string' ? args.teamQuery : ''
 
                 if (!rawP1 || !rawP2) {
-                    return {result: 'Please provide two valid player names to compare.', genUiData: null}
+                    return {result: 'Por favor, proporciona dos nombres de jugadores válidos para comparar.', genUiData: null}
                 }
 
                 try {
                     const games = (await getGames()) as TeamGame[]
-
-                    // 1. Identificar TODOS los partidos que coincidan con la búsqueda (soporta múltiples partidos/rivales)
                     let targetGames: TeamGame[] = []
 
                     if (rawTeamSearch) {
                         const searchLower = normalizeText(rawTeamSearch)
-                        // Dividimos si incluye "y", "contra", "vs", etc.
                         const queryTokens = searchLower.split(/\s+vs\s+|\s+v\s+|\s+contra\s+|\s+y\s+/)
 
                         targetGames = games.filter(g => {
@@ -306,12 +303,10 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         })
                     }
 
-                    // Si no hubo filtro de equipos específico, buscamos en qué partidos participaron los jugadores
                     if (targetGames.length === 0) {
                         targetGames = games
                     }
 
-                    // 2. Recorrer los partidos encontrados y acumular estadísticas para cada jugador
                     let p1TotalPoints = 0, p1TotalRebounds = 0, p1TotalAssists = 0, p1TotalSteals = 0, p1MatchesCount = 0
                     let p2TotalPoints = 0, p2TotalRebounds = 0, p2TotalAssists = 0, p2TotalSteals = 0, p2MatchesCount = 0
 
@@ -358,60 +353,70 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 p2MatchesCount++
                             }
                         } catch {
-                            // Ignorar errores individuales por partido
+                            // Continuar ante errores por partido
                         }
                     }
 
-                    // 3. Fallback a promedios generales si no se encontraron partidos con los filtros
+                    // Consultas de respaldo (fallback)
                     const [p1Fallback, p2Fallback] = await Promise.all([
                         getPlayerSummaryByName(rawP1.trim()) as Promise<PlayerSummary>,
                         getPlayerSummaryByName(rawP2.trim()) as Promise<PlayerSummary>
                     ])
 
-                    const finalP1Points = p1MatchesCount > 0 ? Number((p1TotalPoints / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_points ?? p1Fallback?.total_points ?? 0)
+                    // Verificación real de existencia en la base de datos
+                    const p1Exists = p1MatchesCount > 0 || (p1Fallback && (p1Fallback.average_points !== undefined || p1Fallback.player_name !== undefined))
+                    const p2Exists = p2MatchesCount > 0 || (p2Fallback && (p2Fallback.average_points !== undefined || p2Fallback.player_name !== undefined))
+
+                    if (!p1Exists && !p2Exists) {
+                        return {
+                            result: `No se encontraron registros en el sistema para ninguno de los dos jugadores ingresados ("${rawP1}" y "${rawP2}").`,
+                            genUiData: null
+                        }
+                    }
+
+                    const finalP1Points = p1MatchesCount > 0 ? Number((p1TotalPoints / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_points ?? 0)
                     const finalP1Rebounds = p1MatchesCount > 0 ? Number((p1TotalRebounds / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_rebounds ?? 0)
                     const finalP1Assists = p1MatchesCount > 0 ? Number((p1TotalAssists / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_assists ?? 0)
                     const finalP1Steals = p1MatchesCount > 0 ? Number((p1TotalSteals / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_steals ?? 0)
 
-                    const finalP2Points = p2MatchesCount > 0 ? Number((p2TotalPoints / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_points ?? p2Fallback?.total_points ?? 0)
+                    const finalP2Points = p2MatchesCount > 0 ? Number((p2TotalPoints / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_points ?? 0)
                     const finalP2Rebounds = p2MatchesCount > 0 ? Number((p2TotalRebounds / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_rebounds ?? 0)
                     const finalP2Assists = p2MatchesCount > 0 ? Number((p2TotalAssists / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_assists ?? 0)
-                    const finalP2Steals = p2MatchesCount > 0 ? Number((p2TotalSteals / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_steals ?? 0)
+                    const finalP2Steals = p2MatchesCount > 0 ? Number((p2TotalSteals / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_assists ?? 0)
 
-                    // 4. Construcción de mensaje informativo si un jugador no participó en los partidos filtrados
-                    let clarificationText = `Comparison between ${p1ActualName} and ${p2ActualName} retrieved successfully.`
-                    if (p1MatchesCount === 0) clarificationText += ` Note: ${p1ActualName} did not play in the specified match(es), using general averages.`
-                    if (p2MatchesCount === 0) clarificationText += ` Note: ${p2ActualName} did not play in the specified match(es), using general averages.`
+                    let statusMessage = "Comparación generada correctamente."
+                    if (!p1Exists) statusMessage = `Aviso: No se encontró al jugador "${rawP1}", por lo que sus datos no están disponibles.`
+                    if (!p2Exists) statusMessage = `Aviso: No se encontró al jugador "${rawP2}", por lo que sus datos no están disponibles.`
 
                     const comparisonData = {
                         type: 'compare-card' as const,
                         data: {
                             player1: {
-                                name: p1ActualName,
-                                team: p1Team || p1Fallback?.team_name || '',
-                                points: finalP1Points,
-                                rebounds: finalP1Rebounds,
-                                assists: finalP1Assists,
-                                steals: finalP1Steals
+                                name: p1Exists ? (p1MatchesCount > 0 ? p1ActualName : (p1Fallback?.player_name || rawP1)) : `${rawP1} (No encontrado)`,
+                                team: p1Team || p1Fallback?.team_name || 'Sin equipo',
+                                points: p1Exists ? finalP1Points : 0,
+                                rebounds: p1Exists ? finalP1Rebounds : 0,
+                                assists: p1Exists ? finalP1Assists : 0,
+                                steals: p1Exists ? finalP1Steals : 0
                             },
                             player2: {
-                                name: p2ActualName,
-                                team: p2Team || p2Fallback?.team_name || '',
-                                points: finalP2Points,
-                                rebounds: finalP2Rebounds,
-                                assists: finalP2Assists,
-                                steals: finalP2Steals
+                                name: p2Exists ? (p2MatchesCount > 0 ? p2ActualName : (p2Fallback?.player_name || rawP2)) : `${rawP2} (No encontrado)`,
+                                team: p2Team || p2Fallback?.team_name || 'Sin equipo',
+                                points: p2Exists ? finalP2Points : 0,
+                                rebounds: p2Exists ? finalP2Rebounds : 0,
+                                assists: p2Exists ? finalP2Assists : 0,
+                                steals: p2Exists ? finalP2Steals : 0
                             }
                         }
                     }
 
                     return {
-                        result: clarificationText,
+                        result: statusMessage,
                         genUiData: comparisonData
                     }
                 } catch (err) {
                     console.error('Error in comparePlayers:', err)
-                    return {result: 'Error fetching comparison data.', genUiData: null}
+                    return {result: 'Error al procesar los datos de comparación.', genUiData: null}
                 }
             }
             default: {
