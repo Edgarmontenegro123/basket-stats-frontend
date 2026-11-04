@@ -3,7 +3,8 @@ import {useNavigate} from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import {sendMessageToGateway} from '../../services/aiGatewayService'
 import {MatchCard} from '../genui/MatchCard'
-import type {ChatMessage, GenUiPayload, PlayerCardData, MatchCardData} from '../../types/chat'
+import {CompareCard} from '../genui/CompareCard'
+import type {ChatMessage, GenUiPayload, PlayerCardData, MatchCardData, CompareCardData} from '../../types/chat'
 import {PlayerCard} from '../genui/PlayerCard'
 import './ChatWidget.css'
 
@@ -97,6 +98,8 @@ export const ChatWidget = () => {
                         onNavigateToAnalytics={handleNavigateToAnalytics}
                     />
                 )
+            case 'compare-card':
+                return <CompareCard data={genUiData.data as CompareCardData} />
             default:
                 return null
         }

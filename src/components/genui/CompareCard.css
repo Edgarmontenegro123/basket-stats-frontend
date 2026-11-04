@@ -1,0 +1,88 @@
+.chat-compare-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    color: var(--text);
+    width: 100%;
+    max-width: 320px;
+    font-family: inherit;
+    box-shadow: var(--shadow);
+}
+
+.chat-compare-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.chat-compare-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-soft);
+    font-weight: 600;
+}
+
+.chat-compare-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.chat-compare-player {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.chat-compare-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--title);
+}
+
+.chat-compare-team {
+    font-size: 11px;
+    color: var(--text-soft);
+}
+
+.chat-compare-vs {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-soft);
+}
+
+.chat-compare-stats-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+}
+
+.chat-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    padding: 2px 8px;
+    background: var(--row);
+    border-radius: 4px;
+}
+
+.chat-stat-row span {
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.chat-stat-row strong {
+    font-size: 11px;
+    color: var(--text-soft);
+    text-transform: uppercase;
+}

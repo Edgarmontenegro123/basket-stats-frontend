@@ -1,36 +1,21 @@
 import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName, getPlayerStatsByGameId} from './api'
 import type {Team} from '../types/team'
+import type {TeamGame, TopScorer, GamePlayerStat} from '../types/ai'
 
-interface TeamGame {
-    id: string
-    home_team_id?: string
-    away_team_id?: string
-    home_team?: string
-    away_team?: string
-    home_team_name?: string
-    away_team_name?: string
-    home_score?: number
-    away_score?: number
-    date?: string
-}
-
-interface TopScorer {
+interface PlayerSummary {
     player_name?: string
-    name?: string
     team_name?: string
-    team?: string
+    photo_url?: string
+    team_badge_url?: string
     average_points?: number
+    average_rebounds?: number
+    average_assists?: number
+    average_steals?: number
     total_points?: number
-    points?: number
-}
-
-interface GamePlayerStat {
-    player_name?: string
-    name?: string
-    team_name?: string
-    team?: string
-    points?: number
-    pts?: number
+    total_rebounds?: number
+    total_assists?: number
+    total_steals?: number
+    error?: string
 }
 
 const normalizeText = (text: unknown) =>
@@ -94,6 +79,28 @@ export const aiFunctionDeclarations = [
             },
             required: ['playerName']
         }
+    },
+    {
+        name: 'comparePlayers',
+        description: 'Compares the statistical performance of two basketball players in a specific match or overall.',
+        parameters: {
+            type: 'OBJECT',
+            properties: {
+                player1Name: {
+                    type: 'STRING',
+                    description: 'The full name of the first player'
+                },
+                player2Name: {
+                    type: 'STRING',
+                    description: 'The full name of the second player'
+                },
+                teamQuery: {
+                    type: 'STRING',
+                    description: 'Optional team name or matchup context (e.g. almendra or pegasos)'
+                }
+            },
+            required: ['player1Name', 'player2Name']
+        }
     }
 ]
 
@@ -128,6 +135,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     matchCardData = {
                         type: 'match-card' as const,
                         data: {
+                            gameId: latestGame.id,
                             homeTeam: latestGame.home_team_name || latestGame.home_team || 'Local',
                             awayTeam: latestGame.away_team_name || latestGame.away_team || 'Visitante',
                             homeScore: latestGame.home_score ?? 0,
@@ -206,7 +214,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     matchCardData = {
                         type: 'match-card' as const,
                         data: {
-                            gameId: latestTeamGame.id, // <--- Pasamos el ID del juego aquí
+                            gameId: latestTeamGame.id,
                             homeTeam: latestTeamGame.home_team_name || latestTeamGame.home_team || 'Local',
                             awayTeam: latestTeamGame.away_team_name || latestTeamGame.away_team || 'Visitante',
                             homeScore: latestTeamGame.home_score ?? 0,
@@ -241,21 +249,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
             }
             case 'getPlayerSummary': {
                 const rawName = typeof args?.playerName === 'string' ? args.playerName : ''
-                const player = (await getPlayerSummaryByName(rawName.trim())) as {
-                    player_name?: string
-                    team_name?: string
-                    photo_url?: string
-                    team_badge_url?: string
-                    average_points?: number
-                    average_rebounds?: number
-                    average_assists?: number
-                    average_steals?: number
-                    total_points?: number
-                    total_rebounds?: number
-                    total_assists?: number
-                    total_steals?: number
-                    error?: string
-                } | null
+                const player = (await getPlayerSummaryByName(rawName.trim())) as PlayerSummary | null
 
                 if (!player || player.error || !player.player_name) {
                     return {result: 'Player not found', genUiData: null}
@@ -283,6 +277,141 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             teamBadgeUrl: player.team_badge_url || ''
                         }
                     }
+                }
+            }
+            case 'comparePlayers': {
+                const rawP1 = typeof args?.player1Name === 'string' ? args.player1Name : ''
+                const rawP2 = typeof args?.player2Name === 'string' ? args.player2Name : ''
+                const rawTeamSearch = typeof args?.teamQuery === 'string' ? args.teamQuery : ''
+
+                if (!rawP1 || !rawP2) {
+                    return {result: 'Please provide two valid player names to compare.', genUiData: null}
+                }
+
+                try {
+                    const games = (await getGames()) as TeamGame[]
+
+                    // 1. Identificar TODOS los partidos que coincidan con la búsqueda (soporta múltiples partidos/rivales)
+                    let targetGames: TeamGame[] = []
+
+                    if (rawTeamSearch) {
+                        const searchLower = normalizeText(rawTeamSearch)
+                        // Dividimos si incluye "y", "contra", "vs", etc.
+                        const queryTokens = searchLower.split(/\s+vs\s+|\s+v\s+|\s+contra\s+|\s+y\s+/)
+
+                        targetGames = games.filter(g => {
+                            const home = normalizeText(g.home_team_name || g.home_team || '')
+                            const away = normalizeText(g.away_team_name || g.away_team || '')
+                            return queryTokens.some(token => token.trim().length > 2 && (home.includes(token.trim()) || away.includes(token.trim())))
+                        })
+                    }
+
+                    // Si no hubo filtro de equipos específico, buscamos en qué partidos participaron los jugadores
+                    if (targetGames.length === 0) {
+                        targetGames = games
+                    }
+
+                    // 2. Recorrer los partidos encontrados y acumular estadísticas para cada jugador
+                    let p1TotalPoints = 0, p1TotalRebounds = 0, p1TotalAssists = 0, p1TotalSteals = 0, p1MatchesCount = 0
+                    let p2TotalPoints = 0, p2TotalRebounds = 0, p2TotalAssists = 0, p2TotalSteals = 0, p2MatchesCount = 0
+
+                    let p1ActualName = rawP1
+                    let p2ActualName = rawP2
+                    let p1Team = ''
+                    let p2Team = ''
+
+                    const p1Tokens = normalizeText(rawP1).split(' ')
+                    const p2Tokens = normalizeText(rawP2).split(' ')
+
+                    for (const game of targetGames) {
+                        try {
+                            const gamePlayers = (await getPlayerStatsByGameId(game.id)) as GamePlayerStat[]
+                            if (!Array.isArray(gamePlayers)) continue
+
+                            const foundP1 = gamePlayers.find(p => {
+                                const pName = normalizeText(p.player_name || p.name || '')
+                                return p1Tokens.every(token => pName.includes(token))
+                            })
+
+                            const foundP2 = gamePlayers.find(p => {
+                                const pName = normalizeText(p.player_name || p.name || '')
+                                return p2Tokens.every(token => pName.includes(token))
+                            })
+
+                            if (foundP1) {
+                                p1ActualName = foundP1.player_name || foundP1.name || p1ActualName
+                                p1Team = foundP1.team_name || foundP1.team || p1Team
+                                p1TotalPoints += Number(foundP1.points ?? foundP1.pts ?? 0)
+                                p1TotalRebounds += Number(foundP1.rebounds ?? foundP1.reb ?? 0)
+                                p1TotalAssists += Number(foundP1.assists ?? foundP1.ast ?? 0)
+                                p1TotalSteals += Number(foundP1.steals ?? foundP1.stl ?? 0)
+                                p1MatchesCount++
+                            }
+
+                            if (foundP2) {
+                                p2ActualName = foundP2.player_name || foundP2.name || p2ActualName
+                                p2Team = foundP2.team_name || foundP2.team || p2Team
+                                p2TotalPoints += Number(foundP2.points ?? foundP2.pts ?? 0)
+                                p2TotalRebounds += Number(foundP2.rebounds ?? foundP2.reb ?? 0)
+                                p2TotalAssists += Number(foundP2.assists ?? foundP2.ast ?? 0)
+                                p2TotalSteals += Number(foundP2.steals ?? foundP2.stl ?? 0)
+                                p2MatchesCount++
+                            }
+                        } catch {
+                            // Ignorar errores individuales por partido
+                        }
+                    }
+
+                    // 3. Fallback a promedios generales si no se encontraron partidos con los filtros
+                    const [p1Fallback, p2Fallback] = await Promise.all([
+                        getPlayerSummaryByName(rawP1.trim()) as Promise<PlayerSummary>,
+                        getPlayerSummaryByName(rawP2.trim()) as Promise<PlayerSummary>
+                    ])
+
+                    const finalP1Points = p1MatchesCount > 0 ? Number((p1TotalPoints / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_points ?? p1Fallback?.total_points ?? 0)
+                    const finalP1Rebounds = p1MatchesCount > 0 ? Number((p1TotalRebounds / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_rebounds ?? 0)
+                    const finalP1Assists = p1MatchesCount > 0 ? Number((p1TotalAssists / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_assists ?? 0)
+                    const finalP1Steals = p1MatchesCount > 0 ? Number((p1TotalSteals / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_steals ?? 0)
+
+                    const finalP2Points = p2MatchesCount > 0 ? Number((p2TotalPoints / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_points ?? p2Fallback?.total_points ?? 0)
+                    const finalP2Rebounds = p2MatchesCount > 0 ? Number((p2TotalRebounds / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_rebounds ?? 0)
+                    const finalP2Assists = p2MatchesCount > 0 ? Number((p2TotalAssists / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_assists ?? 0)
+                    const finalP2Steals = p2MatchesCount > 0 ? Number((p2TotalSteals / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_steals ?? 0)
+
+                    // 4. Construcción de mensaje informativo si un jugador no participó en los partidos filtrados
+                    let clarificationText = `Comparison between ${p1ActualName} and ${p2ActualName} retrieved successfully.`
+                    if (p1MatchesCount === 0) clarificationText += ` Note: ${p1ActualName} did not play in the specified match(es), using general averages.`
+                    if (p2MatchesCount === 0) clarificationText += ` Note: ${p2ActualName} did not play in the specified match(es), using general averages.`
+
+                    const comparisonData = {
+                        type: 'compare-card' as const,
+                        data: {
+                            player1: {
+                                name: p1ActualName,
+                                team: p1Team || p1Fallback?.team_name || '',
+                                points: finalP1Points,
+                                rebounds: finalP1Rebounds,
+                                assists: finalP1Assists,
+                                steals: finalP1Steals
+                            },
+                            player2: {
+                                name: p2ActualName,
+                                team: p2Team || p2Fallback?.team_name || '',
+                                points: finalP2Points,
+                                rebounds: finalP2Rebounds,
+                                assists: finalP2Assists,
+                                steals: finalP2Steals
+                            }
+                        }
+                    }
+
+                    return {
+                        result: clarificationText,
+                        genUiData: comparisonData
+                    }
+                } catch (err) {
+                    console.error('Error in comparePlayers:', err)
+                    return {result: 'Error fetching comparison data.', genUiData: null}
                 }
             }
             default: {

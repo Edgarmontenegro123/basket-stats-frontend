@@ -1,5 +1,3 @@
-export type GenUiComponentType = 'player-card' | 'stat-table' | 'team-card' | 'match-card'
-
 export interface MatchCardData {
     homeTeam: string
     awayTeam: string
@@ -19,21 +17,15 @@ export interface PlayerCardData {
     matchesPlayed?: number
 }
 
-export interface StatTableItem {
-    label: string
-    value: number | string
-    secondaryValue?: string
+export interface CompareCardData {
+    player1: { name: string; team: string; points: number; rebounds: number; assists: number; steals: number }
+    player2: { name: string; team: string; points: number; rebounds: number; assists: number; steals: number }
 }
 
-export interface StatTableData {
-    title: string
-    items: StatTableItem[]
-}
-
-export interface GenUiPayload {
-    type: GenUiComponentType
-    data: PlayerCardData | StatTableData | MatchCardData | unknown
-}
+export type GenUiPayload =
+    | { type: 'player-card'; data: PlayerCardData & { teamBadgeUrl?: string; photoUrl?: string } }
+    | { type: 'match-card'; data: MatchCardData & { gameId?: string; topPlayers?: Array<{ name: string; points: number }> } }
+    | { type: 'compare-card'; data: CompareCardData }
 
 export interface ChatMessage {
     id: string
