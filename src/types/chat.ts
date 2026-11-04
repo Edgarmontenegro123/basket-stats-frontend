@@ -1,4 +1,13 @@
-export type GenUiComponentType = 'player-card' | 'stat-table' | 'team-card'
+export type GenUiComponentType = 'player-card' | 'stat-table' | 'team-card' | 'match-card'
+
+export interface MatchCardData {
+    homeTeam: string
+    awayTeam: string
+    homeScore: number
+    awayScore: number
+    status?: string
+    date?: string
+}
 
 export interface PlayerCardData {
     name: string
@@ -23,7 +32,7 @@ export interface StatTableData {
 
 export interface GenUiPayload {
     type: GenUiComponentType
-    data: PlayerCardData | StatTableData | unknown
+    data: PlayerCardData | StatTableData | MatchCardData | unknown
 }
 
 export interface ChatMessage {

@@ -1,4 +1,37 @@
-import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName} from './api'
+import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName, getPlayerStatsByGameId} from './api'
+import type {Team} from '../types/team'
+
+interface TeamGame {
+    id: string
+    home_team_id?: string
+    away_team_id?: string
+    home_team?: string
+    away_team?: string
+    home_team_name?: string
+    away_team_name?: string
+    home_score?: number
+    away_score?: number
+    date?: string
+}
+
+interface TopScorer {
+    player_name?: string
+    name?: string
+    team_name?: string
+    team?: string
+    average_points?: number
+    total_points?: number
+    points?: number
+}
+
+interface GamePlayerStat {
+    player_name?: string
+    name?: string
+    team_name?: string
+    team?: string
+    points?: number
+    pts?: number
+}
 
 const normalizeText = (text: unknown) =>
     typeof text === 'string' ? text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim() : ''
@@ -69,11 +102,49 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
         switch (functionName) {
             case 'getMatchSummary': {
                 const [games, teams, scorers] = await Promise.all([
-                    getGames(),
-                    getTeams(),
-                    getTopScorers(10)
+                    getGames() as Promise<TeamGame[]>,
+                    getTeams() as Promise<Team[]>,
+                    getTopScorers(10) as Promise<TopScorer[]>
                 ])
-                return {games, teams, topScorers: scorers}
+
+                const latestGame = games && games.length > 0 ? games[0] : null
+                let matchCardData = null
+
+                if (latestGame) {
+                    let formattedTopPlayers: Array<{ name: string; points: number }> = []
+                    try {
+                        const gamePlayers = (await getPlayerStatsByGameId(latestGame.id)) as GamePlayerStat[]
+                        formattedTopPlayers = (Array.isArray(gamePlayers) ? gamePlayers : []).slice(0, 5).map((p) => ({
+                            name: p.player_name || p.name || 'Jugador',
+                            points: p.points ?? p.pts ?? 0
+                        }))
+                    } catch {
+                        formattedTopPlayers = (scorers || []).slice(0, 5).map((s) => ({
+                            name: s.player_name || s.name || 'Jugador',
+                            points: s.average_points ?? s.total_points ?? s.points ?? 0
+                        }))
+                    }
+
+                    matchCardData = {
+                        type: 'match-card' as const,
+                        data: {
+                            homeTeam: latestGame.home_team_name || latestGame.home_team || 'Local',
+                            awayTeam: latestGame.away_team_name || latestGame.away_team || 'Visitante',
+                            homeScore: latestGame.home_score ?? 0,
+                            awayScore: latestGame.away_score ?? 0,
+                            date: latestGame.date,
+                            topPlayers: formattedTopPlayers
+                        }
+                    }
+                }
+
+                return {
+                    result: 'Match summary retrieved successfully',
+                    games,
+                    teams,
+                    topScorers: scorers,
+                    genUiData: matchCardData
+                }
             }
             case 'getGames':
                 return await getGames()
@@ -84,27 +155,66 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const searchName = normalizeText(rawSearch)
 
                 const [games, teams, scorers] = await Promise.all([
-                    getGames(),
-                    getTeams(),
-                    getTopScorers(20)
+                    getGames() as Promise<TeamGame[]>,
+                    getTeams() as Promise<Team[]>,
+                    getTopScorers(20) as Promise<TopScorer[]>
                 ])
 
-                const matchingTeam = teams.find((t: {name: string, short_name?: string}) => {
+                const matchingTeam = teams.find((t) => {
                     const normName = normalizeText(t.name)
                     const normShort = normalizeText(t.short_name || '')
                     return normName.includes(searchName) || normShort.includes(searchName) || searchName.includes(normName)
                 })
 
                 if (!matchingTeam) {
-                    return {team: null, message: 'Team not found', availableTeams: teams.map((t: {name: string}) => t.name)}
+                    return {team: null, message: 'Team not found', availableTeams: teams.map((t) => t.name)}
                 }
 
-                const teamGames = games.filter((g: {home_team?: string, away_team?: string, home_team_id?: string, away_team_id?: string}) =>
+                const teamGames = games.filter((g) =>
                     g.home_team_id === matchingTeam.id ||
                     g.away_team_id === matchingTeam.id ||
                     (g.home_team && normalizeText(g.home_team).includes(searchName)) ||
                     (g.away_team && normalizeText(g.away_team).includes(searchName))
                 )
+
+                const latestTeamGame = teamGames && teamGames.length > 0 ? teamGames[0] : null
+                let matchCardData = null
+
+                if (latestTeamGame) {
+                    let formattedTopPlayers: Array<{ name: string; points: number }> = []
+                    try {
+                        const gamePlayers = (await getPlayerStatsByGameId(latestTeamGame.id)) as GamePlayerStat[]
+
+                        const filteredGamePlayers = Array.isArray(gamePlayers) ? gamePlayers.filter((p) => {
+                            const pTeam = normalizeText(p.team_name || p.team || '')
+                            return pTeam.includes(searchName) || searchName.includes(pTeam)
+                        }) : []
+
+                        const pool = filteredGamePlayers.length > 0 ? filteredGamePlayers : (Array.isArray(gamePlayers) ? gamePlayers : [])
+
+                        formattedTopPlayers = pool.slice(0, 5).map((p) => ({
+                            name: p.player_name || p.name || 'Jugador',
+                            points: p.points ?? p.pts ?? 0
+                        }))
+                    } catch {
+                        formattedTopPlayers = (scorers || []).slice(0, 5).map((s) => ({
+                            name: s.player_name || s.name || 'Jugador',
+                            points: s.average_points ?? s.total_points ?? s.points ?? 0
+                        }))
+                    }
+
+                    matchCardData = {
+                        type: 'match-card' as const,
+                        data: {
+                            homeTeam: latestTeamGame.home_team_name || latestTeamGame.home_team || 'Local',
+                            awayTeam: latestTeamGame.away_team_name || latestTeamGame.away_team || 'Visitante',
+                            homeScore: latestTeamGame.home_score ?? 0,
+                            awayScore: latestTeamGame.away_score ?? 0,
+                            date: latestTeamGame.date,
+                            topPlayers: formattedTopPlayers
+                        }
+                    }
+                }
 
                 return {
                     team: {
@@ -113,7 +223,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     },
                     gamesCount: teamGames.length,
                     games: teamGames,
-                    topPlayers: scorers
+                    topPlayers: scorers,
+                    genUiData: matchCardData
                 }
             }
             case 'getTopScorers': {

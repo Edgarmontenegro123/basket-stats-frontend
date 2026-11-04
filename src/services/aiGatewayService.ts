@@ -10,18 +10,14 @@ const SYSTEM_INSTRUCTION = `You are Swish, an intelligent basketball tactical as
 CORE RULES:
 - Assume capitalized words, proper nouns, or informal names (e.g., 'almendra', 'capitan') refer to basketball teams or players in the system.
 - ALWAYS execute available tools to search for data before declaring that information is missing.
-- Handle accent marks and case variations gracefully (e.g., 'capitan' matches 'Capitán El Espacio').
+- Handle accent marks and case variations gracefully.
 - Only refuse queries that are completely unrelated to sports/basketball.
 
-RESPONSE & PRIVACY RULES:
+RESPONSE & FORMATTING RULES:
+- Keep text responses extremely short and direct (maximum 1 or 2 short sentences) when showing visual cards.
 - NEVER display internal database IDs (UUIDs).
 - NEVER mention internal tool or function names to the user.
-- When giving a team or player summary, display available metrics clearly. If a player is not found, state clearly that the player has no recorded stats.
-
-FORMATTING RULES:
-- Keep answers concise, clean, and minimal.
-- Do NOT use large headers (#, ##, ###) or horizontal dividers (---).
-- Use bold text for labels and clear bullet points for stats.`
+- Do NOT use large headers (#, ##, ###) or long bullet point lists when visual components are available.`
 
 interface OpenRouterMessage {
     role: 'system' | 'user' | 'assistant' | 'tool'
@@ -115,13 +111,14 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 const functionArgs = JSON.parse(toolCall.function.arguments || '{}') as Record<string, unknown>
 
                 console.log(`🤖 OpenRouter requested tool execution: ${functionName}`, functionArgs)
-                const toolResult = (await executeAITool(functionName, functionArgs)) as {
-                    result?: string
-                    genUiData?: unknown
-                }
+                const toolResult = (await executeAITool(functionName, functionArgs)) as Record<string, unknown>
 
-                if (toolResult && typeof toolResult === 'object' && 'genUiData' in toolResult && toolResult.genUiData) {
-                    extractedGenUiData = toolResult.genUiData
+                if (toolResult && typeof toolResult === 'object') {
+                    if ('genUiData' in toolResult && toolResult.genUiData) {
+                        extractedGenUiData = toolResult.genUiData
+                    } else if ('type' in toolResult && toolResult.type === 'match-card') {
+                        extractedGenUiData = toolResult
+                    }
                 }
 
                 const toolContent =

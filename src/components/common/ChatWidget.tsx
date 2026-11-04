@@ -1,7 +1,8 @@
 import {useState, useRef, useEffect} from 'react'
 import ReactMarkdown from 'react-markdown'
 import {sendMessageToGateway} from '../../services/aiGatewayService'
-import type {ChatMessage, GenUiPayload, PlayerCardData} from '../../types/chat'
+import {MatchCard} from '../genui/MatchCard'
+import type {ChatMessage, GenUiPayload, PlayerCardData, MatchCardData} from '../../types/chat'
 import {PlayerCard} from '../genui/PlayerCard'
 import './ChatWidget.css'
 
@@ -82,6 +83,8 @@ export const ChatWidget = () => {
         switch (genUiData.type) {
             case 'player-card':
                 return <PlayerCard data={genUiData.data as PlayerCardData & { teamBadgeUrl?: string; photoUrl?: string }} />
+            case 'match-card':
+                return <MatchCard data={genUiData.data as MatchCardData} />
             default:
                 return null
         }
@@ -105,7 +108,10 @@ export const ChatWidget = () => {
                             <div key={msg.id} className={`chat-message ${msg.sender}`}>
                                 {msg.sender === 'bot' ? (
                                     <div className='markdown-content'>
-                                        <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                        {/* Si NO hay genUiData, mostramos el texto plano de la IA */}
+                                        {!msg.genUiData && <ReactMarkdown>{msg.text}</ReactMarkdown>}
+
+                                        {/* Si hay genUiData, se renderiza únicamente la tarjeta limpia */}
                                         {msg.genUiData && renderGenUiComponent(msg.genUiData)}
                                     </div>
                                 ) : (
