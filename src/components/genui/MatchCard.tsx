@@ -3,10 +3,14 @@ import type {MatchCardData} from '../../types/chat'
 import './MatchCard.css'
 
 interface MatchCardProps {
-    data: MatchCardData & { topPlayers?: Array<{ name: string; points: number }> }
+    data: MatchCardData & {
+        gameId?: string
+        topPlayers?: Array<{ name: string; points: number }>
+    }
+    onNavigateToAnalytics?: (gameId: string) => void
 }
 
-export const MatchCard = ({data}: MatchCardProps) => {
+export const MatchCard = ({data, onNavigateToAnalytics}: MatchCardProps) => {
     const [isExpanded, setIsExpanded] = useState(false)
 
     return (
@@ -43,10 +47,20 @@ export const MatchCard = ({data}: MatchCardProps) => {
                                 {data.topPlayers.map((player, index) => (
                                     <li key={index} className='chat-match-player-item'>
                                         <span>{player.name}</span>
-                                        {player.points > 0 && <strong>{player.points} pts</strong>}
+                                        <strong>{player.points} pts</strong>
                                     </li>
                                 ))}
                             </ul>
+
+                            {/* Botón requerido para ir a la vista Analytics con el gameId */}
+                            {data.gameId && onNavigateToAnalytics && (
+                                <button
+                                    className='chat-match-analytics-btn'
+                                    onClick={() => onNavigateToAnalytics(data.gameId!)}
+                                >
+                                    Ver estadísticas completas en Analytics 📊
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

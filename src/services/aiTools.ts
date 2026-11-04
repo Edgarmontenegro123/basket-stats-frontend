@@ -206,6 +206,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     matchCardData = {
                         type: 'match-card' as const,
                         data: {
+                            gameId: latestTeamGame.id, // <--- Pasamos el ID del juego aquí
                             homeTeam: latestTeamGame.home_team_name || latestTeamGame.home_team || 'Local',
                             awayTeam: latestTeamGame.away_team_name || latestTeamGame.away_team || 'Visitante',
                             homeScore: latestTeamGame.home_score ?? 0,

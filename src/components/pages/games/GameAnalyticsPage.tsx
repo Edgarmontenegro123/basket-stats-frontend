@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react'
+import {useParams} from 'react-router-dom'
 import BasketballLoader from '../../common/BasketballLoader'
 import {AnalyticsFilterBar} from '../../analytics/AnalyticsFilterBar'
 import {useAnalyticsFilters} from '../../hooks/useAnalyticsFilters'
@@ -15,6 +16,7 @@ import type {Team} from '../../../types/team'
 import './GameAnalyticsPage.css'
 
 const GameAnalyticsPage = () => {
+    const {gameId: paramGameId} = useParams<{gameId?: string}>()
     const {filters, updateFilters, resetFilters} = useAnalyticsFilters()
     const [fetchedPlayerStats, setFetchedPlayerStats] = useState<PlayerStats[]>([])
     const [fetchedTeamStats, setFetchedTeamStats] = useState<TeamStat[]>([])
@@ -26,6 +28,12 @@ const GameAnalyticsPage = () => {
     const selectedGameId = filters.gameId
     const selectedTeamId = filters.teamId
     const selectedPlayerIds = filters.playerIds
+
+    useEffect(() => {
+        if (paramGameId && paramGameId !== filters.gameId) {
+            updateFilters({ gameId: paramGameId })
+        }
+    }, [paramGameId])
 
     useEffect(() => {
         let isMounted = true

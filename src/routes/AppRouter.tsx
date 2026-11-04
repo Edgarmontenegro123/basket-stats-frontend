@@ -60,7 +60,7 @@ export const AppRouter = () => {
                         <Route path='/rankings' element={<RankingsPage/>}/>
                         <Route path='/compare' element={<ComparePage/>}/>
                         <Route path='/seasons' element={<SeasonsPage/>}/>
-                        <Route path='/analytics' element={<GameAnalyticsPage/>}/>
+                        <Route path='/analytics/:gameId?' element={<GameAnalyticsPage/>}/>
                     </Route>
                 </Route>
             </Routes>

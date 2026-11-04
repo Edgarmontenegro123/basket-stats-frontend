@@ -1,4 +1,5 @@
 import {useState, useRef, useEffect} from 'react'
+import {useNavigate} from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import {sendMessageToGateway} from '../../services/aiGatewayService'
 import {MatchCard} from '../genui/MatchCard'
@@ -7,6 +8,7 @@ import {PlayerCard} from '../genui/PlayerCard'
 import './ChatWidget.css'
 
 export const ChatWidget = () => {
+    const navigate = useNavigate()
     const [isOpen, setIsOpen] = useState(false)
     const [messages, setMessages] = useState<ChatMessage[]>([
         {
@@ -79,12 +81,22 @@ export const ChatWidget = () => {
         }
     }
 
+    const handleNavigateToAnalytics = (gameId: string) => {
+        setIsOpen(false)
+        navigate(`/analytics/${gameId}`)
+    }
+
     const renderGenUiComponent = (genUiData: GenUiPayload) => {
         switch (genUiData.type) {
             case 'player-card':
                 return <PlayerCard data={genUiData.data as PlayerCardData & { teamBadgeUrl?: string; photoUrl?: string }} />
             case 'match-card':
-                return <MatchCard data={genUiData.data as MatchCardData} />
+                return (
+                    <MatchCard
+                        data={genUiData.data as MatchCardData & { gameId?: string; topPlayers?: Array<{ name: string; points: number }> }}
+                        onNavigateToAnalytics={handleNavigateToAnalytics}
+                    />
+                )
             default:
                 return null
         }
