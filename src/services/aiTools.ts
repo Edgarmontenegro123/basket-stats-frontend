@@ -82,7 +82,7 @@ export const aiFunctionDeclarations = [
     },
     {
         name: 'comparePlayers',
-        description: 'Compares the statistical performance of two basketball players in a specific match or overall.',
+        description: 'Compares the statistical performance of two basketball players in a specific match or overall. ALWAYS extract the team or matchup query into teamQuery when the user mentions a match, e.g., "en el partido almendra Vs pegasos" -> teamQuery: "almendra vs pegasos".',
         parameters: {
             type: 'OBJECT',
             properties: {
@@ -96,7 +96,7 @@ export const aiFunctionDeclarations = [
                 },
                 teamQuery: {
                     type: 'STRING',
-                    description: 'Optional team name or matchup context (e.g. almendra or pegasos)'
+                    description: 'The exact matchup or team name mentioned by the user (e.g. almendra vs pegasos)'
                 }
             },
             required: ['player1Name', 'player2Name']
@@ -109,9 +109,9 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
         switch (functionName) {
             case 'getMatchSummary': {
                 const [games, teams, scorers] = await Promise.all([
-                    getGames() as Promise<TeamGame[]>,
-                    getTeams() as Promise<Team[]>,
-                    getTopScorers(10) as Promise<TopScorer[]>
+                    getGames(),
+                    getTeams(),
+                    getTopScorers(10)
                 ])
 
                 const latestGame = games && games.length > 0 ? games[0] : null
@@ -126,7 +126,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             points: p.points ?? p.pts ?? 0
                         }))
                     } catch {
-                        formattedTopPlayers = (scorers || []).slice(0, 5).map((s) => ({
+                        formattedTopPlayers = (scorers || []).slice(0, 5).map((s: TopScorer) => ({
                             name: s.player_name || s.name || 'Jugador',
                             points: s.average_points ?? s.total_points ?? s.points ?? 0
                         }))
@@ -163,9 +163,9 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const searchName = normalizeText(rawSearch)
 
                 const [games, teams, scorers] = await Promise.all([
-                    getGames() as Promise<TeamGame[]>,
-                    getTeams() as Promise<Team[]>,
-                    getTopScorers(20) as Promise<TopScorer[]>
+                    await getGames() as unknown as TeamGame[],
+                    await getTeams() as unknown as Team[],
+                    await getTopScorers(20) as unknown as TopScorer[]
                 ])
 
                 const matchingTeam = teams.find((t) => {
@@ -290,21 +290,24 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
 
                 try {
                     const games = (await getGames()) as TeamGame[]
-                    let targetGames: TeamGame[] = []
+                    let targetGames: TeamGame[] = games
 
                     if (rawTeamSearch) {
                         const searchLower = normalizeText(rawTeamSearch)
                         const queryTokens = searchLower.split(/\s+vs\s+|\s+v\s+|\s+contra\s+|\s+y\s+/)
 
-                        targetGames = games.filter(g => {
+                        const filtered = games.filter(g => {
                             const home = normalizeText(g.home_team_name || g.home_team || '')
                             const away = normalizeText(g.away_team_name || g.away_team || '')
-                            return queryTokens.some(token => token.trim().length > 2 && (home.includes(token.trim()) || away.includes(token.trim())))
+                            return queryTokens.some(token => {
+                                const t = token.trim()
+                                return t.length > 2 && (home.includes(t) || away.includes(t))
+                            })
                         })
-                    }
 
-                    if (targetGames.length === 0) {
-                        targetGames = games
+                        if (filtered.length > 0) {
+                            targetGames = filtered
+                        }
                     }
 
                     let p1TotalPoints = 0, p1TotalRebounds = 0, p1TotalAssists = 0, p1TotalSteals = 0, p1MatchesCount = 0
@@ -315,8 +318,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     let p1Team = ''
                     let p2Team = ''
 
-                    const p1Tokens = normalizeText(rawP1).split(' ')
-                    const p2Tokens = normalizeText(rawP2).split(' ')
+                    const p1Tokens = normalizeText(rawP1).split(' ').filter(t => t.length > 1)
+                    const p2Tokens = normalizeText(rawP2).split(' ').filter(t => t.length > 1)
 
                     for (const game of targetGames) {
                         try {
@@ -325,12 +328,12 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
 
                             const foundP1 = gamePlayers.find(p => {
                                 const pName = normalizeText(p.player_name || p.name || '')
-                                return p1Tokens.every(token => pName.includes(token))
+                                return p1Tokens.some(token => pName.includes(token))
                             })
 
                             const foundP2 = gamePlayers.find(p => {
                                 const pName = normalizeText(p.player_name || p.name || '')
-                                return p2Tokens.every(token => pName.includes(token))
+                                return p2Tokens.some(token => pName.includes(token))
                             })
 
                             if (foundP1) {
@@ -357,15 +360,13 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         }
                     }
 
-                    // Consultas de respaldo (fallback)
                     const [p1Fallback, p2Fallback] = await Promise.all([
-                        getPlayerSummaryByName(rawP1.trim()) as Promise<PlayerSummary>,
-                        getPlayerSummaryByName(rawP2.trim()) as Promise<PlayerSummary>
+                        await getPlayerSummaryByName(rawP1.trim()) as Promise<PlayerSummary>,
+                        await getPlayerSummaryByName(rawP2.trim()) as Promise<PlayerSummary>
                     ])
 
-                    // Verificación real de existencia en la base de datos
-                    const p1Exists = p1MatchesCount > 0 || (p1Fallback && (p1Fallback.average_points !== undefined || p1Fallback.player_name !== undefined))
-                    const p2Exists = p2MatchesCount > 0 || (p2Fallback && (p2Fallback.average_points !== undefined || p2Fallback.player_name !== undefined))
+                    const p1Exists = p1MatchesCount > 0 || Boolean(p1Fallback && (p1Fallback.average_points !== undefined || p1Fallback.player_name !== undefined))
+                    const p2Exists = p2MatchesCount > 0 || Boolean(p2Fallback && (p2Fallback.average_points !== undefined || p2Fallback.player_name !== undefined))
 
                     if (!p1Exists && !p2Exists) {
                         return {
@@ -374,17 +375,19 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         }
                     }
 
-                    const finalP1Points = p1MatchesCount > 0 ? Number((p1TotalPoints / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_points ?? 0)
-                    const finalP1Rebounds = p1MatchesCount > 0 ? Number((p1TotalRebounds / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_rebounds ?? 0)
-                    const finalP1Assists = p1MatchesCount > 0 ? Number((p1TotalAssists / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_assists ?? 0)
-                    const finalP1Steals = p1MatchesCount > 0 ? Number((p1TotalSteals / p1MatchesCount).toFixed(1)) : (p1Fallback?.average_steals ?? 0)
+                    const isSingleMatch = Boolean(rawTeamSearch) && p1MatchesCount > 0
 
-                    const finalP2Points = p2MatchesCount > 0 ? Number((p2TotalPoints / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_points ?? 0)
-                    const finalP2Rebounds = p2MatchesCount > 0 ? Number((p2TotalRebounds / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_rebounds ?? 0)
-                    const finalP2Assists = p2MatchesCount > 0 ? Number((p2TotalAssists / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_assists ?? 0)
-                    const finalP2Steals = p2MatchesCount > 0 ? Number((p2TotalSteals / p2MatchesCount).toFixed(1)) : (p2Fallback?.average_assists ?? 0)
+                    const finalP1Points = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalPoints : Number((p1TotalPoints / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_points ?? 0)
+                    const finalP1Rebounds = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalRebounds : Number((p1TotalRebounds / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_rebounds ?? 0)
+                    const finalP1Assists = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalAssists : Number((p1TotalAssists / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_assists ?? 0)
+                    const finalP1Steals = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalSteals : Number((p1TotalSteals / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_steals ?? 0)
 
-                    let statusMessage = "Comparación generada correctamente."
+                    const finalP2Points = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalPoints : Number((p2TotalPoints / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_points ?? 0)
+                    const finalP2Rebounds = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalRebounds : Number((p2TotalRebounds / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_rebounds ?? 0)
+                    const finalP2Assists = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalAssists : Number((p2TotalAssists / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_assists ?? 0)
+                    const finalP2Steals = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalSteals : Number((p2TotalSteals / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_steals ?? 0)
+
+                    let statusMessage = 'Comparación generada correctamente.'
                     if (!p1Exists) statusMessage = `Aviso: No se encontró al jugador "${rawP1}", por lo que sus datos no están disponibles.`
                     if (!p2Exists) statusMessage = `Aviso: No se encontró al jugador "${rawP2}", por lo que sus datos no están disponibles.`
 
@@ -397,7 +400,9 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 points: p1Exists ? finalP1Points : 0,
                                 rebounds: p1Exists ? finalP1Rebounds : 0,
                                 assists: p1Exists ? finalP1Assists : 0,
-                                steals: p1Exists ? finalP1Steals : 0
+                                steals: p1Exists ? finalP1Steals : 0,
+                                photoUrl: p1Fallback?.photo_url || '',
+                                teamBadgeUrl: p1Fallback?.team_badge_url || ''
                             },
                             player2: {
                                 name: p2Exists ? (p2MatchesCount > 0 ? p2ActualName : (p2Fallback?.player_name || rawP2)) : `${rawP2} (No encontrado)`,
@@ -405,8 +410,11 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 points: p2Exists ? finalP2Points : 0,
                                 rebounds: p2Exists ? finalP2Rebounds : 0,
                                 assists: p2Exists ? finalP2Assists : 0,
-                                steals: p2Exists ? finalP2Steals : 0
-                            }
+                                steals: p2Exists ? finalP2Steals : 0,
+                                photoUrl: p2Fallback?.photo_url || '',
+                                teamBadgeUrl: p2Fallback?.team_badge_url || ''
+                            },
+                            comparisonId: `comp-${Date.now()}`
                         }
                     }
 

@@ -1,3 +1,5 @@
+import type {CompareCardData} from './compare'
+
 export interface MatchCardData {
     homeTeam: string
     awayTeam: string
@@ -17,10 +19,29 @@ export interface PlayerCardData {
     matchesPlayed?: number
 }
 
-export interface CompareCardData {
-    player1: { name: string; team: string; points: number; rebounds: number; assists: number; steals: number }
-    player2: { name: string; team: string; points: number; rebounds: number; assists: number; steals: number }
-}
+/*export interface CompareCardData {
+    player1: {
+        name: string;
+        team: string;
+        points: number;
+        rebounds: number;
+        assists: number;
+        steals: number;
+        photoUrl?: string;
+        teamBadgeUrl?: string;
+    }
+    player2: {
+        name: string;
+        team: string;
+        points: number;
+        rebounds: number;
+        assists: number;
+        steals: number;
+        photoUrl?: string;
+        teamBadgeUrl?: string;
+    }
+    comparisonId?: string; // Para el botón de vista detallada
+}*/
 
 export type GenUiPayload =
     | { type: 'player-card'; data: PlayerCardData & { teamBadgeUrl?: string; photoUrl?: string } }
