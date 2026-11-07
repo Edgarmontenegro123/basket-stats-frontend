@@ -4,6 +4,7 @@ import type {Season} from '../../types/season'
 import type {Team} from '../../types/team'
 import type {Game} from '../../types/game'
 import type {Player} from '../../types/player'
+import {formatDateToDDMMYYYY} from '../helpers/formatDate'
 import {getSeasons, getTeams, getGames, getPlayersByTeam} from '../../services/api'
 import './AnalyticsFilterBar.css'
 
@@ -200,8 +201,7 @@ export const AnalyticsFilterBar: React.FC<AnalyticsFilterBarProps> = ({
                         <option value=''>All Games</option>
                         {availableGames.map((g) => (
                             <option key={g.id} value={g.id}>
-                                {g.home_team_name} vs {g.away_team_name}
-                            </option>
+                                {g.home_team_name} vs {g.away_team_name} ({formatDateToDDMMYYYY(g.game_date)})                            </option>
                         ))}
                     </select>
                 </div>

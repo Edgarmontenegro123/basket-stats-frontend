@@ -1,22 +1,7 @@
 import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName, getPlayerStatsByGameId} from './api'
 import type {Team} from '../types/team'
 import type {TeamGame, TopScorer, GamePlayerStat} from '../types/ai'
-
-interface PlayerSummary {
-    player_name?: string
-    team_name?: string
-    photo_url?: string
-    team_badge_url?: string
-    average_points?: number
-    average_rebounds?: number
-    average_assists?: number
-    average_steals?: number
-    total_points?: number
-    total_rebounds?: number
-    total_assists?: number
-    total_steals?: number
-    error?: string
-}
+import type {PlayerSummary} from '../types/ai'
 
 const normalizeText = (text: unknown) =>
     typeof text === 'string' ? text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim() : ''
@@ -82,7 +67,7 @@ export const aiFunctionDeclarations = [
     },
     {
         name: 'comparePlayers',
-        description: 'Compares the statistical performance of two basketball players in a specific match or overall. ALWAYS extract the team or matchup query into teamQuery when the user mentions a match, e.g., "en el partido almendra Vs pegasos" -> teamQuery: "almendra vs pegasos".',
+        description: 'Compares the statistical performance of two basketball players in a specific match or overall. ALWAYS extract the team or matchup query into teamQuery when the user mentions a match (e.g., "en el partido almendra Vs pegasos" -> teamQuery: "almendra vs pegasos"). If a specific date or "last match" is mentioned, extract it into matchContext.',
         parameters: {
             type: 'OBJECT',
             properties: {
@@ -97,6 +82,10 @@ export const aiFunctionDeclarations = [
                 teamQuery: {
                     type: 'STRING',
                     description: 'The exact matchup or team name mentioned by the user (e.g. almendra vs pegasos)'
+                },
+                matchContext: {
+                    type: 'STRING',
+                    description: 'Specific date, round, or identifier like "ultimo" (last) if a specific game among the same teams is requested'
                 }
             },
             required: ['player1Name', 'player2Name']
@@ -283,6 +272,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const rawP1 = typeof args?.player1Name === 'string' ? args.player1Name : ''
                 const rawP2 = typeof args?.player2Name === 'string' ? args.player2Name : ''
                 const rawTeamSearch = typeof args?.teamQuery === 'string' ? args.teamQuery : ''
+                const rawMatchContext = typeof args?.matchContext === 'string' ? normalizeText(args.matchContext) : ''
 
                 if (!rawP1 || !rawP2) {
                     return {result: 'Por favor, proporciona dos nombres de jugadores válidos para comparar.', genUiData: null}
@@ -292,11 +282,12 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     const games = (await getGames()) as TeamGame[]
                     let targetGames: TeamGame[] = games
 
+                    // Si hay una consulta de equipo/enfrentamiento, filtramos estrictamente esos partidos
                     if (rawTeamSearch) {
                         const searchLower = normalizeText(rawTeamSearch)
                         const queryTokens = searchLower.split(/\s+vs\s+|\s+v\s+|\s+contra\s+|\s+y\s+/)
 
-                        const filtered = games.filter(g => {
+                        targetGames = games.filter(g => {
                             const home = normalizeText(g.home_team_name || g.home_team || '')
                             const away = normalizeText(g.away_team_name || g.away_team || '')
                             return queryTokens.some(token => {
@@ -304,9 +295,29 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 return t.length > 2 && (home.includes(t) || away.includes(t))
                             })
                         })
+                    }
 
-                        if (filtered.length > 0) {
-                            targetGames = filtered
+                    // Ordenar cronológicamente los partidos por fecha
+                    if (targetGames.length > 0) {
+                        targetGames.sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime())
+                    }
+
+                    // Manejo del contexto temporal (último, primero, etc.)
+                    if (targetGames.length > 1) {
+                        if (rawMatchContext.includes('ultimo') || rawMatchContext.includes('recent') || rawMatchContext.includes('reciente')) {
+                            // Nos quedamos solo con el más reciente (el último del array ordenado ascendentemente es el final)
+                            targetGames = [targetGames[targetGames.length - 1]]
+                        } else if (rawMatchContext.includes('primero') || rawMatchContext.includes('primer') || rawMatchContext.includes('oldest')) {
+                            // Nos quedamos solo con el primero registrado
+                            targetGames = [targetGames[0]]
+                        } else if (rawMatchContext) {
+                            const matchFiltered = targetGames.filter(g => {
+                                const gDate = normalizeText(g.date || '')
+                                return gDate.includes(rawMatchContext)
+                            })
+                            if (matchFiltered.length > 0) {
+                                targetGames = matchFiltered
+                            }
                         }
                     }
 
@@ -336,6 +347,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 return p2Tokens.some(token => pName.includes(token))
                             })
 
+                            // Para evitar mezclar partidos donde uno jugó y el otro no dentro del mismo filtro de enfrentamiento:
+                            // Solo sumamos si ambos participaron, o acumulamos sus presencias de forma independiente en los partidos filtrados.
                             if (foundP1) {
                                 p1ActualName = foundP1.player_name || foundP1.name || p1ActualName
                                 p1Team = foundP1.team_name || foundP1.team || p1Team
@@ -355,14 +368,14 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 p2TotalSteals += Number(foundP2.steals ?? foundP2.stl ?? 0)
                                 p2MatchesCount++
                             }
-                        } catch {
-                            // Continuar ante errores por partido
+                        } catch (err) {
+                            console.warn(`Advertencia: No se pudieron procesar las estadísticas para el partido ID ${game.id}:`, err)
                         }
                     }
 
                     const [p1Fallback, p2Fallback] = await Promise.all([
-                        await getPlayerSummaryByName(rawP1.trim()) as Promise<PlayerSummary>,
-                        await getPlayerSummaryByName(rawP2.trim()) as Promise<PlayerSummary>
+                        await getPlayerSummaryByName(rawP1.trim()) as PlayerSummary,
+                        await getPlayerSummaryByName(rawP2.trim()) as PlayerSummary
                     ])
 
                     const p1Exists = p1MatchesCount > 0 || Boolean(p1Fallback && (p1Fallback.average_points !== undefined || p1Fallback.player_name !== undefined))
@@ -375,7 +388,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         }
                     }
 
-                    const isSingleMatch = Boolean(rawTeamSearch) && p1MatchesCount > 0
+                    const isSingleMatch = targetGames.length === 1 && p1MatchesCount > 0
 
                     const finalP1Points = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalPoints : Number((p1TotalPoints / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_points ?? 0)
                     const finalP1Rebounds = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalRebounds : Number((p1TotalRebounds / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_rebounds ?? 0)

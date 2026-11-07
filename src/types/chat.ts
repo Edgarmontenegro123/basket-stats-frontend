@@ -19,30 +19,6 @@ export interface PlayerCardData {
     matchesPlayed?: number
 }
 
-/*export interface CompareCardData {
-    player1: {
-        name: string;
-        team: string;
-        points: number;
-        rebounds: number;
-        assists: number;
-        steals: number;
-        photoUrl?: string;
-        teamBadgeUrl?: string;
-    }
-    player2: {
-        name: string;
-        team: string;
-        points: number;
-        rebounds: number;
-        assists: number;
-        steals: number;
-        photoUrl?: string;
-        teamBadgeUrl?: string;
-    }
-    comparisonId?: string; // Para el botón de vista detallada
-}*/
-
 export type GenUiPayload =
     | { type: 'player-card'; data: PlayerCardData & { teamBadgeUrl?: string; photoUrl?: string } }
     | { type: 'match-card'; data: MatchCardData & { gameId?: string; topPlayers?: Array<{ name: string; points: number }> } }

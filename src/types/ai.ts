@@ -35,3 +35,19 @@ export interface GamePlayerStat {
     steals?: number
     stl?: number
 }
+
+export interface PlayerSummary {
+    player_name?: string
+    team_name?: string
+    photo_url?: string
+    team_badge_url?: string
+    average_points?: number
+    average_rebounds?: number
+    average_assists?: number
+    average_steals?: number
+    total_points?: number
+    total_rebounds?: number
+    total_assists?: number
+    total_steals?: number
+    error?: string
+}
