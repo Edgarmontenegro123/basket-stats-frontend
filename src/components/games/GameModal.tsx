@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import type { Team } from '../../types/team'
-import type { Season } from '../../types/season'
-import type { Game } from '../../types/game'
+import {useState} from 'react'
+import type {Team} from '../../types/team'
+import type {Season} from '../../types/season'
+import type {Game} from '../../types/game'
 import './GameModal.css'
 
 type GameModalProps = {
@@ -15,6 +15,7 @@ type GameModalProps = {
         homeTeamId: string,
         awayTeamId: string,
         videoUrl: string,
+        gameDate: string,
     ) => Promise<void>
 }
 
@@ -26,10 +27,14 @@ const GameModal = ({
                        onClose,
                        onSubmit,
                    }: GameModalProps) => {
+    // Inicialización directa basada en gameToEdit para evitar llamadas a setState síncronas en effect
     const [seasonId, setSeasonId] = useState(gameToEdit?.season_id ?? '')
     const [homeTeamId, setHomeTeamId] = useState(gameToEdit?.home_team_id ?? '')
     const [awayTeamId, setAwayTeamId] = useState(gameToEdit?.away_team_id ?? '')
     const [videoUrl, setVideoUrl] = useState(gameToEdit?.video_url ?? '')
+    const [gameDate, setGameDate] = useState(
+        gameToEdit?.game_date ? gameToEdit.game_date.split('T')[0] : new Date().toISOString().split('T')[0]
+    )
     const [error, setError] = useState('')
 
     if (!isOpen) return null
@@ -47,12 +52,8 @@ const GameModal = ({
             return
         }
 
-        await onSubmit(seasonId, homeTeamId, awayTeamId, videoUrl)
+        await onSubmit(seasonId, homeTeamId, awayTeamId, videoUrl, gameDate)
 
-        setSeasonId('')
-        setHomeTeamId('')
-        setAwayTeamId('')
-        setVideoUrl('')
         onClose()
     }
 
@@ -123,6 +124,13 @@ const GameModal = ({
                             </option>
                         ))}
                     </select>
+                    <input
+                        className='form-input'
+                        type='date'
+                        value={gameDate}
+                        onChange={(event) => setGameDate(event.target.value)}
+                        placeholder='Game Date'
+                    />
                     <input
                         className='form-input'
                         type='url'

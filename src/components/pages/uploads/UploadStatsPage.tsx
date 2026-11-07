@@ -6,6 +6,7 @@ import type {Game} from '../../../types/game'
 import type {TeamStat} from '../../../types/analytics'
 import BasketballLoader from '../../common/BasketballLoader'
 import { normaliseText } from '../../helpers/normaliseText'
+import { formatDateToDDMMYYYY } from '../../helpers/formatDate'
 import {
     uploadStats,
     processStats,
@@ -132,12 +133,12 @@ const UploadStatsPage = () => {
                 awayTeamStat.points,
             )
 
-            setPlayers(playersData);
+            setPlayers(playersData)
         } catch (error) {
             console.error(error)
             setErrorMessage(getUploadErrorMessage(error))
         } finally {
-            setIsProcessing(false);
+            setIsProcessing(false)
         }
     }
 
@@ -178,7 +179,7 @@ const UploadStatsPage = () => {
                             <option value=''>Select Game</option>
                             {games.map((game) => (
                                 <option key={game.id} value={game.id}>
-                                    {game.home_team_name} vs {game.away_team_name}
+                                    {game.home_team_name} vs {game.away_team_name} ({formatDateToDDMMYYYY(game.game_date)})
                                 </option>
                             ))}
                         </select>
@@ -188,7 +189,7 @@ const UploadStatsPage = () => {
                             type='file'
                             accept='.pdf'
                             onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-                            />
+                        />
                     </div>
                     <button
                         className='primary-button'
@@ -207,17 +208,17 @@ const UploadStatsPage = () => {
                     <div className='table-wrapper upload-table-wrapper'>
                         <table className='data-table'>
                             <thead>
-                                <tr>
-                                    <th>Player</th>
-                                    <th>Team</th>
-                                    <th>PTS</th>
-                                    <th>REB</th>
-                                    <th>AST</th>
-                                    <th>MIN</th>
-                                    <th>TOV</th>
-                                    <th>STL</th>
-                                    <th>BLK</th>
-                                </tr>
+                            <tr>
+                                <th>Player</th>
+                                <th>Team</th>
+                                <th>PTS</th>
+                                <th>REB</th>
+                                <th>AST</th>
+                                <th>MIN</th>
+                                <th>TOV</th>
+                                <th>STL</th>
+                                <th>BLK</th>
+                            </tr>
                             </thead>
                             <tbody>
                             {players.map((player, index) => (

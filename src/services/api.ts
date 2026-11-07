@@ -31,11 +31,10 @@ export const createGame = async (
     homeTeamId: string,
     awayTeamId: string,
     videoUrl: string,
+    gameDate: string,
 ) => {
-    // Go backend connection
-    // const res = await fetch('http://localhost:8080/games', {
+    const formattedDate = gameDate ? new Date(`${gameDate}T12:00:00`).toISOString() : new Date().toISOString()
 
-    // Node backend connection
     const res = await fetch(`${MANAGEMENT_API_URL}/games`, {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -43,7 +42,7 @@ export const createGame = async (
             season_id: seasonId,
             home_team_id: homeTeamId,
             away_team_id: awayTeamId,
-            game_date: new Date().toISOString(),
+            game_date: formattedDate,
             location: null,
             video_url: videoUrl || null,
             is_friendly: false,
@@ -81,7 +80,10 @@ export const updateGame = async (
     homeTeamId: string,
     awayTeamId: string,
     videoUrl: string,
+    gameDate: string,
 ) => {
+    const formattedDate = gameDate ? new Date(`${gameDate}T12:00:00`).toISOString() : new Date().toISOString()
+
     const res = await fetch(`${MANAGEMENT_API_URL}/games/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
@@ -89,7 +91,7 @@ export const updateGame = async (
             season_id: seasonId,
             home_team_id: homeTeamId,
             away_team_id: awayTeamId,
-            game_date: new Date().toISOString(),
+            game_date: formattedDate,
             location: null,
             video_url: videoUrl || null,
             is_friendly: false,

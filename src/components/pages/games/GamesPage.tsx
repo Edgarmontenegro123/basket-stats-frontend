@@ -8,6 +8,7 @@ import ConfirmModal from '../../common/ConfirmModal'
 import type { Team } from '../../../types/team'
 import type { Season } from '../../../types/season'
 import type { Game } from '../../../types/game'
+import {formatDateToDDMMYYYY} from '../../helpers/formatDate'
 import {
     createGame,
     deleteGame,
@@ -68,6 +69,7 @@ const GamesPage = () => {
         homeTeamId: string,
         awayTeamId: string,
         videoUrl: string,
+        gameDate: string,
     ) => {
         try {
             if (gameToEdit) {
@@ -77,10 +79,11 @@ const GamesPage = () => {
                     homeTeamId,
                     awayTeamId,
                     videoUrl,
+                    gameDate,
                 )
                 setFeedbackMessage({ type: 'success', text: 'Game updated successfully.' })
             } else {
-                await createGame(seasonId, homeTeamId, awayTeamId, videoUrl)
+                await createGame(seasonId, homeTeamId, awayTeamId, videoUrl, gameDate)
                 setFeedbackMessage({ type: 'success', text: 'Game created successfully.' })
             }
 
@@ -202,6 +205,9 @@ const GamesPage = () => {
                                         {getTeamName(game.home_team_id)} vs{' '}
                                         {getTeamName(game.away_team_id)}
                                     </strong>
+                                    <div style={{ fontSize: '0.9rem', color: '#888', marginTop: '2px' }}>
+                                        Date: {formatDateToDDMMYYYY(game.game_date)}
+                                    </div>
                                     <div>
                                         Season: {getSeasonName(game.season_id)}
                                     </div>
