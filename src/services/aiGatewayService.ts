@@ -1,23 +1,30 @@
 import type {AIGatewayResponse, AIFunctionDeclaration, ChatMessage} from '../types/chat'
 import {aiFunctionDeclarations, executeAITool} from './aiTools'
 
-const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY || ''
-const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'https://147.15.10.181.nip.io/analytics'
 const MODEL_NAME = 'meta-llama/llama-3.3-70b-instruct'
 
 const SYSTEM_INSTRUCTION = `You are Swish, an intelligent basketball tactical assistant.
 
 CORE RULES:
 - Assume capitalized words, proper nouns, or informal names (e.g., 'almendra', 'capitan') refer to basketball teams or players in the system.
+
 - ALWAYS execute available tools to search for data before declaring that information is missing.
+
 - Handle accent marks and case variations gracefully.
+
 - Only refuse queries that are completely unrelated to sports/basketball.
+
 
 RESPONSE & FORMATTING RULES:
 - Keep text responses extremely short and direct (maximum 1 or 2 short sentences) when showing visual cards.
+
 - NEVER display internal database IDs (UUIDs).
+
 - NEVER mention internal tool or function names to the user.
+
 - Do NOT use large headers (#, ##, ###) or long bullet point lists when visual components are available.`
+
 
 interface OpenRouterMessage {
     role: 'system' | 'user' | 'assistant' | 'tool'
@@ -33,12 +40,6 @@ interface OpenRouterMessage {
 }
 
 export const sendMessageToGateway = async(userMessage: string, chatHistory: ChatMessage[] = []): Promise<AIGatewayResponse> => {
-    if (!OPENROUTER_API_KEY) {
-        return {
-            text: 'OpenRouter API Key is missing. Please add VITE_OPENROUTER_API_KEY to your .env file.'
-        }
-    }
-
     const recentHistory = chatHistory
         .filter((msg) => msg.id !== 'init-1')
         .slice(-6)
@@ -74,13 +75,11 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
     }))
 
     try {
-        const response = await fetch(API_URL, {
+        const response = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
                 'Content-Type': 'application/json',
-                'HTTP-Referer': window.location.origin,
-                'X-Title': 'Basket Stats AI'
+                'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
             },
             body: JSON.stringify({
                 model: MODEL_NAME,
@@ -135,13 +134,11 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 })
             }
 
-            const secondResponse = await fetch(API_URL, {
+            const secondResponse = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
                     'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.origin,
-                    'X-Title': 'Basket Stats AI'
+                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
                 },
                 body: JSON.stringify({
                     model: MODEL_NAME,
@@ -162,7 +159,7 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
             text: message?.content || 'No se obtuvo respuesta de Swish.'
         }
     } catch (error) {
-        console.error('Error connecting to OpenRouter:', error)
+        console.error('Error connecting to AI gateway:', error)
         return {
             text: 'Error de conexión con el servidor de IA.'
         }
