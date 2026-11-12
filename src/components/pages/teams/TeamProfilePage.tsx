@@ -2,16 +2,19 @@ import {useEffect, useState} from 'react'
 import {useNavigate, useParams} from 'react-router-dom'
 import BasketballLoader from '../../common/BasketballLoader'
 import PageHeader from '../../common/PageHeader'
+import TeamModal from '../../teams/TeamModal'
+import { canManageTeams } from '../../../auth/permissions'
 import {
     getGames,
     getPlayersByTeam,
     getTeamById,
+    updateTeam,
 } from '../../../services/api'
 import buildTeamAnalyticsSummary from '../../../services/teamAnalytics'
 import { getPlayerPositionLabel } from '../../helpers/playerHelpers'
 import type {Game} from '../../../types/game'
 import type {Player} from '../../../types/player'
-import type {Team} from '../../../types/team'
+import type {Team, CreateTeamPayload} from '../../../types/team'
 import type {TeamAnalyticsSummary} from '../../../types/analytics'
 import './TeamProfilePage.css'
 import '../../layout/MainLayout.css'
@@ -27,7 +30,11 @@ const TeamProfilePage = () => {
     const [error, setError] = useState('')
     const [analyticsSummary, setAnalyticsSummary] =
         useState<TeamAnalyticsSummary | null>(null)
+    const [isModalOpen, setIsModalOpen] = useState(false)
 
+    const storedUser = localStorage.getItem('basket_stats_user')
+    const currentUser = storedUser ? JSON.parse(storedUser) : null
+    const canEditTeams = canManageTeams(currentUser?.role)
 
     useEffect(() => {
         const fetchTeamProfile = async () => {
@@ -44,7 +51,7 @@ const TeamProfilePage = () => {
                 const [teamData, playersData, gamesData] = await Promise.all([
                     getTeamById(id),
                     getPlayersByTeam(id),
-                    getGames()
+                    getGames(),
                 ])
 
                 const teamGames = gamesData.filter(
@@ -61,8 +68,8 @@ const TeamProfilePage = () => {
                 setPlayers(playersData)
                 setGames(teamGames)
                 setAnalyticsSummary(summary)
-            } catch (error) {
-                console.error(error)
+            } catch (err) {
+                console.error(err)
                 setError('Could not load team profile. The server may be waking up. Please try again in a few seconds.')
             } finally {
                 setIsLoading(false)
@@ -71,6 +78,36 @@ const TeamProfilePage = () => {
 
         void fetchTeamProfile()
     }, [id])
+
+    const handleSubmitTeam = async (payload: CreateTeamPayload) => {
+        if (!team) return
+
+        const trimmedName = payload.name.trim()
+        const trimmedLogoUrl = payload.logo_url?.trim() || ''
+
+        if (trimmedName.length < 2) {
+            alert('Team name must contain at least 2 characters')
+            return
+        }
+
+        if (trimmedName.length > 30) {
+            alert('Team name must contain a maximum 30 characters')
+            return
+        }
+
+        try {
+            const updatedTeam = await updateTeam(team.id, {
+                name: trimmedName,
+                logo_url: trimmedLogoUrl,
+            })
+
+            setTeam(updatedTeam)
+            setIsModalOpen(false)
+        } catch (err) {
+            console.error(err)
+            alert('Could not update team.')
+        }
+    }
 
     if (isLoading) {
         return (
@@ -151,14 +188,24 @@ const TeamProfilePage = () => {
             ? Math.round((wins / completedGamesList.length) * 100)
             : 0
 
-
     return (
         <div className='team-profile-page'>
-            <PageHeader
-                title='Team Profile'
-                subtitle=''
-                showBack
-            />
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%'}}>
+                <PageHeader
+                    title='Team Profile'
+                    subtitle=''
+                    showBack
+                />
+                {canEditTeams && (
+                    <button
+                        type='button'
+                        className='secondary-button'
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        Edit Team
+                    </button>
+                )}
+            </div>
             <section className='team-profile-header'>
                 <div className='team-profile-header__content'>
                     {team.logo_url ? (
@@ -206,8 +253,8 @@ const TeamProfilePage = () => {
                         <h2>Team Averages</h2>
                     </div>
                     <span className='team-profile-count'>
-            {analyticsSummary?.gamesWithStats || 0} games
-        </span>
+                        {analyticsSummary?.gamesWithStats || 0} games
+                    </span>
                 </div>
                 {!analyticsSummary ? (
                     <p className='team-profile-empty'>
@@ -329,6 +376,14 @@ const TeamProfilePage = () => {
                     </ul>
                 )}
             </section>
+            {isModalOpen && (
+                <TeamModal
+                    isOpen={isModalOpen}
+                    teamToEdit={team}
+                    onClose={() => setIsModalOpen(false)}
+                    onSubmit={handleSubmitTeam}
+                />
+            )}
         </div>
     )
 }
