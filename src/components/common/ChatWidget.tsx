@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect} from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import {useNavigate} from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import {sendMessageToGateway} from '../../services/aiGatewayService'
@@ -107,12 +107,13 @@ export const ChatWidget = () => {
     }
 
     return (
-        <div className='chat-widget-container'>
+        <div className={`chat-widget-container ${isOpen ? 'open' : ''}`}>
             {isOpen && (
                 <div className='chat-window'>
                     <div className='chat-header'>
                         <div className='chat-header-title'>
-                            <span>🏀 Swish</span>
+                            <span className='chat-status-dot' />
+                            <span>🏀 Swish Assistant</span>
                         </div>
                         <button className='chat-close-btn' onClick={() => setIsOpen(false)}>
                             ✕
@@ -124,10 +125,7 @@ export const ChatWidget = () => {
                             <div key={msg.id} className={`chat-message ${msg.sender}`}>
                                 {msg.sender === 'bot' ? (
                                     <div className='markdown-content'>
-                                        {/* Si NO hay genUiData, mostramos el texto plano de la IA */}
                                         {!msg.genUiData && <ReactMarkdown>{msg.text}</ReactMarkdown>}
-
-                                        {/* Si hay genUiData, se renderiza únicamente la tarjeta limpia */}
                                         {msg.genUiData && renderGenUiComponent(msg.genUiData)}
                                     </div>
                                 ) : (
@@ -136,8 +134,8 @@ export const ChatWidget = () => {
                             </div>
                         ))}
                         {isLoading && (
-                            <div className='chat-message bot'>
-                                Thinking...
+                            <div className='chat-message bot thinking-indicator'>
+                                <span>Swish is thinking...</span>
                             </div>
                         )}
                         <div ref={messagesEndRef} />
@@ -170,7 +168,7 @@ export const ChatWidget = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label='Toggle Chat Assistant'
             >
-                💬
+                {isOpen ? '✕' : '💬'}
             </button>
         </div>
     )

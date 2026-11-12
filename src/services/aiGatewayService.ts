@@ -1,7 +1,7 @@
 import type {AIGatewayResponse, AIFunctionDeclaration, ChatMessage} from '../types/chat'
 import {aiFunctionDeclarations, executeAITool} from './aiTools'
 
-const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || 'https://147.15.10.181.nip.io/analytics'
+const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || (import.meta.env.DEV ? 'http://localhost:8081' : 'https://147.15.10.181.nip.io/analytics')
 const MODEL_NAME = 'meta-llama/llama-3.3-70b-instruct'
 
 const SYSTEM_INSTRUCTION = `You are Swish, an intelligent basketball tactical assistant.
