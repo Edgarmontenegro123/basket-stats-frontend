@@ -79,7 +79,7 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
             },
             body: JSON.stringify({
                 model: MODEL_NAME,
@@ -138,7 +138,7 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                    'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
                 },
                 body: JSON.stringify({
                     model: MODEL_NAME,
