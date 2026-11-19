@@ -22,7 +22,7 @@ jobs:
           script: |
             cd ~/basket-stats-frontend
             git pull origin main
-            docker build \
+            docker build --no-cache \
               --build-arg VITE_MANAGEMENT_API_URL=https://147.15.10.181.nip.io/management \
               --build-arg VITE_ANALYTICS_API_URL=https://147.15.10.181.nip.io/analytics \
               -t basket-stats-frontend .
