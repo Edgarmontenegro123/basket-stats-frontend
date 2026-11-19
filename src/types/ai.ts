@@ -51,3 +51,16 @@ export interface PlayerSummary {
     total_steals?: number
     error?: string
 }
+
+export interface OpenRouterMessage {
+    role: 'system' | 'user' | 'assistant' | 'tool'
+    content?: string
+    tool_calls?: Array<{
+        id: string
+        function: {
+            name: string
+            arguments: string
+        }
+    }>
+    tool_call_id?: string
+}
