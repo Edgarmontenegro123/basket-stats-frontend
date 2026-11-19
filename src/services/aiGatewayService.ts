@@ -27,11 +27,11 @@ RESPONSE & FORMATTING RULES:
 
 export const sendMessageToGateway = async(userMessage: string, chatHistory: ChatMessage[] = []): Promise<AIGatewayResponse> => {
     const recentHistory = chatHistory
-        .filter((msg) => msg.id !== 'init-1')
+        .filter((msg) => msg.id !== 'init-1' && (msg.text.trim() !== '' || Boolean(msg.genUiData)))
         .slice(-6)
         .map((msg) => ({
             role: msg.sender === 'user' ? ('user' as const) : ('assistant' as const),
-            content: msg.text
+            content: msg.text.trim() !== '' ? msg.text : '[Visual card displayed]'
         }))
 
     const messages: OpenRouterMessage[] = [
