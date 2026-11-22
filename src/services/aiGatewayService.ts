@@ -193,6 +193,95 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
             }
         }
 
+        // Interceptor determinista: si el modelo anuncia en texto que va a consultar datos sin emitir tool_calls, forzamos la ejecución
+        const replyText = (message?.content || '').toLowerCase()
+        const skippedToolCall =
+            (!message?.tool_calls || message.tool_calls.length === 0) &&
+            (replyText.includes('consultar sus estadísticas') ||
+                replyText.includes('consultar las estadísticas') ||
+                replyText.includes('check the database') ||
+                replyText.includes('need to check') ||
+                replyText.includes('getplayersummary') ||
+                replyText.includes('getteamstats'))
+
+        if (skippedToolCall) {
+            const forcedResponse = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
+                },
+                body: JSON.stringify({
+                    model: MODEL_NAME,
+                    messages: [
+                        ...messages,
+                        {
+                            role: 'system',
+                            content: 'CRITICAL: Do NOT write text saying you will check statistics. Emit the required tool_call (getPlayerSummary or getTeamStats) NOW.'
+                        }
+                    ],
+                    tools,
+                    tool_choice: 'required',
+                    temperature: 0.1
+                })
+            })
+
+            if (forcedResponse.ok) {
+                const forcedData = await forcedResponse.json()
+                const forcedMsg = forcedData.choices?.[0]?.message as OpenRouterMessage
+                if (forcedMsg?.tool_calls && forcedMsg.tool_calls.length > 0) {
+                    messages.push(forcedMsg)
+                    let forcedGenUiData: unknown = undefined
+
+                    for (const toolCall of forcedMsg.tool_calls) {
+                        const fnName = toolCall.function.name
+                        const fnArgs = JSON.parse(toolCall.function.arguments || '{}') as Record<string, unknown>
+                        console.log(`🛡️ Forced tool execution: ${fnName}`, fnArgs)
+                        const toolResult = (await executeAITool(fnName, fnArgs)) as Record<string, unknown>
+
+                        if (toolResult && typeof toolResult === 'object') {
+                            if ('genUiData' in toolResult && toolResult.genUiData) {
+                                forcedGenUiData = toolResult.genUiData
+                            } else if ('type' in toolResult && toolResult.type === 'match-card') {
+                                forcedGenUiData = toolResult
+                            }
+                        }
+
+                        const toolContent =
+                            toolResult && typeof toolResult === 'object' && 'result' in toolResult
+                                ? toolResult.result
+                                : JSON.stringify(toolResult)
+
+                        messages.push({
+                            role: 'tool',
+                            tool_call_id: toolCall.id,
+                            content: typeof toolContent === 'string' ? toolContent : JSON.stringify(toolContent)
+                        })
+                    }
+
+                    const finalFollowUp = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
+                        },
+                        body: JSON.stringify({
+                            model: MODEL_NAME,
+                            messages,
+                            temperature: 0.2
+                        })
+                    })
+
+                    const finalFollowUpData = await finalFollowUp.json()
+                    const finalText = finalFollowUpData.choices?.[0]?.message?.content
+                    return {
+                        text: finalText && finalText.trim() !== '' ? finalText : '',
+                        genUiData: forcedGenUiData as ChatMessage['genUiData']
+                    }
+                }
+            }
+        }
+
         if (!message?.content || message.content.trim() === '') {
             const fallbackResponse = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
                 method: 'POST',
