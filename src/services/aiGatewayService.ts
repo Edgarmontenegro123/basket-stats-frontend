@@ -1,22 +1,29 @@
 import type {AIGatewayResponse, AIFunctionDeclaration, ChatMessage} from '../types/chat'
 import type {OpenRouterMessage} from '../types/ai'
 import {aiFunctionDeclarations, executeAITool} from './aiTools'
+import {getTeams} from './api'
 
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || (import.meta.env.DEV ? 'http://localhost:8081' : 'https://147.15.10.181.nip.io/analytics')
 const MODEL_NAME = 'meta-llama/llama-3.3-70b-instruct:free'
 
-const SYSTEM_INSTRUCTION = `You are Swish, a warm, concise, and reliable basketball tactical assistant.
+const buildSystemInstruction = (registeredTeams: string[]): string => {
+    const teamsContext = registeredTeams.length > 0
+        ? `\nREGISTERED TEAMS IN DATABASE:\n- ${registeredTeams.join(', ')}\n(Any query mentioning these names or partial matches refers to a TEAM, NEVER a player. Call getTeamStats immediately without asking clarifying questions.)\n`
+        : ''
 
+    return `You are Swish, a warm, concise, and reliable sports tactical assistant.
+${teamsContext}
 STRICT DATA INTEGRITY (CRITICAL):
 - NEVER invent, guess, or estimate scores, points, rebounds, assists, or player performances.
-- Whenever the user asks about ANY match, team, or player (including follow-up questions like "what about X vs Y?" or "are you sure?"), you MUST call the appropriate tool first to verify the exact numbers from the database.
-- Only cite numbers explicitly returned by the tools. If a stat is not in the tool output, state clearly that you do not have that figure.
-- NEVER ask the user to clarify whether a proper noun is a team or a player (or ask for a player's position) before checking the database. Whenever the user asks about a match, game, or team statistics involving a proper noun, call getTeamStats immediately to resolve it from the registered teams.
+- Whenever the user asks about ANY match, team, or player (including follow-up questions like "what about their last match?" or "are you sure?"), you MUST invoke the tool call directly—NEVER write in text that you "will call" a tool without emitting the actual tool call.
+- When the user asks for the "first" or "primer" match/game of a team, ALWAYS pass matchOrder: "oldest" to getTeamStats. When asking for the "last" or "último" match/game, pass matchOrder: "latest".
+- NEVER ask the user to clarify whether a registered team is a team or a player, or ask what position a team plays.
+- Only cite numbers explicitly returned by the tools.
 
 PERSONALITY & CONCISENESS:
-- Be friendly, human, and insightful, like a sharp basketball coach—never robotic.
+- Be friendly, human, and insightful, like a sharp coach—never robotic.
 - Keep ALL responses brief and punchy: maximum 2 to 3 short sentences per reply (around 40-65 words total).
-- When a visual card is displayed, briefly interpret the key takeaway (strengths, weakness, or turning point) instead of listing every number on the card.
+- When a visual card is displayed, briefly interpret the key takeaway instead of listing every number on the card.
 - End with at most one short, natural follow-up question.
 
 LANGUAGE RULES (HIGHEST PRIORITY):
@@ -25,11 +32,12 @@ LANGUAGE RULES (HIGHEST PRIORITY):
 - If the latest message is in Spanish, reply strictly in natural Spanish.
 
 FORMATTING RULES:
-- NEVER display internal database IDs (UUIDs) or internal tool/function names.`
+- NEVER display internal database IDs (UUIDs) or internal tool/function names (like getTeamStats or getPlayerSummary) in your text response.`
+}
 
 const detectTargetLanguage = (text: string): 'en' | 'es' => {
     const clean = text.toLowerCase()
-    const englishMarkers = /\b(the|what|about|how|are|you|can|show|first|last|game|match|team|player|points|sure|did|just|between|with|for|stats|statistics|analysis|analyse)\b/
+    const englishMarkers = /\b(the|what|about|how|are|you|can|show|first|last|game|match|team|player|points|sure|did|just|between|with|for|stats|statistics|analysis|analyse|their)\b/
     const spanishMarkers = /\b(el|la|los|las|que|como|cómo|puedes|primer|ultimo|último|partido|equipo|jugador|puntos|seguro|entre|con|para|estadisticas|estadísticas|hola|buenas)\b/
 
     const enMatches = (clean.match(new RegExp(englishMarkers, 'g')) || []).length
@@ -45,23 +53,43 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
         ? '\n\n[Language instruction: Reply strictly in British English.]'
         : '\n\n[Instrucción de idioma: Responde estrictamente en español.]'
 
+    let registeredTeamNames: string[] = []
+    try {
+        const teams = await getTeams()
+        if (Array.isArray(teams)) {
+            registeredTeamNames = teams.map((t) => t.name).filter(Boolean)
+        }
+    } catch {
+        // Continúa si no se pudieron precargar los equipos
+    }
+
     const recentHistory = chatHistory
         .filter((msg) => msg.id !== 'init-1' && (msg.text.trim() !== '' || Boolean(msg.genUiData)))
         .slice(-6)
-        .map((msg) => ({
-            role: msg.sender === 'user' ? ('user' as const) : ('assistant' as const),
-            content: msg.text.trim() !== '' ? msg.text : '[Visual card displayed]'
-        }))
+        .map((msg) => {
+            let cardContext = ''
+            if (msg.genUiData?.type === 'match-card') {
+                const d = msg.genUiData.data as { homeTeam?: string; awayTeam?: string; date?: string }
+                cardContext = ` [Match card shown: ${d.homeTeam} vs ${d.awayTeam} (${d.date || ''})]`
+            } else if (msg.genUiData?.type === 'player-card') {
+                const d = msg.genUiData.data as { name?: string; team?: string }
+                cardContext = ` [Player card shown: ${d.name} (${d.team})]`
+            }
+            return {
+                role: msg.sender === 'user' ? ('user' as const) : ('assistant' as const),
+                content: `${msg.text.trim()}${cardContext}`.trim()
+            }
+        })
 
     const messages: OpenRouterMessage[] = [
         {
             role: 'system',
-            content: SYSTEM_INSTRUCTION
+            content: buildSystemInstruction(registeredTeamNames)
         },
         ...recentHistory
     ]
 
-    if (recentHistory.length === 0 || recentHistory[recentHistory.length - 1].content !== userMessage) {
+    if (recentHistory.length === 0 || !recentHistory[recentHistory.length - 1].content.startsWith(userMessage)) {
         messages.push({
             role: 'user',
             content: `${userMessage}${langDirective}`

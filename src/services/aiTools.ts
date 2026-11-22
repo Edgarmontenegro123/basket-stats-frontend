@@ -5,6 +5,11 @@ import {normaliseText} from '../components/helpers/normaliseText'
 import {parseGameTimestamp} from '../components/helpers/formatDate'
 import {buildPlayerNameCandidates} from '../components/helpers/playerHelpers'
 
+const getRawDate = (game: TeamGame): unknown => {
+    const g = game as unknown as Record<string, unknown>
+    return g.date ?? g.game_date ?? g.match_date ?? g.created_at ?? ''
+}
+
 const resolvePlayerSummary = async(rawName: string): Promise<PlayerSummary | null> => {
     const candidates = buildPlayerNameCandidates(rawName)
     for (const candidate of candidates) {
@@ -134,12 +139,13 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 ])
 
                 const sortedGames = [...(games || [])].sort(
-                    (a, b) => parseGameTimestamp(b.date) - parseGameTimestamp(a.date)
+                    (a, b) => parseGameTimestamp(getRawDate(b)) - parseGameTimestamp(getRawDate(a))
                 )
                 const latestGame = sortedGames.length > 0 ? sortedGames[0] : null
                 let matchCardData = null
 
                 if (latestGame) {
+                    const resolvedDate = String(getRawDate(latestGame) || '')
                     let formattedTopPlayers: Array<{ name: string; points: number }> = []
                     try {
                         const gamePlayers = (await getPlayerStatsByGameId(latestGame.id)) as GamePlayerStat[]
@@ -165,7 +171,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             awayTeam: latestGame.away_team_name || latestGame.away_team || 'Visitante',
                             homeScore: latestGame.home_score ?? 0,
                             awayScore: latestGame.away_score ?? 0,
-                            date: latestGame.date,
+                            date: resolvedDate,
                             topPlayers: formattedTopPlayers
                         }
                     }
@@ -235,8 +241,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const matchOrder = typeof args?.matchOrder === 'string' ? normaliseText(args.matchOrder) : 'latest'
 
                 teamGames.sort((a, b) => {
-                    const timeA = parseGameTimestamp(a.date)
-                    const timeB = parseGameTimestamp(b.date)
+                    const timeA = parseGameTimestamp(getRawDate(a))
+                    const timeB = parseGameTimestamp(getRawDate(b))
                     if (timeA !== timeB) return timeA - timeB
                     return String(a.id).localeCompare(String(b.id))
                 })
@@ -254,6 +260,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     const awayName = selectedGame.away_team_name || selectedGame.away_team || 'Visitante'
                     const homeScore = selectedGame.home_score ?? 0
                     const awayScore = selectedGame.away_score ?? 0
+                    const resolvedDate = String(getRawDate(selectedGame) || '')
 
                     let formattedTopPlayers: Array<{ name: string; points: number }> = []
                     try {
@@ -284,7 +291,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     }
 
                     const topScorersStr = formattedTopPlayers.map((p) => `${p.name} (${p.points} pts)`).join(', ')
-                    matchSummaryText = `${isOldest ? 'First' : 'Latest'} match for ${matchingTeam.name}: ${homeName} ${homeScore} vs ${awayName} ${awayScore} (Date: ${selectedGame.date || 'N/A'}). Top performers: ${topScorersStr}.`
+                    matchSummaryText = `${isOldest ? 'First' : 'Latest'} match for ${matchingTeam.name}: ${homeName} ${homeScore} vs ${awayName} ${awayScore} (Date: ${resolvedDate || 'N/A'}). Top performers: ${topScorersStr}.`
 
                     matchCardData = {
                         type: 'match-card' as const,
@@ -294,7 +301,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             awayTeam: awayName,
                             homeScore,
                             awayScore,
-                            date: selectedGame.date,
+                            date: resolvedDate,
                             topPlayers: formattedTopPlayers
                         }
                     }
@@ -382,7 +389,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     }
 
                     if (targetGames.length > 0) {
-                        targetGames.sort((a, b) => parseGameTimestamp(a.date) - parseGameTimestamp(b.date))
+                        targetGames.sort((a, b) => parseGameTimestamp(getRawDate(a)) - parseGameTimestamp(getRawDate(b)))
                     }
 
                     if (targetGames.length > 1) {
@@ -392,7 +399,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             targetGames = [targetGames[0]]
                         } else if (rawMatchContext) {
                             const matchFiltered = targetGames.filter(g => {
-                                const gDate = normaliseText(g.date || '')
+                                const gDate = normaliseText(String(getRawDate(g) || ''))
                                 return gDate.includes(rawMatchContext)
                             })
                             if (matchFiltered.length > 0) {
