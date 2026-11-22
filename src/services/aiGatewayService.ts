@@ -5,32 +5,45 @@ import {aiFunctionDeclarations, executeAITool} from './aiTools'
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || (import.meta.env.DEV ? 'http://localhost:8081' : 'https://147.15.10.181.nip.io/analytics')
 const MODEL_NAME = 'meta-llama/llama-3.3-70b-instruct:free'
 
-const SYSTEM_INSTRUCTION = `You are Swish, a warm, insightful, and conversational basketball tactical assistant and sports analyst.
+const SYSTEM_INSTRUCTION = `You are Swish, a warm, concise, and reliable basketball tactical assistant.
 
-PERSONALITY & TONE:
-- Be approachable, natural, and genuinely helpful—like a knowledgeable basketball coach or analyst chatting with a colleague.
-- When the user greets you (e.g., "Hola", "How are you?"), respond warmly and naturally in their language, and invite them to explore team stats, match results, or player analysis.
-- Never sound robotic or merely dump raw numbers. Always interpret the stats: highlight strengths, areas for improvement, tactical impact, and context.
-- When a visual card (match card, player card, or comparison card) is displayed alongside your message, write a concise, engaging tactical commentary (2 to 4 sentences) explaining what the numbers mean rather than repeating every single stat on the card.
+STRICT DATA INTEGRITY (CRITICAL):
+- NEVER invent, guess, or estimate scores, points, rebounds, assists, or player performances.
+- Whenever the user asks about ANY match, team, or player (including follow-up questions like "what about X vs Y?" or "are you sure?"), you MUST call the appropriate tool first to verify the exact numbers from the database.
+- Only cite numbers explicitly returned by the tools. If a stat is not in the tool output, state clearly that you do not have that figure.
 
-LANGUAGE RULES:
-- Detect the language of the user's latest message and reply strictly in that same language.
-- If the user writes in English, you MUST respond in British English (use British spelling and terminology such as 'analyse', 'defence', 'offence', 'match', 'colour').
-- If the user writes in Spanish, you MUST respond in natural, fluent Spanish.
-- If the language is ambiguous (e.g., only a team or player name), default to Spanish.
+PERSONALITY & CONCISENESS:
+- Be friendly, human, and insightful, like a sharp basketball coach—never robotic.
+- Keep ALL responses brief and punchy: maximum 2 to 3 short sentences per reply (around 40-65 words total).
+- When a visual card is displayed, briefly interpret the key takeaway (strengths, weakness, or turning point) instead of listing every number on the card.
+- End with at most one short, natural follow-up question.
 
-CORE RULES:
-- Assume capitalized words, proper nouns, or informal names (e.g., 'almendra', 'capitan', 'pegasos') refer to basketball teams or players in the system.
-- ALWAYS execute available tools to search for real data before answering questions about teams, matches, or players.
-- Handle accent marks, typos, and case variations gracefully.
-- Politely steer off-topic questions back to basketball analytics without sounding rigid.
+LANGUAGE RULES (HIGHEST PRIORITY):
+- Always match the language of the user's LATEST message, ignoring the language of earlier messages in the chat history.
+- If the latest message is in English, reply strictly in British English (e.g. 'analyse', 'defence', 'offence', 'match', 'colour').
+- If the latest message is in Spanish, reply strictly in natural Spanish.
 
 FORMATTING RULES:
-- NEVER display internal database IDs (UUIDs).
-- NEVER mention internal tool or function names to the user.
-- Keep paragraphs clean and readable; use bolding sparingly for key tactical insights.`
+- NEVER display internal database IDs (UUIDs) or internal tool/function names.`
+
+const detectTargetLanguage = (text: string): 'en' | 'es' => {
+    const clean = text.toLowerCase()
+    const englishMarkers = /\b(the|what|about|how|are|you|can|show|first|last|game|match|team|player|points|sure|did|just|between|with|for|stats|statistics|analysis|analyse)\b/
+    const spanishMarkers = /\b(el|la|los|las|que|como|cómo|puedes|primer|ultimo|último|partido|equipo|jugador|puntos|seguro|entre|con|para|estadisticas|estadísticas|hola|buenas)\b/
+
+    const enMatches = (clean.match(new RegExp(englishMarkers, 'g')) || []).length
+    const esMatches = (clean.match(new RegExp(spanishMarkers, 'g')) || []).length
+
+    if (enMatches > esMatches) return 'en'
+    return 'es'
+}
 
 export const sendMessageToGateway = async(userMessage: string, chatHistory: ChatMessage[] = []): Promise<AIGatewayResponse> => {
+    const targetLang = detectTargetLanguage(userMessage)
+    const langDirective = targetLang === 'en'
+        ? '\n\n[Language instruction: Reply strictly in British English.]'
+        : '\n\n[Instrucción de idioma: Responde estrictamente en español.]'
+
     const recentHistory = chatHistory
         .filter((msg) => msg.id !== 'init-1' && (msg.text.trim() !== '' || Boolean(msg.genUiData)))
         .slice(-6)
@@ -50,8 +63,13 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
     if (recentHistory.length === 0 || recentHistory[recentHistory.length - 1].content !== userMessage) {
         messages.push({
             role: 'user',
-            content: userMessage
+            content: `${userMessage}${langDirective}`
         })
+    } else {
+        messages[messages.length - 1] = {
+            role: 'user',
+            content: `${userMessage}${langDirective}`
+        }
     }
 
     const typedDeclarations = aiFunctionDeclarations as unknown as AIFunctionDeclaration[]
@@ -76,7 +94,8 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 model: MODEL_NAME,
                 messages,
                 tools,
-                tool_choice: 'auto'
+                tool_choice: 'auto',
+                temperature: 0.2
             })
         })
 
@@ -130,7 +149,8 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 },
                 body: JSON.stringify({
                     model: MODEL_NAME,
-                    messages
+                    messages,
+                    temperature: 0.2
                 })
             })
 
@@ -143,7 +163,6 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
             }
         }
 
-        // Si el modelo devolvió contenido vacío (ej. en saludos simples con tools activos), reintentamos como conversación pura
         if (!message?.content || message.content.trim() === '') {
             const fallbackResponse = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
                 method: 'POST',
@@ -153,7 +172,8 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 },
                 body: JSON.stringify({
                     model: MODEL_NAME,
-                    messages
+                    messages,
+                    temperature: 0.3
                 })
             })
 
@@ -167,7 +187,9 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
         }
 
         return {
-            text: message?.content || '¡Hola! Todo muy bien por aquí. ¿Sobre qué equipo, partido o jugador te gustaría analizar estadísticas hoy?'
+            text: message?.content || (targetLang === 'en'
+                ? 'Hello! I am doing great. Which team, match, or player would you like to analyse today?'
+                : '¡Hola! Todo muy bien por aquí. ¿Sobre qué equipo, partido o jugador te gustaría analizar estadísticas hoy?')
         }
     } catch (error) {
         console.error('Error connecting to AI gateway:', error)

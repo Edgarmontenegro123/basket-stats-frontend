@@ -239,18 +239,25 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     let formattedTopPlayers: Array<{ name: string; points: number }> = []
                     try {
                         const gamePlayers = (await getPlayerStatsByGameId(selectedGame.id)) as GamePlayerStat[]
+                        const validPlayers = Array.isArray(gamePlayers) ? gamePlayers : []
 
-                        const filteredGamePlayers = Array.isArray(gamePlayers) ? gamePlayers.filter((p) => {
-                            const pTeam = normaliseText(p.team_name || p.team || '')
-                            return pTeam.includes(searchName) || searchName.includes(pTeam)
-                        }) : []
+                        // Si es un cruce directo (opponentName), mostramos los líderes de ambos equipos; si no, del equipo consultado
+                        const filteredGamePlayers = opponentSearch
+                            ? validPlayers
+                            : validPlayers.filter((p) => {
+                                const pTeam = normaliseText(p.team_name || p.team || '')
+                                return pTeam.includes(searchName) || searchName.includes(pTeam)
+                            })
 
-                        const pool = filteredGamePlayers.length > 0 ? filteredGamePlayers : (Array.isArray(gamePlayers) ? gamePlayers : [])
+                        const pool = filteredGamePlayers.length > 0 ? filteredGamePlayers : validPlayers
 
-                        formattedTopPlayers = pool.slice(0, 5).map((p) => ({
-                            name: p.player_name || p.name || 'Jugador',
-                            points: p.points ?? p.pts ?? 0
-                        }))
+                        formattedTopPlayers = [...pool]
+                            .sort((a, b) => Number(b.points ?? b.pts ?? 0) - Number(a.points ?? a.pts ?? 0))
+                            .slice(0, 5)
+                            .map((p) => ({
+                                name: p.player_name || p.name || 'Jugador',
+                                points: Number(p.points ?? p.pts ?? 0)
+                            }))
                     } catch {
                         formattedTopPlayers = (scorers || []).slice(0, 5).map((s) => ({
                             name: s.player_name || s.name || 'Jugador',
