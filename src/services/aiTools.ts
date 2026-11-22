@@ -2,6 +2,19 @@ import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryBy
 import type {Team} from '../types/team'
 import type {TeamGame, TopScorer, GamePlayerStat, PlayerSummary} from '../types/ai'
 import {normaliseText} from '../components/helpers/normaliseText'
+import {parseGameTimestamp} from '../components/helpers/formatDate'
+import {buildPlayerNameCandidates} from '../components/helpers/playerHelpers'
+
+const resolvePlayerSummary = async(rawName: string): Promise<PlayerSummary | null> => {
+    const candidates = buildPlayerNameCandidates(rawName)
+    for (const candidate of candidates) {
+        const result = (await getPlayerSummaryByName(candidate)) as PlayerSummary | null
+        if (result && !result.error && (result.player_name || result.average_points !== undefined)) {
+            return result
+        }
+    }
+    return null
+}
 
 export const aiFunctionDeclarations = [
     {
@@ -30,7 +43,7 @@ export const aiFunctionDeclarations = [
     },
     {
         name: 'getTeamStats',
-        description: 'Retrieves team info, recent or first games, or a specific head-to-head match between two teams (e.g. Almendra vs Pegasos). ALWAYS set matchOrder to "oldest" if the user asks for the first match ("primer partido", "first one"), or "latest" for the most recent match ("último partido").',
+        description: 'Retrieves team info, recent or first games, or a specific head-to-head match between two teams (e.g. Almendra vs Pegasos). ALWAYS set matchOrder to "oldest" if the user asks for the first match ("primer partido", "first one", "first game"), or "latest" for the most recent match ("último partido", "last game").',
         parameters: {
             type: 'object',
             properties: {
@@ -120,17 +133,23 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     getTopScorers(10)
                 ])
 
-                const latestGame = games && games.length > 0 ? games[0] : null
+                const sortedGames = [...(games || [])].sort(
+                    (a, b) => parseGameTimestamp(b.date) - parseGameTimestamp(a.date)
+                )
+                const latestGame = sortedGames.length > 0 ? sortedGames[0] : null
                 let matchCardData = null
 
                 if (latestGame) {
                     let formattedTopPlayers: Array<{ name: string; points: number }> = []
                     try {
                         const gamePlayers = (await getPlayerStatsByGameId(latestGame.id)) as GamePlayerStat[]
-                        formattedTopPlayers = (Array.isArray(gamePlayers) ? gamePlayers : []).slice(0, 5).map((p) => ({
-                            name: p.player_name || p.name || 'Jugador',
-                            points: p.points ?? p.pts ?? 0
-                        }))
+                        formattedTopPlayers = (Array.isArray(gamePlayers) ? gamePlayers : [])
+                            .sort((a, b) => Number(b.points ?? b.pts ?? 0) - Number(a.points ?? a.pts ?? 0))
+                            .slice(0, 5)
+                            .map((p) => ({
+                                name: p.player_name || p.name || 'Jugador',
+                                points: Number(p.points ?? p.pts ?? 0)
+                            }))
                     } catch {
                         formattedTopPlayers = (scorers || []).slice(0, 5).map((s: TopScorer) => ({
                             name: s.player_name || s.name || 'Jugador',
@@ -154,7 +173,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
 
                 return {
                     result: 'Match summary retrieved successfully',
-                    games,
+                    games: sortedGames,
                     teams,
                     topScorers: scorers,
                     genUiData: matchCardData
@@ -216,8 +235,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const matchOrder = typeof args?.matchOrder === 'string' ? normaliseText(args.matchOrder) : 'latest'
 
                 teamGames.sort((a, b) => {
-                    const timeA = a.date ? new Date(a.date).getTime() : 0
-                    const timeB = b.date ? new Date(b.date).getTime() : 0
+                    const timeA = parseGameTimestamp(a.date)
+                    const timeB = parseGameTimestamp(b.date)
                     if (timeA !== timeB) return timeA - timeB
                     return String(a.id).localeCompare(String(b.id))
                 })
@@ -241,7 +260,6 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         const gamePlayers = (await getPlayerStatsByGameId(selectedGame.id)) as GamePlayerStat[]
                         const validPlayers = Array.isArray(gamePlayers) ? gamePlayers : []
 
-                        // Si es un cruce directo (opponentName), mostramos los líderes de ambos equipos; si no, del equipo consultado
                         const filteredGamePlayers = opponentSearch
                             ? validPlayers
                             : validPlayers.filter((p) => {
@@ -305,10 +323,10 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
             }
             case 'getPlayerSummary': {
                 const rawName = typeof args?.playerName === 'string' ? args.playerName : ''
-                const player = (await getPlayerSummaryByName(rawName.trim())) as PlayerSummary | null
+                const player = await resolvePlayerSummary(rawName)
 
-                if (!player || player.error || !player.player_name) {
-                    return {result: 'Player not found', genUiData: null}
+                if (!player || !player.player_name) {
+                    return {result: `Player "${rawName}" not found in database.`, genUiData: null}
                 }
 
                 const name = player.player_name
@@ -319,7 +337,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const steals = player.average_steals ?? player.total_steals ?? 0
 
                 return {
-                    result: `Player found: ${name}. Team: ${team}. Points: ${points}, Rebounds: ${rebounds}, Assists: ${assists}, Steals: ${steals}`,
+                    result: `Player found: ${name}. Team: ${team}. Average stats — Points: ${points}, Rebounds: ${rebounds}, Assists: ${assists}, Steals: ${steals}.`,
                     genUiData: {
                         type: 'player-card',
                         data: {
@@ -364,13 +382,13 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     }
 
                     if (targetGames.length > 0) {
-                        targetGames.sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime())
+                        targetGames.sort((a, b) => parseGameTimestamp(a.date) - parseGameTimestamp(b.date))
                     }
 
                     if (targetGames.length > 1) {
                         if (rawMatchContext.includes('ultimo') || rawMatchContext.includes('recent') || rawMatchContext.includes('reciente')) {
                             targetGames = [targetGames[targetGames.length - 1]]
-                        } else if (rawMatchContext.includes('primero') || rawMatchContext.includes('primer') || rawMatchContext.includes('oldest')) {
+                        } else if (rawMatchContext.includes('primero') || rawMatchContext.includes('primer') || rawMatchContext.includes('oldest') || rawMatchContext.includes('first')) {
                             targetGames = [targetGames[0]]
                         } else if (rawMatchContext) {
                             const matchFiltered = targetGames.filter(g => {
@@ -433,13 +451,10 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         }
                     }
 
-                    const [rawP1Fallback, rawP2Fallback] = await Promise.all([
-                        getPlayerSummaryByName(rawP1.trim()),
-                        getPlayerSummaryByName(rawP2.trim())
+                    const [p1Fallback, p2Fallback] = await Promise.all([
+                        resolvePlayerSummary(rawP1),
+                        resolvePlayerSummary(rawP2)
                     ])
-
-                    const p1Fallback = rawP1Fallback as PlayerSummary
-                    const p2Fallback = rawP2Fallback as PlayerSummary
 
                     const p1Exists = p1MatchesCount > 0 || Boolean(p1Fallback && (p1Fallback.average_points !== undefined || p1Fallback.player_name !== undefined))
                     const p2Exists = p2MatchesCount > 0 || Boolean(p2Fallback && (p2Fallback.average_points !== undefined || p2Fallback.player_name !== undefined))
@@ -463,16 +478,21 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     const finalP2Assists = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalAssists : Number((p2TotalAssists / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_assists ?? 0)
                     const finalP2Steals = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalSteals : Number((p2TotalSteals / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_steals ?? 0)
 
-                    let statusMessage = 'Comparación generada correctamente.'
-                    if (!p1Exists) statusMessage = `Aviso: No se encontró al jugador "${rawP1}", por lo que sus datos no están disponibles.`
-                    if (!p2Exists) statusMessage = `Aviso: No se encontró al jugador "${rawP2}", por lo que sus datos no están disponibles.`
+                    const resolvedP1Name = p1Exists ? (p1MatchesCount > 0 ? p1ActualName : (p1Fallback?.player_name || rawP1)) : `${rawP1} (No encontrado)`
+                    const resolvedP2Name = p2Exists ? (p2MatchesCount > 0 ? p2ActualName : (p2Fallback?.player_name || rawP2)) : `${rawP2} (No encontrado)`
+                    const resolvedP1Team = p1Team || p1Fallback?.team_name || 'Sin equipo'
+                    const resolvedP2Team = p2Team || p2Fallback?.team_name || 'Sin equipo'
+
+                    let statusMessage = `Comparison stats (${isSingleMatch ? 'single match' : 'average'}): ${resolvedP1Name} (${resolvedP1Team}) — ${finalP1Points} PTS, ${finalP1Rebounds} REB, ${finalP1Assists} AST, ${finalP1Steals} STL vs ${resolvedP2Name} (${resolvedP2Team}) — ${finalP2Points} PTS, ${finalP2Rebounds} REB, ${finalP2Assists} AST, ${finalP2Steals} STL.`
+                    if (!p1Exists) statusMessage = `Notice: Player "${rawP1}" was not found in the database.`
+                    if (!p2Exists) statusMessage = `Notice: Player "${rawP2}" was not found in the database.`
 
                     const comparisonData = {
                         type: 'compare-card' as const,
                         data: {
                             player1: {
-                                name: p1Exists ? (p1MatchesCount > 0 ? p1ActualName : (p1Fallback?.player_name || rawP1)) : `${rawP1} (No encontrado)`,
-                                team: p1Team || p1Fallback?.team_name || 'Sin equipo',
+                                name: resolvedP1Name,
+                                team: resolvedP1Team,
                                 points: p1Exists ? finalP1Points : 0,
                                 rebounds: p1Exists ? finalP1Rebounds : 0,
                                 assists: p1Exists ? finalP1Assists : 0,
@@ -481,8 +501,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 teamBadgeUrl: p1Fallback?.team_badge_url || ''
                             },
                             player2: {
-                                name: p2Exists ? (p2MatchesCount > 0 ? p2ActualName : (p2Fallback?.player_name || rawP2)) : `${rawP2} (No encontrado)`,
-                                team: p2Team || p2Fallback?.team_name || 'Sin equipo',
+                                name: resolvedP2Name,
+                                team: resolvedP2Team,
                                 points: p2Exists ? finalP2Points : 0,
                                 rebounds: p2Exists ? finalP2Rebounds : 0,
                                 assists: p2Exists ? finalP2Assists : 0,
