@@ -1,7 +1,6 @@
 import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName, getPlayerStatsByGameId} from './api'
 import type {Team} from '../types/team'
-import type {TeamGame, TopScorer, GamePlayerStat} from '../types/ai'
-import type {PlayerSummary} from '../types/ai'
+import type {TeamGame, TopScorer, GamePlayerStat, PlayerSummary} from '../types/ai'
 
 const normalizeText = (text: unknown) =>
     typeof text === 'string' ? text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim() : ''
@@ -9,25 +8,41 @@ const normalizeText = (text: unknown) =>
 export const aiFunctionDeclarations = [
     {
         name: 'getMatchSummary',
-        description: 'Retrieves complete match data including recent games, team information, and top scorers in a single request.'
+        description: 'Retrieves complete match data including recent games, team information, and top scorers in a single request.',
+        parameters: {
+            type: 'object',
+            properties: {}
+        }
     },
     {
         name: 'getGames',
-        description: 'Retrieves the list of basketball games with scores, status, and teams.'
+        description: 'Retrieves the list of basketball games with scores, status, and teams.',
+        parameters: {
+            type: 'object',
+            properties: {}
+        }
     },
     {
         name: 'getTeams',
-        description: 'Retrieves the list of registered basketball teams.'
+        description: 'Retrieves the list of registered basketball teams.',
+        parameters: {
+            type: 'object',
+            properties: {}
+        }
     },
     {
         name: 'getTeamStats',
-        description: 'Retrieves team info, recent games, or roster stats for a specific TEAM (e.g. Almendra, Capitan el Espacio). Use this when the user asks about a TEAM summary or team stats.',
+        description: 'Retrieves team info, recent games, or a specific head-to-head match between two teams (e.g. Almendra vs Pegasos). Use this when the user asks about a team or a match between two teams.',
         parameters: {
-            type: 'OBJECT',
+            type: 'object',
             properties: {
                 teamName: {
-                    type: 'STRING',
-                    description: 'The name or short name of the team'
+                    type: 'string',
+                    description: 'The name or short name of the primary team (e.g. Almendra)'
+                },
+                opponentName: {
+                    type: 'string',
+                    description: 'Optional name of the opponent team if the user asks for a specific match between two teams (e.g. Pegasos)'
                 }
             },
             required: ['teamName']
@@ -37,14 +52,14 @@ export const aiFunctionDeclarations = [
         name: 'getTopScorers',
         description: 'Retrieves top player stats rankings. Category can be strictly: points, rebounds, assists, or steals. Always use this when asked for leaders in points, steals, or rebounds.',
         parameters: {
-            type: 'OBJECT',
+            type: 'object',
             properties: {
                 limit: {
-                    type: 'NUMBER',
+                    type: 'number',
                     description: 'Number of players to return (default 5)'
                 },
                 category: {
-                    type: 'STRING',
+                    type: 'string',
                     description: 'The exact stat category: points, rebounds, assists, or steals'
                 }
             },
@@ -55,10 +70,10 @@ export const aiFunctionDeclarations = [
         name: 'getPlayerSummary',
         description: 'Retrieves detailed statistical summary for a single human PLAYER by full name (e.g. Jose Escalante, Edgar Montenegro). Do NOT use for team searches.',
         parameters: {
-            type: 'OBJECT',
+            type: 'object',
             properties: {
                 playerName: {
-                    type: 'STRING',
+                    type: 'string',
                     description: 'The full name of the player'
                 }
             },
@@ -69,22 +84,22 @@ export const aiFunctionDeclarations = [
         name: 'comparePlayers',
         description: 'Compares the statistical performance of two basketball players in a specific match or overall. ALWAYS extract the team or matchup query into teamQuery when the user mentions a match (e.g., "en el partido almendra Vs pegasos" -> teamQuery: "almendra vs pegasos"). If a specific date or "last match" is mentioned, extract it into matchContext.',
         parameters: {
-            type: 'OBJECT',
+            type: 'object',
             properties: {
                 player1Name: {
-                    type: 'STRING',
+                    type: 'string',
                     description: 'The full name of the first player'
                 },
                 player2Name: {
-                    type: 'STRING',
+                    type: 'string',
                     description: 'The full name of the second player'
                 },
                 teamQuery: {
-                    type: 'STRING',
+                    type: 'string',
                     description: 'The exact matchup or team name mentioned by the user (e.g. almendra vs pegasos)'
                 },
                 matchContext: {
-                    type: 'STRING',
+                    type: 'string',
                     description: 'Specific date, round, or identifier like "ultimo" (last) if a specific game among the same teams is requested'
                 }
             },
@@ -149,13 +164,19 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 return await getTeams()
             case 'getTeamStats': {
                 const rawSearch = typeof args?.teamName === 'string' ? args.teamName : ''
+                const rawOpponent = typeof args?.opponentName === 'string' ? args.opponentName : ''
                 const searchName = normalizeText(rawSearch)
+                const opponentSearch = normalizeText(rawOpponent)
 
-                const [games, teams, scorers] = await Promise.all([
-                    await getGames() as unknown as TeamGame[],
-                    await getTeams() as unknown as Team[],
-                    await getTopScorers(20) as unknown as TopScorer[]
+                const [rawGames, rawTeams, rawScorers] = await Promise.all([
+                    getGames(),
+                    getTeams(),
+                    getTopScorers(20)
                 ])
+
+                const games = rawGames as unknown as TeamGame[]
+                const teams = rawTeams as unknown as Team[]
+                const scorers = rawScorers as unknown as TopScorer[]
 
                 const matchingTeam = teams.find((t) => {
                     const normName = normalizeText(t.name)
@@ -167,14 +188,30 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     return {team: null, message: 'Team not found', availableTeams: teams.map((t) => t.name)}
                 }
 
-                const teamGames = games.filter((g) =>
-                    g.home_team_id === matchingTeam.id ||
-                    g.away_team_id === matchingTeam.id ||
-                    (g.home_team && normalizeText(g.home_team).includes(searchName)) ||
-                    (g.away_team && normalizeText(g.away_team).includes(searchName))
-                )
+                let teamGames = games.filter((g) => {
+                    const home = normalizeText(g.home_team_name || g.home_team || '')
+                    const away = normalizeText(g.away_team_name || g.away_team || '')
+                    return (
+                        g.home_team_id === matchingTeam.id ||
+                        g.away_team_id === matchingTeam.id ||
+                        home.includes(searchName) ||
+                        away.includes(searchName)
+                    )
+                })
 
-                const latestTeamGame = teamGames && teamGames.length > 0 ? teamGames[0] : null
+                if (opponentSearch) {
+                    const headToHeadGames = teamGames.filter((g) => {
+                        const home = normalizeText(g.home_team_name || g.home_team || '')
+                        const away = normalizeText(g.away_team_name || g.away_team || '')
+                        return home.includes(opponentSearch) || away.includes(opponentSearch)
+                    })
+
+                    if (headToHeadGames.length > 0) {
+                        teamGames = headToHeadGames
+                    }
+                }
+
+                const latestTeamGame = teamGames.length > 0 ? teamGames[0] : null
                 let matchCardData = null
 
                 if (latestTeamGame) {
@@ -282,7 +319,6 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     const games = (await getGames()) as TeamGame[]
                     let targetGames: TeamGame[] = games
 
-                    // Si hay una consulta de equipo/enfrentamiento, filtramos estrictamente esos partidos
                     if (rawTeamSearch) {
                         const searchLower = normalizeText(rawTeamSearch)
                         const queryTokens = searchLower.split(/\s+vs\s+|\s+v\s+|\s+contra\s+|\s+y\s+/)
@@ -297,18 +333,14 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         })
                     }
 
-                    // Ordenar cronológicamente los partidos por fecha
                     if (targetGames.length > 0) {
                         targetGames.sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime())
                     }
 
-                    // Manejo del contexto temporal (último, primero, etc.)
                     if (targetGames.length > 1) {
                         if (rawMatchContext.includes('ultimo') || rawMatchContext.includes('recent') || rawMatchContext.includes('reciente')) {
-                            // Nos quedamos solo con el más reciente (el último del array ordenado ascendentemente es el final)
                             targetGames = [targetGames[targetGames.length - 1]]
                         } else if (rawMatchContext.includes('primero') || rawMatchContext.includes('primer') || rawMatchContext.includes('oldest')) {
-                            // Nos quedamos solo con el primero registrado
                             targetGames = [targetGames[0]]
                         } else if (rawMatchContext) {
                             const matchFiltered = targetGames.filter(g => {
@@ -347,8 +379,6 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 return p2Tokens.some(token => pName.includes(token))
                             })
 
-                            // Para evitar mezclar partidos donde uno jugó y el otro no dentro del mismo filtro de enfrentamiento:
-                            // Solo sumamos si ambos participaron, o acumulamos sus presencias de forma independiente en los partidos filtrados.
                             if (foundP1) {
                                 p1ActualName = foundP1.player_name || foundP1.name || p1ActualName
                                 p1Team = foundP1.team_name || foundP1.team || p1Team
@@ -373,10 +403,13 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         }
                     }
 
-                    const [p1Fallback, p2Fallback] = await Promise.all([
-                        await getPlayerSummaryByName(rawP1.trim()) as PlayerSummary,
-                        await getPlayerSummaryByName(rawP2.trim()) as PlayerSummary
+                    const [rawP1Fallback, rawP2Fallback] = await Promise.all([
+                        getPlayerSummaryByName(rawP1.trim()),
+                        getPlayerSummaryByName(rawP2.trim())
                     ])
+
+                    const p1Fallback = rawP1Fallback as PlayerSummary
+                    const p2Fallback = rawP2Fallback as PlayerSummary
 
                     const p1Exists = p1MatchesCount > 0 || Boolean(p1Fallback && (p1Fallback.average_points !== undefined || p1Fallback.player_name !== undefined))
                     const p2Exists = p2MatchesCount > 0 || Boolean(p2Fallback && (p2Fallback.average_points !== undefined || p2Fallback.player_name !== undefined))
