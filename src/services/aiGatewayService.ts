@@ -15,9 +15,10 @@ const buildSystemInstruction = (registeredTeams: string[]): string => {
 ${teamsContext}
 STRICT DATA INTEGRITY (CRITICAL):
 - NEVER invent, guess, or estimate scores, points, rebounds, assists, or player performances.
-- Whenever the user asks about ANY match, team, or player (including follow-up questions like "what about their last match?" or "are you sure?"), you MUST invoke the tool call directly—NEVER write in text that you "will call" a tool without emitting the actual tool call.
+- NEVER say "I don't have information" about a player or team without calling the corresponding tool first.
+- Whenever the user asks about ANY match or team in the registered teams list (including follow-up questions like "what about their last match?"), invoke getTeamStats immediately.
+- Whenever the user asks about ANY person/player name NOT in the registered teams list (e.g. strengths, weaknesses, stats of an individual), invoke getPlayerSummary immediately.
 - When the user asks for the "first" or "primer" match/game of a team, ALWAYS pass matchOrder: "oldest" to getTeamStats. When asking for the "last" or "último" match/game, pass matchOrder: "latest".
-- NEVER ask the user to clarify whether a registered team is a team or a player, or ask what position a team plays.
 - Only cite numbers explicitly returned by the tools.
 
 PERSONALITY & CONCISENESS:

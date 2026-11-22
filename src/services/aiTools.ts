@@ -2,7 +2,7 @@ import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryBy
 import type {Team} from '../types/team'
 import type {TeamGame, TopScorer, GamePlayerStat, PlayerSummary} from '../types/ai'
 import {normaliseText} from '../components/helpers/normaliseText'
-import {parseGameTimestamp} from '../components/helpers/formatDate'
+import {parseGameTimestamp, formatDateToDDMMYYYY} from '../components/helpers/formatDate'
 import {buildPlayerNameCandidates} from '../components/helpers/playerHelpers'
 
 const getRawDate = (game: TeamGame): unknown => {
@@ -171,7 +171,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             awayTeam: latestGame.away_team_name || latestGame.away_team || 'Visitante',
                             homeScore: latestGame.home_score ?? 0,
                             awayScore: latestGame.away_score ?? 0,
-                            date: resolvedDate,
+                            date: formatDateToDDMMYYYY(resolvedDate),
                             topPlayers: formattedTopPlayers
                         }
                     }
@@ -261,6 +261,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     const homeScore = selectedGame.home_score ?? 0
                     const awayScore = selectedGame.away_score ?? 0
                     const resolvedDate = String(getRawDate(selectedGame) || '')
+                    const formattedDate = formatDateToDDMMYYYY(resolvedDate)
 
                     let formattedTopPlayers: Array<{ name: string; points: number }> = []
                     try {
@@ -291,7 +292,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     }
 
                     const topScorersStr = formattedTopPlayers.map((p) => `${p.name} (${p.points} pts)`).join(', ')
-                    matchSummaryText = `${isOldest ? 'First' : 'Latest'} match for ${matchingTeam.name}: ${homeName} ${homeScore} vs ${awayName} ${awayScore} (Date: ${resolvedDate || 'N/A'}). Top performers: ${topScorersStr}.`
+                    matchSummaryText = `${isOldest ? 'First' : 'Latest'} match for ${matchingTeam.name}: ${homeName} ${homeScore} vs ${awayName} ${awayScore} (Date: ${formattedDate || 'N/A'}). Top performers: ${topScorersStr}.`
 
                     matchCardData = {
                         type: 'match-card' as const,
@@ -301,7 +302,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             awayTeam: awayName,
                             homeScore,
                             awayScore,
-                            date: resolvedDate,
+                            date: formattedDate,
                             topPlayers: formattedTopPlayers
                         }
                     }
