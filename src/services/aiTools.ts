@@ -43,6 +43,10 @@ export const aiFunctionDeclarations = [
                 opponentName: {
                     type: 'string',
                     description: 'Optional name of the opponent team if the user asks for a specific match between two teams (e.g. Pegasos)'
+                },
+                matchOrder: {
+                    type: 'string',
+                    description: 'Optional order: "latest" for the most recent game (default) or "oldest" for the first game'
                 }
             },
             required: ['teamName']
@@ -211,13 +215,20 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     }
                 }
 
-                const latestTeamGame = teamGames.length > 0 ? teamGames[0] : null
+                const matchOrder = typeof args?.matchOrder === 'string' ? normalizeText(args.matchOrder) : 'latest'
+
+                teamGames.sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime())
+
+                const selectedGame = teamGames.length > 0
+                    ? (matchOrder.includes('oldest') || matchOrder.includes('primer') ? teamGames[0] : teamGames[teamGames.length - 1])
+                    : null
+
                 let matchCardData = null
 
-                if (latestTeamGame) {
+                if (selectedGame) {
                     let formattedTopPlayers: Array<{ name: string; points: number }> = []
                     try {
-                        const gamePlayers = (await getPlayerStatsByGameId(latestTeamGame.id)) as GamePlayerStat[]
+                        const gamePlayers = (await getPlayerStatsByGameId(selectedGame.id)) as GamePlayerStat[]
 
                         const filteredGamePlayers = Array.isArray(gamePlayers) ? gamePlayers.filter((p) => {
                             const pTeam = normalizeText(p.team_name || p.team || '')
@@ -240,12 +251,12 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     matchCardData = {
                         type: 'match-card' as const,
                         data: {
-                            gameId: latestTeamGame.id,
-                            homeTeam: latestTeamGame.home_team_name || latestTeamGame.home_team || 'Local',
-                            awayTeam: latestTeamGame.away_team_name || latestTeamGame.away_team || 'Visitante',
-                            homeScore: latestTeamGame.home_score ?? 0,
-                            awayScore: latestTeamGame.away_score ?? 0,
-                            date: latestTeamGame.date,
+                            gameId: selectedGame.id,
+                            homeTeam: selectedGame.home_team_name || selectedGame.home_team || 'Local',
+                            awayTeam: selectedGame.away_team_name || selectedGame.away_team || 'Visitante',
+                            homeScore: selectedGame.home_score ?? 0,
+                            awayScore: selectedGame.away_score ?? 0,
+                            date: selectedGame.date,
                             topPlayers: formattedTopPlayers
                         }
                     }

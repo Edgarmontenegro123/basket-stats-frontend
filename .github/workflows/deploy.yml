@@ -19,13 +19,11 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          command_timeout: 20m
           script: |
             cd ~/basket-stats-frontend
             git pull origin main
-            docker build --no-cache \
-              --build-arg VITE_MANAGEMENT_API_URL=https://147.15.10.181.nip.io/management \
-              --build-arg VITE_ANALYTICS_API_URL=https://147.15.10.181.nip.io/analytics \
-              -t basket-stats-frontend .
-            docker stop basket-stats-frontend || true
-            docker rm basket-stats-frontend || true
-            docker run -d --name basket-stats-frontend --restart always -p 8080:80 basket-stats-frontend
+            cd ~
+            docker compose build frontend
+            docker compose up -d --force-recreate --no-deps frontend
+            docker image prune -f
