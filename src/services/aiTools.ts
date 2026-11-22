@@ -1,9 +1,7 @@
 import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName, getPlayerStatsByGameId} from './api'
 import type {Team} from '../types/team'
 import type {TeamGame, TopScorer, GamePlayerStat, PlayerSummary} from '../types/ai'
-
-const normalizeText = (text: unknown) =>
-    typeof text === 'string' ? text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim() : ''
+import {normaliseText} from '../components/helpers/normaliseText'
 
 export const aiFunctionDeclarations = [
     {
@@ -32,7 +30,7 @@ export const aiFunctionDeclarations = [
     },
     {
         name: 'getTeamStats',
-        description: 'Retrieves team info, recent games, or a specific head-to-head match between two teams (e.g. Almendra vs Pegasos). Use this when the user asks about a team or a match between two teams.',
+        description: 'Retrieves team info, recent or first games, or a specific head-to-head match between two teams (e.g. Almendra vs Pegasos). ALWAYS set matchOrder to "oldest" if the user asks for the first match ("primer partido", "first one"), or "latest" for the most recent match ("último partido").',
         parameters: {
             type: 'object',
             properties: {
@@ -46,7 +44,7 @@ export const aiFunctionDeclarations = [
                 },
                 matchOrder: {
                     type: 'string',
-                    description: 'Optional order: "latest" for the most recent game (default) or "oldest" for the first game'
+                    description: 'Set to "oldest" when asking for the first game ("primer partido", "first"), or "latest" (default) for the most recent game.'
                 }
             },
             required: ['teamName']
@@ -169,8 +167,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
             case 'getTeamStats': {
                 const rawSearch = typeof args?.teamName === 'string' ? args.teamName : ''
                 const rawOpponent = typeof args?.opponentName === 'string' ? args.opponentName : ''
-                const searchName = normalizeText(rawSearch)
-                const opponentSearch = normalizeText(rawOpponent)
+                const searchName = normaliseText(rawSearch)
+                const opponentSearch = normaliseText(rawOpponent)
 
                 const [rawGames, rawTeams, rawScorers] = await Promise.all([
                     getGames(),
@@ -183,8 +181,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const scorers = rawScorers as unknown as TopScorer[]
 
                 const matchingTeam = teams.find((t) => {
-                    const normName = normalizeText(t.name)
-                    const normShort = normalizeText(t.short_name || '')
+                    const normName = normaliseText(t.name)
+                    const normShort = normaliseText(t.short_name || '')
                     return normName.includes(searchName) || normShort.includes(searchName) || searchName.includes(normName)
                 })
 
@@ -193,8 +191,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 }
 
                 let teamGames = games.filter((g) => {
-                    const home = normalizeText(g.home_team_name || g.home_team || '')
-                    const away = normalizeText(g.away_team_name || g.away_team || '')
+                    const home = normaliseText(g.home_team_name || g.home_team || '')
+                    const away = normaliseText(g.away_team_name || g.away_team || '')
                     return (
                         g.home_team_id === matchingTeam.id ||
                         g.away_team_id === matchingTeam.id ||
@@ -205,8 +203,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
 
                 if (opponentSearch) {
                     const headToHeadGames = teamGames.filter((g) => {
-                        const home = normalizeText(g.home_team_name || g.home_team || '')
-                        const away = normalizeText(g.away_team_name || g.away_team || '')
+                        const home = normaliseText(g.home_team_name || g.home_team || '')
+                        const away = normaliseText(g.away_team_name || g.away_team || '')
                         return home.includes(opponentSearch) || away.includes(opponentSearch)
                     })
 
@@ -215,23 +213,35 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     }
                 }
 
-                const matchOrder = typeof args?.matchOrder === 'string' ? normalizeText(args.matchOrder) : 'latest'
+                const matchOrder = typeof args?.matchOrder === 'string' ? normaliseText(args.matchOrder) : 'latest'
 
-                teamGames.sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime())
+                teamGames.sort((a, b) => {
+                    const timeA = a.date ? new Date(a.date).getTime() : 0
+                    const timeB = b.date ? new Date(b.date).getTime() : 0
+                    if (timeA !== timeB) return timeA - timeB
+                    return String(a.id).localeCompare(String(b.id))
+                })
 
+                const isOldest = matchOrder.includes('oldest') || matchOrder.includes('primer') || matchOrder.includes('first')
                 const selectedGame = teamGames.length > 0
-                    ? (matchOrder.includes('oldest') || matchOrder.includes('primer') ? teamGames[0] : teamGames[teamGames.length - 1])
+                    ? (isOldest ? teamGames[0] : teamGames[teamGames.length - 1])
                     : null
 
                 let matchCardData = null
+                let matchSummaryText = `Team ${matchingTeam.name} has ${teamGames.length} registered game(s).`
 
                 if (selectedGame) {
+                    const homeName = selectedGame.home_team_name || selectedGame.home_team || 'Local'
+                    const awayName = selectedGame.away_team_name || selectedGame.away_team || 'Visitante'
+                    const homeScore = selectedGame.home_score ?? 0
+                    const awayScore = selectedGame.away_score ?? 0
+
                     let formattedTopPlayers: Array<{ name: string; points: number }> = []
                     try {
                         const gamePlayers = (await getPlayerStatsByGameId(selectedGame.id)) as GamePlayerStat[]
 
                         const filteredGamePlayers = Array.isArray(gamePlayers) ? gamePlayers.filter((p) => {
-                            const pTeam = normalizeText(p.team_name || p.team || '')
+                            const pTeam = normaliseText(p.team_name || p.team || '')
                             return pTeam.includes(searchName) || searchName.includes(pTeam)
                         }) : []
 
@@ -248,14 +258,17 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         }))
                     }
 
+                    const topScorersStr = formattedTopPlayers.map((p) => `${p.name} (${p.points} pts)`).join(', ')
+                    matchSummaryText = `${isOldest ? 'First' : 'Latest'} match for ${matchingTeam.name}: ${homeName} ${homeScore} vs ${awayName} ${awayScore} (Date: ${selectedGame.date || 'N/A'}). Top performers: ${topScorersStr}.`
+
                     matchCardData = {
                         type: 'match-card' as const,
                         data: {
                             gameId: selectedGame.id,
-                            homeTeam: selectedGame.home_team_name || selectedGame.home_team || 'Local',
-                            awayTeam: selectedGame.away_team_name || selectedGame.away_team || 'Visitante',
-                            homeScore: selectedGame.home_score ?? 0,
-                            awayScore: selectedGame.away_score ?? 0,
+                            homeTeam: homeName,
+                            awayTeam: awayName,
+                            homeScore,
+                            awayScore,
                             date: selectedGame.date,
                             topPlayers: formattedTopPlayers
                         }
@@ -263,19 +276,18 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 }
 
                 return {
+                    result: matchSummaryText,
                     team: {
                         name: matchingTeam.name,
                         shortName: matchingTeam.short_name
                     },
                     gamesCount: teamGames.length,
-                    games: teamGames,
-                    topPlayers: scorers,
                     genUiData: matchCardData
                 }
             }
             case 'getTopScorers': {
                 const limit = typeof args?.limit === 'number' ? args.limit : 5
-                const rawCat = typeof args?.category === 'string' ? normalizeText(args.category) : 'points'
+                const rawCat = typeof args?.category === 'string' ? normaliseText(args.category) : 'points'
 
                 let category = 'points'
                 if (rawCat.includes('robo') || rawCat.includes('steal')) category = 'steals'
@@ -320,7 +332,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 const rawP1 = typeof args?.player1Name === 'string' ? args.player1Name : ''
                 const rawP2 = typeof args?.player2Name === 'string' ? args.player2Name : ''
                 const rawTeamSearch = typeof args?.teamQuery === 'string' ? args.teamQuery : ''
-                const rawMatchContext = typeof args?.matchContext === 'string' ? normalizeText(args.matchContext) : ''
+                const rawMatchContext = typeof args?.matchContext === 'string' ? normaliseText(args.matchContext) : ''
 
                 if (!rawP1 || !rawP2) {
                     return {result: 'Por favor, proporciona dos nombres de jugadores válidos para comparar.', genUiData: null}
@@ -331,12 +343,12 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     let targetGames: TeamGame[] = games
 
                     if (rawTeamSearch) {
-                        const searchLower = normalizeText(rawTeamSearch)
+                        const searchLower = normaliseText(rawTeamSearch)
                         const queryTokens = searchLower.split(/\s+vs\s+|\s+v\s+|\s+contra\s+|\s+y\s+/)
 
                         targetGames = games.filter(g => {
-                            const home = normalizeText(g.home_team_name || g.home_team || '')
-                            const away = normalizeText(g.away_team_name || g.away_team || '')
+                            const home = normaliseText(g.home_team_name || g.home_team || '')
+                            const away = normaliseText(g.away_team_name || g.away_team || '')
                             return queryTokens.some(token => {
                                 const t = token.trim()
                                 return t.length > 2 && (home.includes(t) || away.includes(t))
@@ -355,7 +367,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             targetGames = [targetGames[0]]
                         } else if (rawMatchContext) {
                             const matchFiltered = targetGames.filter(g => {
-                                const gDate = normalizeText(g.date || '')
+                                const gDate = normaliseText(g.date || '')
                                 return gDate.includes(rawMatchContext)
                             })
                             if (matchFiltered.length > 0) {
@@ -372,8 +384,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     let p1Team = ''
                     let p2Team = ''
 
-                    const p1Tokens = normalizeText(rawP1).split(' ').filter(t => t.length > 1)
-                    const p2Tokens = normalizeText(rawP2).split(' ').filter(t => t.length > 1)
+                    const p1Tokens = normaliseText(rawP1).split(' ').filter(t => t.length > 1)
+                    const p2Tokens = normaliseText(rawP2).split(' ').filter(t => t.length > 1)
 
                     for (const game of targetGames) {
                         try {
@@ -381,12 +393,12 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             if (!Array.isArray(gamePlayers)) continue
 
                             const foundP1 = gamePlayers.find(p => {
-                                const pName = normalizeText(p.player_name || p.name || '')
+                                const pName = normaliseText(p.player_name || p.name || '')
                                 return p1Tokens.some(token => pName.includes(token))
                             })
 
                             const foundP2 = gamePlayers.find(p => {
-                                const pName = normalizeText(p.player_name || p.name || '')
+                                const pName = normaliseText(p.player_name || p.name || '')
                                 return p2Tokens.some(token => pName.includes(token))
                             })
 

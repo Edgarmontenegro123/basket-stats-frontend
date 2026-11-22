@@ -125,7 +125,9 @@ export const ChatWidget = () => {
                             <div key={msg.id} className={`chat-message ${msg.sender}`}>
                                 {msg.sender === 'bot' ? (
                                     <div className='markdown-content'>
-                                        {!msg.genUiData && <ReactMarkdown>{msg.text}</ReactMarkdown>}
+                                        {msg.text && msg.text.trim() !== '' && (
+                                            <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                        )}
                                         {msg.genUiData && renderGenUiComponent(msg.genUiData)}
                                     </div>
                                 ) : (

@@ -5,7 +5,13 @@ import {aiFunctionDeclarations, executeAITool} from './aiTools'
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || (import.meta.env.DEV ? 'http://localhost:8081' : 'https://147.15.10.181.nip.io/analytics')
 const MODEL_NAME = 'meta-llama/llama-3.3-70b-instruct:free'
 
-const SYSTEM_INSTRUCTION = `You are Swish, an intelligent basketball tactical assistant.
+const SYSTEM_INSTRUCTION = `You are Swish, a warm, insightful, and conversational basketball tactical assistant and sports analyst.
+
+PERSONALITY & TONE:
+- Be approachable, natural, and genuinely helpful—like a knowledgeable basketball coach or analyst chatting with a colleague.
+- When the user greets you (e.g., "Hola", "How are you?"), respond warmly and naturally in their language, and invite them to explore team stats, match results, or player analysis.
+- Never sound robotic or merely dump raw numbers. Always interpret the stats: highlight strengths, areas for improvement, tactical impact, and context.
+- When a visual card (match card, player card, or comparison card) is displayed alongside your message, write a concise, engaging tactical commentary (2 to 4 sentences) explaining what the numbers mean rather than repeating every single stat on the card.
 
 LANGUAGE RULES:
 - Detect the language of the user's latest message and reply strictly in that same language.
@@ -14,16 +20,15 @@ LANGUAGE RULES:
 - If the language is ambiguous (e.g., only a team or player name), default to Spanish.
 
 CORE RULES:
-- Assume capitalized words, proper nouns, or informal names (e.g., 'almendra', 'capitan') refer to basketball teams or players in the system.
-- ALWAYS execute available tools to search for data before declaring that information is missing.
-- Handle accent marks and case variations gracefully.
-- Only refuse queries that are completely unrelated to sports/basketball.
+- Assume capitalized words, proper nouns, or informal names (e.g., 'almendra', 'capitan', 'pegasos') refer to basketball teams or players in the system.
+- ALWAYS execute available tools to search for real data before answering questions about teams, matches, or players.
+- Handle accent marks, typos, and case variations gracefully.
+- Politely steer off-topic questions back to basketball analytics without sounding rigid.
 
-RESPONSE & FORMATTING RULES:
-- Keep text responses extremely short and direct (maximum 1 or 2 short sentences) when showing visual cards.
+FORMATTING RULES:
 - NEVER display internal database IDs (UUIDs).
 - NEVER mention internal tool or function names to the user.
-- Do NOT use large headers (#, ##, ###) or long bullet point lists when visual components are available.`
+- Keep paragraphs clean and readable; use bolding sparingly for key tactical insights.`
 
 export const sendMessageToGateway = async(userMessage: string, chatHistory: ChatMessage[] = []): Promise<AIGatewayResponse> => {
     const recentHistory = chatHistory
@@ -89,7 +94,6 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
             messages.push(message)
 
             let extractedGenUiData: unknown = undefined
-            const combinedResults: Record<string, unknown> = {}
 
             for (const toolCall of message.tool_calls) {
                 const functionName = toolCall.function.name
@@ -110,8 +114,6 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                     toolResult && typeof toolResult === 'object' && 'result' in toolResult
                         ? toolResult.result
                         : JSON.stringify(toolResult)
-
-                combinedResults[functionName] = toolResult
 
                 messages.push({
                     role: 'tool',
@@ -136,13 +138,36 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
             const finalReply = secondData.choices?.[0]?.message?.content
 
             return {
-                text: finalReply && finalReply.trim() !== '' ? finalReply : 'Consulta procesada exitosamente.',
+                text: finalReply && finalReply.trim() !== '' ? finalReply : '',
                 genUiData: extractedGenUiData as ChatMessage['genUiData']
             }
         }
 
+        // Si el modelo devolvió contenido vacío (ej. en saludos simples con tools activos), reintentamos como conversación pura
+        if (!message?.content || message.content.trim() === '') {
+            const fallbackResponse = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
+                },
+                body: JSON.stringify({
+                    model: MODEL_NAME,
+                    messages
+                })
+            })
+
+            if (fallbackResponse.ok) {
+                const fallbackData = await fallbackResponse.json()
+                const fallbackContent = fallbackData.choices?.[0]?.message?.content
+                if (fallbackContent && fallbackContent.trim() !== '') {
+                    return {text: fallbackContent}
+                }
+            }
+        }
+
         return {
-            text: message?.content || 'No se obtuvo respuesta de Swish.'
+            text: message?.content || '¡Hola! Todo muy bien por aquí. ¿Sobre qué equipo, partido o jugador te gustaría analizar estadísticas hoy?'
         }
     } catch (error) {
         console.error('Error connecting to AI gateway:', error)

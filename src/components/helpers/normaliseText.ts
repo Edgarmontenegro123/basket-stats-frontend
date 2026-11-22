@@ -1,4 +1,6 @@
-export const normaliseText = (value: string) => {
+export const normaliseText = (value: unknown): string => {
+    if (typeof value !== 'string') return ''
+
     return value
         .toLowerCase()
         .normalize('NFD')
