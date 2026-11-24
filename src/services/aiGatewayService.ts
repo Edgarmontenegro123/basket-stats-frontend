@@ -5,6 +5,44 @@ import {getTeams} from './api'
 
 const ANALYTICS_API_URL = import.meta.env.VITE_ANALYTICS_API_URL || (import.meta.env.DEV ? 'http://localhost:8081' : 'https://147.15.10.181.nip.io/analytics')
 const MODEL_NAME = 'meta-llama/llama-3.3-70b-instruct:free'
+const TRANSIENT_GATEWAY_STATUSES = [502, 503, 504]
+const MAX_GATEWAY_RETRIES = 2
+const RETRY_BASE_DELAY_MS = 800
+
+const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+const postChatCompletionWithRetry = async(payload: Record<string, unknown>): Promise<Response> => {
+    let lastError: unknown = null
+
+    for (let attempt = 0; attempt <= MAX_GATEWAY_RETRIES; attempt++) {
+        try {
+            const response = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
+                },
+                body: JSON.stringify(payload)
+            })
+
+            if (!TRANSIENT_GATEWAY_STATUSES.includes(response.status) || attempt === MAX_GATEWAY_RETRIES) {
+                return response
+            }
+
+            console.warn(`⚠️ Gateway returned ${response.status}. Retrying attempt ${attempt + 1}/${MAX_GATEWAY_RETRIES}...`)
+        } catch (error) {
+            lastError = error
+            if (attempt === MAX_GATEWAY_RETRIES) {
+                throw lastError
+            }
+            console.warn(`⚠️ Network error reaching AI gateway. Retrying attempt ${attempt + 1}/${MAX_GATEWAY_RETRIES}...`)
+        }
+
+        await wait(RETRY_BASE_DELAY_MS * (attempt + 1))
+    }
+
+    throw lastError || new Error('Failed to reach AI gateway after retries')
+}
 
 const buildSystemInstruction = (registeredTeams: string[]): string => {
     const teamsContext = registeredTeams.length > 0
@@ -70,10 +108,10 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
         .map((msg) => {
             let cardContext = ''
             if (msg.genUiData?.type === 'match-card') {
-                const d = msg.genUiData.data as { homeTeam?: string; awayTeam?: string; date?: string }
+                const d = msg.genUiData.data as {homeTeam?: string; awayTeam?: string; date?: string}
                 cardContext = ` [Match card shown: ${d.homeTeam} vs ${d.awayTeam} (${d.date || ''})]`
             } else if (msg.genUiData?.type === 'player-card') {
-                const d = msg.genUiData.data as { name?: string; team?: string }
+                const d = msg.genUiData.data as {name?: string; team?: string}
                 cardContext = ` [Player card shown: ${d.name} (${d.team})]`
             }
             return {
@@ -114,24 +152,19 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
     }))
 
     try {
-        const response = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
-            },
-            body: JSON.stringify({
-                model: MODEL_NAME,
-                messages,
-                tools,
-                tool_choice: 'auto',
-                temperature: 0.2
-            })
+        const response = await postChatCompletionWithRetry({
+            model: MODEL_NAME,
+            messages,
+            tools,
+            tool_choice: 'auto',
+            temperature: 0.2
         })
 
         if (!response.ok) {
             return {
-                text: `Error de API (${response.status}): No se pudo conectar con el servidor.`
+                text: targetLang === 'en'
+                    ? `API Error (${response.status}): Could not connect to the AI service right now. Please try again in a moment.`
+                    : `Error de API (${response.status}): No se pudo conectar con el servidor de IA en este momento. Inténtalo de nuevo en unos segundos.`
             }
         }
 
@@ -171,18 +204,18 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 })
             }
 
-            const secondResponse = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
-                },
-                body: JSON.stringify({
-                    model: MODEL_NAME,
-                    messages,
-                    temperature: 0.2
-                })
+            const secondResponse = await postChatCompletionWithRetry({
+                model: MODEL_NAME,
+                messages,
+                temperature: 0.2
             })
+
+            if (!secondResponse.ok) {
+                return {
+                    text: '',
+                    genUiData: extractedGenUiData as ChatMessage['genUiData']
+                }
+            }
 
             const secondData = await secondResponse.json()
             const finalReply = secondData.choices?.[0]?.message?.content
@@ -205,25 +238,18 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                 replyText.includes('getteamstats'))
 
         if (skippedToolCall) {
-            const forcedResponse = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
-                },
-                body: JSON.stringify({
-                    model: MODEL_NAME,
-                    messages: [
-                        ...messages,
-                        {
-                            role: 'system',
-                            content: 'CRITICAL: Do NOT write text saying you will check statistics. Emit the required tool_call (getPlayerSummary or getTeamStats) NOW.'
-                        }
-                    ],
-                    tools,
-                    tool_choice: 'required',
-                    temperature: 0.1
-                })
+            const forcedResponse = await postChatCompletionWithRetry({
+                model: MODEL_NAME,
+                messages: [
+                    ...messages,
+                    {
+                        role: 'system',
+                        content: 'CRITICAL: Do NOT write text saying you will check statistics. Emit the required tool_call (getPlayerSummary or getTeamStats) NOW.'
+                    }
+                ],
+                tools,
+                tool_choice: 'required',
+                temperature: 0.1
             })
 
             if (forcedResponse.ok) {
@@ -259,18 +285,18 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
                         })
                     }
 
-                    const finalFollowUp = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
-                        },
-                        body: JSON.stringify({
-                            model: MODEL_NAME,
-                            messages,
-                            temperature: 0.2
-                        })
+                    const finalFollowUp = await postChatCompletionWithRetry({
+                        model: MODEL_NAME,
+                        messages,
+                        temperature: 0.2
                     })
+
+                    if (!finalFollowUp.ok) {
+                        return {
+                            text: '',
+                            genUiData: forcedGenUiData as ChatMessage['genUiData']
+                        }
+                    }
 
                     const finalFollowUpData = await finalFollowUp.json()
                     const finalText = finalFollowUpData.choices?.[0]?.message?.content
@@ -283,17 +309,10 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
         }
 
         if (!message?.content || message.content.trim() === '') {
-            const fallbackResponse = await fetch(`${ANALYTICS_API_URL}/ai/chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('basket_stats_token') || ''}`
-                },
-                body: JSON.stringify({
-                    model: MODEL_NAME,
-                    messages,
-                    temperature: 0.3
-                })
+            const fallbackResponse = await postChatCompletionWithRetry({
+                model: MODEL_NAME,
+                messages,
+                temperature: 0.3
             })
 
             if (fallbackResponse.ok) {
@@ -313,7 +332,9 @@ export const sendMessageToGateway = async(userMessage: string, chatHistory: Chat
     } catch (error) {
         console.error('Error connecting to AI gateway:', error)
         return {
-            text: 'Error de conexión con el servidor de IA.'
+            text: targetLang === 'en'
+                ? 'Connection error with the AI server. Please try again shortly.'
+                : 'Error de conexión con el servidor de IA. Inténtalo nuevamente en un momento.'
         }
     }
 }
