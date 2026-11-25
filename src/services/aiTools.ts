@@ -1,6 +1,7 @@
 import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName, getPlayerStatsByGameId} from './api'
 import type {Team} from '../types/team'
 import type {TeamGame, TopScorer, GamePlayerStat, PlayerSummary} from '../types/ai'
+import type {CompareGameOption} from '../types/compare'
 import {normaliseText} from '../components/helpers/normaliseText'
 import {parseGameTimestamp, formatDateToDDMMYYYY} from '../components/helpers/formatDate'
 import {buildPlayerNameCandidates} from '../components/helpers/playerHelpers'
@@ -10,15 +11,62 @@ const getRawDate = (game: TeamGame): unknown => {
     return g.date ?? g.game_date ?? g.match_date ?? g.created_at ?? ''
 }
 
-const resolvePlayerSummary = async(rawName: string): Promise<PlayerSummary | null> => {
+interface ResolvedPlayerResult {
+    player: PlayerSummary | null
+    ambiguousMatches?: Array<{name: string; team: string}>
+}
+
+const resolvePlayerWithDisambiguation = async(rawName: string): Promise<ResolvedPlayerResult> => {
     const candidates = buildPlayerNameCandidates(rawName)
     for (const candidate of candidates) {
         const result = (await getPlayerSummaryByName(candidate)) as PlayerSummary | null
         if (result && !result.error && (result.player_name || result.average_points !== undefined)) {
-            return result
+            return {player: result}
         }
     }
-    return null
+
+    // Fallback: buscar por coincidencia de todos los tokens en la lista completa de jugadores
+    const tokens = normaliseText(rawName).split(' ').filter((t) => t.length > 1)
+    if (tokens.length === 0) return {player: null}
+
+    try {
+        const allRankings = (await getPlayerRankings('points', 300)) as TopScorer[]
+        const list = Array.isArray(allRankings) ? allRankings : []
+
+        const tokenMatches = list.filter((item) => {
+            const fullName = normaliseText(item.player_name || item.name || '')
+            return tokens.every((token) => fullName.includes(token))
+        })
+
+        if (tokenMatches.length === 1) {
+            const exactName = tokenMatches[0].player_name || tokenMatches[0].name || ''
+            if (exactName) {
+                const fullSummary = (await getPlayerSummaryByName(exactName)) as PlayerSummary | null
+                if (fullSummary && !fullSummary.error) {
+                    return {player: fullSummary}
+                }
+            }
+        }
+
+        if (tokenMatches.length > 1) {
+            const uniqueMatches = Array.from(
+                new Map(
+                    tokenMatches.map((m) => [
+                        m.player_name || m.name || '',
+                        {
+                            name: m.player_name || m.name || 'Jugador',
+                            team: m.team_name || 'Sin equipo'
+                        }
+                    ])
+                ).values()
+            )
+            return {player: null, ambiguousMatches: uniqueMatches}
+        }
+    } catch {
+        // Ignorar error de fallback y retornar null
+    }
+
+    return {player: null}
 }
 
 export const aiFunctionDeclarations = [
@@ -102,7 +150,7 @@ export const aiFunctionDeclarations = [
     },
     {
         name: 'comparePlayers',
-        description: 'Compares the statistical performance of two basketball players in a specific match or overall. ALWAYS extract the team or matchup query into teamQuery when the user mentions a match (e.g., "en el partido almendra Vs pegasos" -> teamQuery: "almendra vs pegasos"). If a specific date or "last match" is mentioned, extract it into matchContext.',
+        description: 'Compares the statistical performance of two basketball players overall and across head-to-head or shared matches. ALWAYS extract the team or matchup query into teamQuery ONLY when the user explicitly mentions a match or teams (e.g., "en el partido almendra Vs pegasos" -> teamQuery: "almendra vs pegasos"). Leave teamQuery empty for overall/general comparisons.',
         parameters: {
             type: 'object',
             properties: {
@@ -116,11 +164,11 @@ export const aiFunctionDeclarations = [
                 },
                 teamQuery: {
                     type: 'string',
-                    description: 'The exact matchup or team name mentioned by the user (e.g. almendra vs pegasos)'
+                    description: 'The exact matchup or team name mentioned by the user (e.g. almendra vs pegasos), or empty if overall comparison'
                 },
                 matchContext: {
                     type: 'string',
-                    description: 'Specific date, round, or identifier like "ultimo" (last) if a specific game among the same teams is requested'
+                    description: 'Specific date, round, or identifier like "ultimo" (last) if a specific game is requested'
                 }
             },
             required: ['player1Name', 'player2Name']
@@ -308,7 +356,15 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
             }
             case 'getPlayerSummary': {
                 const rawName = typeof args?.playerName === 'string' ? args.playerName : ''
-                const player = await resolvePlayerSummary(rawName)
+                const resolved = await resolvePlayerWithDisambiguation(rawName)
+                if (resolved.ambiguousMatches && resolved.ambiguousMatches.length > 1) {
+                    const optionsList = resolved.ambiguousMatches.map((m) => `${m.name} (${m.team})`).join(', ')
+                    return {
+                        result: `Se encontraron varios jugadores llamados "${rawName}": ${optionsList}. Pregunta al usuario cuál de ellos desea consultar indicando nombre completo y equipo.`,
+                        genUiData: null
+                    }
+                }
+                const player = resolved.player
                 if (!player || !player.player_name) {
                     return {result: `Player "${rawName}" not found in database.`, genUiData: null}
                 }
@@ -338,147 +394,184 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
             case 'comparePlayers': {
                 const rawP1 = typeof args?.player1Name === 'string' ? args.player1Name : ''
                 const rawP2 = typeof args?.player2Name === 'string' ? args.player2Name : ''
-                const rawTeamSearch = typeof args?.teamQuery === 'string' ? args.teamQuery : ''
+                const rawTeamSearch = typeof args?.teamQuery === 'string' ? args.teamQuery.trim() : ''
                 const rawMatchContext = typeof args?.matchContext === 'string' ? normaliseText(args.matchContext) : ''
                 if (!rawP1 || !rawP2) {
                     return {result: 'Por favor, proporciona dos nombres de jugadores válidos para comparar.', genUiData: null}
                 }
 
                 try {
-                    const games = (await getGames()) as TeamGame[]
-                    let targetGames: TeamGame[] = games
-                    if (rawTeamSearch) {
-                        const searchLower = normaliseText(rawTeamSearch)
-                        const queryTokens = searchLower.split(/\s+vs\s+|\s+v\s+|\s+contra\s+|\s+y\s+/)
-                        targetGames = games.filter((g) => {
-                            const home = normaliseText(g.home_team_name || g.home_team || '')
-                            const away = normaliseText(g.away_team_name || g.away_team || '')
-                            return queryTokens.some((token) => {
-                                const t = token.trim()
-                                return t.length > 2 && (home.includes(t) || away.includes(t))
-                            })
-                        })
-                    }
-                    if (targetGames.length > 0) {
-                        targetGames.sort((a, b) => parseGameTimestamp(getRawDate(a)) - parseGameTimestamp(getRawDate(b)))
-                    }
-                    if (targetGames.length > 1) {
-                        if (rawMatchContext.includes('ultimo') || rawMatchContext.includes('recent') || rawMatchContext.includes('reciente')) {
-                            targetGames = [targetGames[targetGames.length - 1]]
-                        } else if (rawMatchContext.includes('primero') || rawMatchContext.includes('primer') || rawMatchContext.includes('oldest') || rawMatchContext.includes('first')) {
-                            targetGames = [targetGames[0]]
-                        } else if (rawMatchContext) {
-                            const matchFiltered = targetGames.filter((g) => {
-                                const gDate = normaliseText(String(getRawDate(g) || ''))
-                                return gDate.includes(rawMatchContext)
-                            })
-                            if (matchFiltered.length > 0) {
-                                targetGames = matchFiltered
-                            }
-                        }
-                    }
-                    let p1TotalPoints = 0, p1TotalRebounds = 0, p1TotalAssists = 0, p1TotalSteals = 0, p1MatchesCount = 0
-                    let p2TotalPoints = 0, p2TotalRebounds = 0, p2TotalAssists = 0, p2TotalSteals = 0, p2MatchesCount = 0
-                    let p1ActualName = rawP1
-                    let p2ActualName = rawP2
-                    let p1Team = ''
-                    let p2Team = ''
-                    let p1StatId = ''
-                    let p2StatId = ''
-                    const p1Tokens = normaliseText(rawP1).split(' ').filter((t) => t.length > 1)
-                    const p2Tokens = normaliseText(rawP2).split(' ').filter((t) => t.length > 1)
-                    for (const game of targetGames) {
-                        try {
-                            const gamePlayers = (await getPlayerStatsByGameId(game.id)) as GamePlayerStat[]
-                            if (!Array.isArray(gamePlayers)) continue
-                            const foundP1 = gamePlayers.find((p) => {
-                                const pName = normaliseText(p.player_name || p.name || '')
-                                return p1Tokens.some((token) => pName.includes(token))
-                            })
-                            const foundP2 = gamePlayers.find((p) => {
-                                const pName = normaliseText(p.player_name || p.name || '')
-                                return p2Tokens.some((token) => pName.includes(token))
-                            })
-                            if (foundP1) {
-                                p1ActualName = foundP1.player_name || foundP1.name || p1ActualName
-                                p1Team = foundP1.team_name || foundP1.team || p1Team
-                                p1StatId = foundP1.id ? String(foundP1.id) : p1StatId
-                                p1TotalPoints += Number(foundP1.points ?? foundP1.pts ?? 0)
-                                p1TotalRebounds += Number(foundP1.rebounds ?? foundP1.reb ?? 0)
-                                p1TotalAssists += Number(foundP1.assists ?? foundP1.ast ?? 0)
-                                p1TotalSteals += Number(foundP1.steals ?? foundP1.stl ?? 0)
-                                p1MatchesCount++
-                            }
-                            if (foundP2) {
-                                p2ActualName = foundP2.player_name || foundP2.name || p2ActualName
-                                p2Team = foundP2.team_name || foundP2.team || p2Team
-                                p2StatId = foundP2.id ? String(foundP2.id) : p2StatId
-                                p2TotalPoints += Number(foundP2.points ?? foundP2.pts ?? 0)
-                                p2TotalRebounds += Number(foundP2.rebounds ?? foundP2.reb ?? 0)
-                                p2TotalAssists += Number(foundP2.assists ?? foundP2.ast ?? 0)
-                                p2TotalSteals += Number(foundP2.steals ?? foundP2.stl ?? 0)
-                                p2MatchesCount++
-                            }
-                        } catch (err) {
-                            console.warn(`Advertencia: No se pudieron procesar las estadísticas para el partido ID ${game.id}:`, err)
-                        }
-                    }
-                    const [p1Fallback, p2Fallback] = await Promise.all([
-                        resolvePlayerSummary(rawP1),
-                        resolvePlayerSummary(rawP2)
+                    const [p1Res, p2Res, rawAllGames] = await Promise.all([
+                        resolvePlayerWithDisambiguation(rawP1),
+                        resolvePlayerWithDisambiguation(rawP2),
+                        getGames()
                     ])
-                    const p1Exists = p1MatchesCount > 0 || Boolean(p1Fallback && (p1Fallback.average_points !== undefined || p1Fallback.player_name !== undefined))
-                    const p2Exists = p2MatchesCount > 0 || Boolean(p2Fallback && (p2Fallback.average_points !== undefined || p2Fallback.player_name !== undefined))
-                    if (!p1Exists && !p2Exists) {
+
+                    if (p1Res.ambiguousMatches && p1Res.ambiguousMatches.length > 1) {
+                        const options = p1Res.ambiguousMatches.map((m) => `**${m.name}** (${m.team})`).join(', ')
                         return {
-                            result: `No se encontraron registros en el sistema para ninguno de los dos jugadores ingresados ("${rawP1}" y "${rawP2}").`,
+                            result: `Se encontraron múltiples coincidencias para "${rawP1}": ${options}. Pide al usuario que aclare con cuál de ellos (y de qué equipo) desea comparar.`,
                             genUiData: null
                         }
                     }
-                    const isSingleMatch = targetGames.length === 1 && (p1MatchesCount > 0 || p2MatchesCount > 0)
-                    const resolvedGameId = isSingleMatch ? String(targetGames[0].id) : undefined
-                    const finalP1Points = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalPoints : Number((p1TotalPoints / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_points ?? 0)
-                    const finalP1Rebounds = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalRebounds : Number((p1TotalRebounds / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_rebounds ?? 0)
-                    const finalP1Assists = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalAssists : Number((p1TotalAssists / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_assists ?? 0)
-                    const finalP1Steals = p1MatchesCount > 0 ? (isSingleMatch ? p1TotalSteals : Number((p1TotalSteals / p1MatchesCount).toFixed(1))) : (p1Fallback?.average_steals ?? 0)
-                    const finalP2Points = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalPoints : Number((p2TotalPoints / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_points ?? 0)
-                    const finalP2Rebounds = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalRebounds : Number((p2TotalRebounds / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_rebounds ?? 0)
-                    const finalP2Assists = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalAssists : Number((p2TotalAssists / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_assists ?? 0)
-                    const finalP2Steals = p2MatchesCount > 0 ? (isSingleMatch ? p2TotalSteals : Number((p2TotalSteals / p2MatchesCount).toFixed(1))) : (p2Fallback?.average_steals ?? 0)
-                    const resolvedP1Name = p1Exists ? (p1MatchesCount > 0 ? p1ActualName : (p1Fallback?.player_name || rawP1)) : `${rawP1} (No encontrado)`
-                    const resolvedP2Name = p2Exists ? (p2MatchesCount > 0 ? p2ActualName : (p2Fallback?.player_name || rawP2)) : `${rawP2} (No encontrado)`
-                    const resolvedP1Team = p1Team || p1Fallback?.team_name || 'Sin equipo'
-                    const resolvedP2Team = p2Team || p2Fallback?.team_name || 'Sin equipo'
-                    let statusMessage = `Comparison stats (${isSingleMatch ? 'single match' : 'average'}): ${resolvedP1Name} (${resolvedP1Team}) — ${finalP1Points} PTS, ${finalP1Rebounds} REB, ${finalP1Assists} AST, ${finalP1Steals} STL vs ${resolvedP2Name} (${resolvedP2Team}) — ${finalP2Points} PTS, ${finalP2Rebounds} REB, ${finalP2Assists} AST, ${finalP2Steals} STL.`
-                    if (!p1Exists) statusMessage = `Notice: Player "${rawP1}" was not found in the database.`
-                    if (!p2Exists) statusMessage = `Notice: Player "${rawP2}" was not found in the database.`
+
+                    if (p2Res.ambiguousMatches && p2Res.ambiguousMatches.length > 1) {
+                        const options = p2Res.ambiguousMatches.map((m) => `**${m.name}** (${m.team})`).join(', ')
+                        return {
+                            result: `Se encontraron múltiples coincidencias para "${rawP2}": ${options}. Pide al usuario que aclare con cuál de ellos (y de qué equipo) desea comparar.`,
+                            genUiData: null
+                        }
+                    }
+
+                    const p1Summary = p1Res.player
+                    const p2Summary = p2Res.player
+
+                    const p1Exists = Boolean(p1Summary && (p1Summary.average_points !== undefined || p1Summary.player_name !== undefined))
+                    const p2Exists = Boolean(p2Summary && (p2Summary.average_points !== undefined || p2Summary.player_name !== undefined))
+
+                    if (!p1Exists || !p2Exists) {
+                        const missingName = !p1Exists ? rawP1 : rawP2
+                        return {
+                            result: `No se encontró el jugador "${missingName}" en la base de datos. Informa al usuario que verifique el nombre o apellido antes de generar la comparación.`,
+                            genUiData: null
+                        }
+                    }
+
+                    const resolvedP1Name = p1Summary?.player_name || rawP1
+                    const resolvedP2Name = p2Summary?.player_name || rawP2
+                    const resolvedP1Team = p1Summary?.team_name || 'Sin equipo'
+                    const resolvedP2Team = p2Summary?.team_name || 'Sin equipo'
+
+                    const allGames = (Array.isArray(rawAllGames) ? rawAllGames : []) as TeamGame[]
+                    const normTeam1 = normaliseText(resolvedP1Team)
+                    const normTeam2 = normaliseText(resolvedP2Team)
+
+                    const sharedTeamGames = allGames
+                        .filter((g) => {
+                            if (!normTeam1 || !normTeam2 || normTeam1 === 'sin equipo' || normTeam2 === 'sin equipo') {
+                                return false
+                            }
+                            const home = normaliseText(g.home_team_name || g.home_team || '')
+                            const away = normaliseText(g.away_team_name || g.away_team || '')
+                            const p1InGame = home.includes(normTeam1) || away.includes(normTeam1)
+                            const p2InGame = home.includes(normTeam2) || away.includes(normTeam2)
+                            return p1InGame && p2InGame
+                        })
+                        .sort((a, b) => {
+                            const timeDiff = parseGameTimestamp(getRawDate(b)) - parseGameTimestamp(getRawDate(a))
+                            return timeDiff !== 0 ? timeDiff : String(b.id).localeCompare(String(a.id))
+                        })
+
+                    const availableGames: CompareGameOption[] = sharedTeamGames.map((g) => {
+                        const homeName = g.home_team_name || g.home_team || 'Local'
+                        const awayName = g.away_team_name || g.away_team || 'Visitante'
+                        const formattedDate = formatDateToDDMMYYYY(String(getRawDate(g) || ''))
+                        return {
+                            id: String(g.id),
+                            date: formattedDate,
+                            label: `${formattedDate ? `${formattedDate} · ` : ''}${homeName} vs ${awayName}`
+                        }
+                    })
+
+                    let preselectedGameId: string | undefined
+                    let singleMatchP1: GamePlayerStat | undefined
+                    let singleMatchP2: GamePlayerStat | undefined
+
+                    const requestedSpecificMatch = Boolean(rawTeamSearch || rawMatchContext)
+                    if (requestedSpecificMatch && sharedTeamGames.length > 0) {
+                        const isOldest =
+                            rawMatchContext.includes('primero') ||
+                            rawMatchContext.includes('primer') ||
+                            rawMatchContext.includes('oldest') ||
+                            rawMatchContext.includes('first')
+
+                        const chosenGame = isOldest
+                            ? sharedTeamGames[sharedTeamGames.length - 1]
+                            : sharedTeamGames[0]
+
+                        preselectedGameId = String(chosenGame.id)
+
+                        try {
+                            const gamePlayers = (await getPlayerStatsByGameId(chosenGame.id)) as GamePlayerStat[]
+                            const validPlayers = Array.isArray(gamePlayers) ? gamePlayers : []
+                            const p1Tokens = normaliseText(resolvedP1Name).split(' ').filter((t) => t.length > 1)
+                            const p2Tokens = normaliseText(resolvedP2Name).split(' ').filter((t) => t.length > 1)
+
+                            singleMatchP1 = validPlayers.find((p) => {
+                                const pName = normaliseText(p.player_name || p.name || '')
+                                return p1Tokens.some((token) => pName.includes(token))
+                            })
+                            singleMatchP2 = validPlayers.find((p) => {
+                                const pName = normaliseText(p.player_name || p.name || '')
+                                return p2Tokens.some((token) => pName.includes(token))
+                            })
+                        } catch {
+                            preselectedGameId = undefined
+                        }
+                    }
+
+                    const useSingleMatchStats = Boolean(preselectedGameId && (singleMatchP1 || singleMatchP2))
+
+                    const finalP1Points = useSingleMatchStats
+                        ? Number(singleMatchP1?.points ?? singleMatchP1?.pts ?? 0)
+                        : (p1Summary?.average_points ?? 0)
+                    const finalP1Rebounds = useSingleMatchStats
+                        ? Number(singleMatchP1?.rebounds ?? singleMatchP1?.reb ?? 0)
+                        : (p1Summary?.average_rebounds ?? 0)
+                    const finalP1Assists = useSingleMatchStats
+                        ? Number(singleMatchP1?.assists ?? singleMatchP1?.ast ?? 0)
+                        : (p1Summary?.average_assists ?? 0)
+                    const finalP1Steals = useSingleMatchStats
+                        ? Number(singleMatchP1?.steals ?? singleMatchP1?.stl ?? 0)
+                        : (p1Summary?.average_steals ?? 0)
+
+                    const finalP2Points = useSingleMatchStats
+                        ? Number(singleMatchP2?.points ?? singleMatchP2?.pts ?? 0)
+                        : (p2Summary?.average_points ?? 0)
+                    const finalP2Rebounds = useSingleMatchStats
+                        ? Number(singleMatchP2?.rebounds ?? singleMatchP2?.reb ?? 0)
+                        : (p2Summary?.average_rebounds ?? 0)
+                    const finalP2Assists = useSingleMatchStats
+                        ? Number(singleMatchP2?.assists ?? singleMatchP2?.ast ?? 0)
+                        : (p2Summary?.average_assists ?? 0)
+                    const finalP2Steals = useSingleMatchStats
+                        ? Number(singleMatchP2?.steals ?? singleMatchP2?.stl ?? 0)
+                        : (p2Summary?.average_steals ?? 0)
+
+                    const sharedNote = availableGames.length > 0
+                        ? ` They also have ${availableGames.length} shared game(s) available to inspect in the card selector.`
+                        : ''
+
+                    const statusMessage = `Comparison stats (${useSingleMatchStats ? 'single match' : 'season average'}): ${resolvedP1Name} (${resolvedP1Team}) — ${finalP1Points} PTS, ${finalP1Rebounds} REB, ${finalP1Assists} AST, ${finalP1Steals} STL vs ${resolvedP2Name} (${resolvedP2Team}) — ${finalP2Points} PTS, ${finalP2Rebounds} REB, ${finalP2Assists} AST, ${finalP2Steals} STL.${sharedNote}`
+
                     const comparisonData = {
                         type: 'compare-card' as const,
                         data: {
                             player1: {
-                                id: isSingleMatch ? p1StatId : undefined,
+                                id: useSingleMatchStats && singleMatchP1?.id ? String(singleMatchP1.id) : undefined,
                                 name: resolvedP1Name,
                                 team: resolvedP1Team,
-                                points: p1Exists ? finalP1Points : 0,
-                                rebounds: p1Exists ? finalP1Rebounds : 0,
-                                assists: p1Exists ? finalP1Assists : 0,
-                                steals: p1Exists ? finalP1Steals : 0,
-                                photoUrl: p1Fallback?.photo_url || '',
-                                teamBadgeUrl: p1Fallback?.team_badge_url || ''
+                                points: finalP1Points,
+                                rebounds: finalP1Rebounds,
+                                assists: finalP1Assists,
+                                steals: finalP1Steals,
+                                photoUrl: p1Summary?.photo_url || '',
+                                teamBadgeUrl: p1Summary?.team_badge_url || ''
                             },
                             player2: {
-                                id: isSingleMatch ? p2StatId : undefined,
+                                id: useSingleMatchStats && singleMatchP2?.id ? String(singleMatchP2.id) : undefined,
                                 name: resolvedP2Name,
                                 team: resolvedP2Team,
-                                points: p2Exists ? finalP2Points : 0,
-                                rebounds: p2Exists ? finalP2Rebounds : 0,
-                                assists: p2Exists ? finalP2Assists : 0,
-                                steals: p2Exists ? finalP2Steals : 0,
-                                photoUrl: p2Fallback?.photo_url || '',
-                                teamBadgeUrl: p2Fallback?.team_badge_url || ''
+                                points: finalP2Points,
+                                rebounds: finalP2Rebounds,
+                                assists: finalP2Assists,
+                                steals: finalP2Steals,
+                                photoUrl: p2Summary?.photo_url || '',
+                                teamBadgeUrl: p2Summary?.team_badge_url || ''
                             },
                             comparisonId: `comp-${Date.now()}`,
-                            gameId: resolvedGameId
+                            gameId: useSingleMatchStats ? preselectedGameId : undefined,
+                            availableGames
                         }
                     }
                     return {

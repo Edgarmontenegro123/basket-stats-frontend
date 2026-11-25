@@ -10,11 +10,18 @@ export interface ComparePlayerStats {
     teamBadgeUrl?: string
 }
 
+export interface CompareGameOption {
+    id: string
+    label: string
+    date: string
+}
+
 export interface CompareCardData {
     player1: ComparePlayerStats
     player2: ComparePlayerStats
     comparisonId?: string
     gameId?: string
+    availableGames?: CompareGameOption[]
 }
 
 export interface CompareCardProps {

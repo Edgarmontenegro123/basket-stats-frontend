@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react'
-import {useLocation, useParams} from 'react-router-dom'
+import {useLocation, useParams, useSearchParams} from 'react-router-dom'
 import BasketballLoader from '../../common/BasketballLoader'
 import {AnalyticsFilterBar} from '../../analytics/AnalyticsFilterBar'
 import {useAnalyticsFilters} from '../../hooks/useAnalyticsFilters'
@@ -18,6 +18,7 @@ import './GameAnalyticsPage.css'
 const GameAnalyticsPage = () => {
     const {gameId: paramGameId} = useParams<{gameId?: string}>()
     const location = useLocation()
+    const [searchParams, setSearchParams] = useSearchParams()
     const {filters, updateFilters, resetFilters} = useAnalyticsFilters()
     const updateFiltersRef = useRef(updateFilters)
 
@@ -38,17 +39,25 @@ const GameAnalyticsPage = () => {
 
     useEffect(() => {
         const navState = location.state as {playerIds?: string[]} | null
-        const incomingPlayerIds = Array.isArray(navState?.playerIds) ? navState.playerIds : undefined
+        const statePlayerIds = Array.isArray(navState?.playerIds) ? navState.playerIds : undefined
+        const queryPlayerIdsRaw = searchParams.get('playerIds')
+        const queryPlayerIds = queryPlayerIdsRaw
+            ? queryPlayerIdsRaw.split(',').map((id) => id.trim()).filter(Boolean)
+            : undefined
+        const queryGameId = searchParams.get('gameId') || undefined
 
-        if (paramGameId) {
+        const incomingPlayerIds = statePlayerIds ?? queryPlayerIds
+        const resolvedGameId = paramGameId || queryGameId
+
+        if (resolvedGameId) {
             updateFiltersRef.current({
-                gameId: paramGameId,
-                ...(incomingPlayerIds ? {playerIds: incomingPlayerIds, teamId: ''} : {})
+                gameId: resolvedGameId,
+                ...(incomingPlayerIds && incomingPlayerIds.length > 0 ? {playerIds: incomingPlayerIds, teamId: ''} : {})
             })
         } else if (incomingPlayerIds && incomingPlayerIds.length > 0) {
             updateFiltersRef.current({playerIds: incomingPlayerIds})
         }
-    }, [paramGameId, location.state])
+    }, [paramGameId, location.state, searchParams])
 
     useEffect(() => {
         let isMounted = true
@@ -77,12 +86,14 @@ const GameAnalyticsPage = () => {
         })
         : []
 
+    const isPlayerFiltered = Boolean(selectedPlayerIds && selectedPlayerIds.length > 0)
+
     const playerStats = selectedGameId
         ? fetchedPlayerStats.filter((stat) => {
             if (selectedTeam && stat.team_name.toLowerCase() !== selectedTeam.name.toLowerCase()) {
                 return false
             }
-            if (selectedPlayerIds && selectedPlayerIds.length > 0) {
+            if (isPlayerFiltered && selectedPlayerIds) {
                 return selectedPlayerIds.includes(stat.id)
             }
             return true
@@ -218,7 +229,34 @@ const GameAnalyticsPage = () => {
                     </section>
 
                     <section className='analytics-card'>
-                        <h2>Player Stats</h2>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '12px'}}>
+                            <h2 style={{margin: 0}}>Player Stats</h2>
+                            {isPlayerFiltered && (
+                                <button
+                                    type='button'
+                                    onClick={() => {
+                                        updateFilters({playerIds: []})
+                                        if (searchParams.has('playerIds')) {
+                                            const nextParams = new URLSearchParams(searchParams)
+                                            nextParams.delete('playerIds')
+                                            setSearchParams(nextParams, {replace: true})
+                                        }
+                                    }}
+                                    style={{
+                                        background: 'rgba(56, 189, 248, 0.15)',
+                                        color: '#38bdf8',
+                                        border: '1px solid rgba(56, 189, 248, 0.4)',
+                                        borderRadius: '8px',
+                                        padding: '6px 12px',
+                                        fontSize: '0.82rem',
+                                        fontWeight: 600,
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    Ver plantilla completa ({fetchedPlayerStats.length})
+                                </button>
+                            )}
+                        </div>
                         <div className='table-wrapper analytics-table-wrapper'>
                             <table>
                                 <thead>

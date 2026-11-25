@@ -83,10 +83,28 @@ export const ChatWidget = () => {
         }
     }
 
-    const handleNavigateToAnalytics = (gameId?: string, playerIds?: string[]) => {
+    const handleNavigateToAnalytics = (gameId?: string, extraParams?: string[]) => {
         setIsOpen(false)
-        const targetPath = gameId ? `/analytics/${gameId}` : '/analytics'
-        navigate(targetPath, playerIds && playerIds.length > 0 ? {state: {playerIds}} : undefined)
+
+        if (!gameId) {
+            const compareParams = new URLSearchParams()
+            if (extraParams && extraParams.length > 0) {
+                compareParams.set('mode', 'players')
+                compareParams.set('players', extraParams.join(','))
+            }
+            const query = compareParams.toString()
+            navigate(query ? `/compare?${query}` : '/compare')
+            return
+        }
+
+        const searchParams = new URLSearchParams()
+        searchParams.set('gameId', gameId)
+
+        if (extraParams && extraParams.length > 0) {
+            searchParams.set('playerIds', extraParams.join(','))
+        }
+
+        navigate(`/analytics?${searchParams.toString()}`)
     }
 
     const renderGenUiComponent = (genUiData: GenUiPayload) => {

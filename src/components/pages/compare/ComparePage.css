@@ -1,49 +1,183 @@
+.compare-team-link {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    text-align: left;
+}
+
+.compare-team-link:hover {
+    text-decoration: underline;
+}
+
+.compare-table-wrapper {
+    width: 100%;
+    margin-top: 16px;
+}
+
 .compare-mobile-list {
     display: none;
+    width: 100%;
+    margin-top: 16px;
 }
 
 .compare-mobile-card {
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: 18px;
     background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
 }
 
 .compare-mobile-card h3 {
-    margin: 0 0 14px;
-    color: var(--title);
+    margin: 0 0 12px;
+    font-size: 1.05rem;
 }
 
 .compare-mobile-card p {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
-    margin: 0;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
+    align-items: center;
+    margin: 6px 0;
+    font-size: 0.9rem;
+}
+
+.compare-mobile-card p span {
     color: var(--text-soft);
 }
 
-.compare-mobile-card p:last-child {
-    border-bottom: none;
+/* Mode Tabs */
+.compare-mode-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
 }
 
-.compare-mobile-card strong {
-    color: var(--title);
-}
-
-.compare-team-link {
-    border: 0;
-    padding: 0;
+.compare-mode-tab {
+    background: var(--card);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    background: transparent;
+    transition: all 0.2s ease;
+}
+
+.compare-mode-tab:hover {
+    border-color: var(--accent);
+    color: var(--text);
+}
+
+.compare-mode-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+}
+
+/* Multi-Player Toolbar & Slots */
+.compare-players-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.compare-game-filter {
+    flex: 1;
+    min-width: 240px;
+    margin-bottom: 0;
+}
+
+.compare-add-player-btn {
+    background: var(--accent-soft);
     color: var(--accent);
-    font: inherit;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.compare-add-player-btn:hover {
+    background: var(--accent);
+    color: #ffffff;
+}
+
+.compare-player-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.compare-player-slot-card {
+    background: var(--card-soft);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.compare-slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-soft);
+}
+
+.compare-remove-slot-btn {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border: 1px solid var(--danger-border);
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.compare-remove-slot-btn:hover {
+    opacity: 0.85;
+}
+
+.compare-th-sub {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-soft);
+    margin-top: 2px;
+}
+
+.compare-best-stat {
+    color: var(--accent);
     font-weight: 700;
 }
 
-.compare-team-link:hover {
-    text-decoration: underline;
+.compare-players-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 28px 0;
+    color: var(--text-soft);
 }
 
 @media (max-width: 768px) {
@@ -52,8 +186,6 @@
     }
 
     .compare-mobile-list {
-        display: grid;
-        gap: 16px;
-        width: 100%;
+        display: block;
     }
 }
