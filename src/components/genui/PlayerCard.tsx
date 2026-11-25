@@ -1,18 +1,6 @@
 import {useState} from 'react'
-import type {PlayerCardData} from '../../types/chat'
+import type {PlayerCardProps} from '../../types/chat'
 import './PlayerCard.css'
-
-interface ExtendedPlayerCardData extends PlayerCardData {
-    id?: string
-    teamBadgeUrl?: string
-    photoUrl?: string
-    number?: number
-}
-
-interface PlayerCardProps {
-    data: ExtendedPlayerCardData
-    onNavigateToPlayer?: (playerId: string) => void
-}
 
 const getInitials = (name: string): string =>
     name

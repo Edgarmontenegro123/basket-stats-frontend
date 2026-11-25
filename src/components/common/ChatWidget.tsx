@@ -4,8 +4,7 @@ import ReactMarkdown from 'react-markdown'
 import {sendMessageToGateway} from '../../services/aiGatewayService'
 import {MatchCard} from '../genui/MatchCard'
 import {CompareCard} from '../genui/CompareCard'
-import type {CompareCardData} from '../../types/compare'
-import type {ChatMessage, GenUiPayload, PlayerCardData, MatchCardData} from '../../types/chat'
+import type {ChatMessage, GenUiPayload} from '../../types/chat'
 import {PlayerCard} from '../genui/PlayerCard'
 import './ChatWidget.css'
 
@@ -117,21 +116,21 @@ export const ChatWidget = () => {
             case 'player-card':
                 return (
                     <PlayerCard
-                        data={genUiData.data as PlayerCardData & {id?: string; teamBadgeUrl?: string; photoUrl?: string; number?: number}}
+                        data={genUiData.data}
                         onNavigateToPlayer={handleNavigateToPlayer}
                     />
                 )
             case 'match-card':
                 return (
                     <MatchCard
-                        data={genUiData.data as MatchCardData & {gameId?: string; topPlayers?: Array<{name: string; points: number}>}}
+                        data={genUiData.data}
                         onNavigateToAnalytics={handleNavigateToAnalytics}
                     />
                 )
             case 'compare-card':
                 return (
                     <CompareCard
-                        data={genUiData.data as CompareCardData}
+                        data={genUiData.data}
                         onNavigateToAnalytics={handleNavigateToAnalytics}
                     />
                 )

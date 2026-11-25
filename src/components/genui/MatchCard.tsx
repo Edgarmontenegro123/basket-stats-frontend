@@ -1,18 +1,6 @@
 import {useState} from 'react'
-import type {MatchCardData} from '../../types/chat'
+import type {MatchCardProps} from '../../types/chat'
 import './MatchCard.css'
-
-interface ExtendedMatchCardData extends MatchCardData {
-    gameId?: string
-    homeBadgeUrl?: string
-    awayBadgeUrl?: string
-    topPlayers?: Array<{ name: string; points: number }>
-}
-
-interface MatchCardProps {
-    data: ExtendedMatchCardData
-    onNavigateToAnalytics?: (gameId: string) => void
-}
 
 const getTeamInitials = (name: string): string =>
     name
