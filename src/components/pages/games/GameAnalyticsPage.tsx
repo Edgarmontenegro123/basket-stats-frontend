@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react'
-import {useParams} from 'react-router-dom'
+import {useEffect, useRef, useState} from 'react'
+import {useLocation, useParams} from 'react-router-dom'
 import BasketballLoader from '../../common/BasketballLoader'
 import {AnalyticsFilterBar} from '../../analytics/AnalyticsFilterBar'
 import {useAnalyticsFilters} from '../../hooks/useAnalyticsFilters'
@@ -17,7 +17,10 @@ import './GameAnalyticsPage.css'
 
 const GameAnalyticsPage = () => {
     const {gameId: paramGameId} = useParams<{gameId?: string}>()
+    const location = useLocation()
     const {filters, updateFilters, resetFilters} = useAnalyticsFilters()
+    const updateFiltersRef = useRef(updateFilters)
+
     const [fetchedPlayerStats, setFetchedPlayerStats] = useState<PlayerStats[]>([])
     const [fetchedTeamStats, setFetchedTeamStats] = useState<TeamStat[]>([])
     const [teams, setTeams] = useState<Team[]>([])
@@ -30,14 +33,26 @@ const GameAnalyticsPage = () => {
     const selectedPlayerIds = filters.playerIds
 
     useEffect(() => {
-        if (paramGameId && paramGameId !== filters.gameId) {
-            updateFilters({ gameId: paramGameId })
+        updateFiltersRef.current = updateFilters
+    }, [updateFilters])
+
+    useEffect(() => {
+        const navState = location.state as {playerIds?: string[]} | null
+        const incomingPlayerIds = Array.isArray(navState?.playerIds) ? navState.playerIds : undefined
+
+        if (paramGameId) {
+            updateFiltersRef.current({
+                gameId: paramGameId,
+                ...(incomingPlayerIds ? {playerIds: incomingPlayerIds, teamId: ''} : {})
+            })
+        } else if (incomingPlayerIds && incomingPlayerIds.length > 0) {
+            updateFiltersRef.current({playerIds: incomingPlayerIds})
         }
-    }, [paramGameId])
+    }, [paramGameId, location.state])
 
     useEffect(() => {
         let isMounted = true
-        const loadTeams = async () => {
+        const loadTeams = async() => {
             try {
                 const data = await getTeams()
                 if (isMounted) {
@@ -83,7 +98,7 @@ const GameAnalyticsPage = () => {
 
         let isMounted = true
 
-        const loadAnalytics = async () => {
+        const loadAnalytics = async() => {
             try {
                 setError('')
                 setIsLoadingAnalytics(true)

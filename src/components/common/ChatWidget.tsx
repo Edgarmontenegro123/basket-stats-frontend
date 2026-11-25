@@ -83,24 +83,30 @@ export const ChatWidget = () => {
         }
     }
 
-    const handleNavigateToAnalytics = (gameId: string) => {
+    const handleNavigateToAnalytics = (gameId?: string, playerIds?: string[]) => {
         setIsOpen(false)
-        navigate(`/analytics/${gameId}`)
+        const targetPath = gameId ? `/analytics/${gameId}` : '/analytics'
+        navigate(targetPath, playerIds && playerIds.length > 0 ? {state: {playerIds}} : undefined)
     }
 
     const renderGenUiComponent = (genUiData: GenUiPayload) => {
         switch (genUiData.type) {
             case 'player-card':
-                return <PlayerCard data={genUiData.data as PlayerCardData & { teamBadgeUrl?: string; photoUrl?: string }} />
+                return <PlayerCard data={genUiData.data as PlayerCardData & {teamBadgeUrl?: string; photoUrl?: string}} />
             case 'match-card':
                 return (
                     <MatchCard
-                        data={genUiData.data as MatchCardData & { gameId?: string; topPlayers?: Array<{ name: string; points: number }> }}
+                        data={genUiData.data as MatchCardData & {gameId?: string; topPlayers?: Array<{name: string; points: number}>}}
                         onNavigateToAnalytics={handleNavigateToAnalytics}
                     />
                 )
             case 'compare-card':
-                return <CompareCard data={genUiData.data as CompareCardData} />
+                return (
+                    <CompareCard
+                        data={genUiData.data as CompareCardData}
+                        onNavigateToAnalytics={handleNavigateToAnalytics}
+                    />
+                )
             default:
                 return null
         }

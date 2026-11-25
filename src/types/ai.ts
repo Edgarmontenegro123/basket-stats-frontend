@@ -22,6 +22,8 @@ export interface TopScorer {
 }
 
 export interface GamePlayerStat {
+    id?: string
+    player_id?: string
     player_name?: string
     name?: string
     team_name?: string
