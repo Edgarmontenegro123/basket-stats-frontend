@@ -8,6 +8,8 @@ import './CompareCard.css'
 interface ActiveComparisonStats {
     p1Id?: string
     p2Id?: string
+    p1DidNotPlay?: boolean
+    p2DidNotPlay?: boolean
     p1Points: number
     p1Rebounds: number
     p1Assists: number
@@ -20,9 +22,19 @@ interface ActiveComparisonStats {
 
 const roundStat = (value: number): number => Number(value.toFixed(1))
 
+const getInitials = (name: string): string =>
+    name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() || '')
+        .join('') || '?'
+
 const buildDefaultStats = (data: CompareCardData, includePlayerIds = false): ActiveComparisonStats => ({
     p1Id: includePlayerIds ? data.player1.id : undefined,
     p2Id: includePlayerIds ? data.player2.id : undefined,
+    p1DidNotPlay: false,
+    p2DidNotPlay: false,
     p1Points: data.player1.points,
     p1Rebounds: data.player1.rebounds ?? 0,
     p1Assists: data.player1.assists ?? 0,
@@ -60,6 +72,69 @@ const findPlayersInGame = (
         foundP1: matchByTokens(p1Tokens),
         foundP2: matchByTokens(p2Tokens)
     }
+}
+
+const PlayerVisualIdentity = ({
+                                  name,
+                                  team,
+                                  number,
+                                  photoUrl,
+                                  teamBadgeUrl,
+                                  didNotPlay
+                              }: {
+    name: string
+    team: string
+    number?: number
+    photoUrl?: string
+    teamBadgeUrl?: string
+    didNotPlay?: boolean
+}) => {
+    const [avatarErr, setAvatarErr] = useState(false)
+    const [badgeErr, setBadgeErr] = useState(false)
+
+    return (
+        <div className='chat-compare-player'>
+            <div className='chat-compare-avatar-wrap'>
+                {photoUrl && !avatarErr ? (
+                    <img
+                        src={photoUrl}
+                        alt={name}
+                        className='chat-compare-avatar'
+                        onError={() => setAvatarErr(true)}
+                    />
+                ) : (
+                    <div className='chat-compare-avatar chat-compare-avatar--fallback'>
+                        {getInitials(name)}
+                    </div>
+                )}
+                {number !== undefined && (
+                    <span className='chat-compare-jersey-pill'>#{number}</span>
+                )}
+            </div>
+
+            <span className='chat-compare-name'>{name}</span>
+
+            <div className='chat-compare-team-row'>
+                {teamBadgeUrl && !badgeErr ? (
+                    <img
+                        src={teamBadgeUrl}
+                        alt={team}
+                        className='chat-compare-team-badge'
+                        onError={() => setBadgeErr(true)}
+                    />
+                ) : (
+                    <span className='chat-compare-team-badge chat-compare-team-badge--fallback'>
+                        {getInitials(team || 'TM')}
+                    </span>
+                )}
+                <span className='chat-compare-team'>{team}</span>
+            </div>
+
+            {didNotPlay && (
+                <span className='chat-compare-dnp-badge'>DNP · No jugó</span>
+            )}
+        </div>
+    )
 }
 
 export const CompareCard = ({data, onNavigateToAnalytics}: CompareCardProps) => {
@@ -117,6 +192,8 @@ export const CompareCard = ({data, onNavigateToAnalytics}: CompareCardProps) => 
                 setActiveStats({
                     p1Id: undefined,
                     p2Id: undefined,
+                    p1DidNotPlay: totals.p1.games === 0,
+                    p2DidNotPlay: totals.p2.games === 0,
                     p1Points: totals.p1.games > 0 ? roundStat(totals.p1.pts / totals.p1.games) : 0,
                     p1Rebounds: totals.p1.games > 0 ? roundStat(totals.p1.reb / totals.p1.games) : 0,
                     p1Assists: totals.p1.games > 0 ? roundStat(totals.p1.ast / totals.p1.games) : 0,
@@ -142,6 +219,8 @@ export const CompareCard = ({data, onNavigateToAnalytics}: CompareCardProps) => 
             setActiveStats({
                 p1Id: foundP1?.id ? String(foundP1.id) : undefined,
                 p2Id: foundP2?.id ? String(foundP2.id) : undefined,
+                p1DidNotPlay: !foundP1,
+                p2DidNotPlay: !foundP2,
                 p1Points: Number(foundP1?.points ?? foundP1?.pts ?? 0),
                 p1Rebounds: Number(foundP1?.rebounds ?? foundP1?.reb ?? 0),
                 p1Assists: Number(foundP1?.assists ?? foundP1?.ast ?? 0),
@@ -181,6 +260,12 @@ export const CompareCard = ({data, onNavigateToAnalytics}: CompareCardProps) => 
             ? 'Comparación en Partido'
             : 'Comparación General'
 
+    const formatCell = (val: number, dnp?: boolean) => {
+        if (isLoadingGame) return '...'
+        if (dnp) return '—'
+        return val
+    }
+
     return (
         <div className='chat-compare-card'>
             <div className='chat-compare-header'>
@@ -215,37 +300,45 @@ export const CompareCard = ({data, onNavigateToAnalytics}: CompareCardProps) => 
             )}
 
             <div className='chat-compare-body'>
-                <div className='chat-compare-player'>
-                    <span className='chat-compare-name'>{data.player1.name}</span>
-                    <span className='chat-compare-team'>{data.player1.team}</span>
-                </div>
+                <PlayerVisualIdentity
+                    name={data.player1.name}
+                    team={data.player1.team}
+                    number={data.player1.number}
+                    photoUrl={data.player1.photoUrl}
+                    teamBadgeUrl={data.player1.teamBadgeUrl}
+                    didNotPlay={activeStats.p1DidNotPlay}
+                />
                 <div className='chat-compare-vs'>VS</div>
-                <div className='chat-compare-player'>
-                    <span className='chat-compare-name'>{data.player2.name}</span>
-                    <span className='chat-compare-team'>{data.player2.team}</span>
-                </div>
+                <PlayerVisualIdentity
+                    name={data.player2.name}
+                    team={data.player2.team}
+                    number={data.player2.number}
+                    photoUrl={data.player2.photoUrl}
+                    teamBadgeUrl={data.player2.teamBadgeUrl}
+                    didNotPlay={activeStats.p2DidNotPlay}
+                />
             </div>
 
             <div className='chat-compare-stats-table'>
                 <div className='chat-stat-row'>
-                    <span>{isLoadingGame ? '...' : activeStats.p1Points}</span>
+                    <span>{formatCell(activeStats.p1Points, activeStats.p1DidNotPlay)}</span>
                     <strong>PTS</strong>
-                    <span>{isLoadingGame ? '...' : activeStats.p2Points}</span>
+                    <span>{formatCell(activeStats.p2Points, activeStats.p2DidNotPlay)}</span>
                 </div>
                 <div className='chat-stat-row'>
-                    <span>{isLoadingGame ? '...' : activeStats.p1Rebounds}</span>
+                    <span>{formatCell(activeStats.p1Rebounds, activeStats.p1DidNotPlay)}</span>
                     <strong>REB</strong>
-                    <span>{isLoadingGame ? '...' : activeStats.p2Rebounds}</span>
+                    <span>{formatCell(activeStats.p2Rebounds, activeStats.p2DidNotPlay)}</span>
                 </div>
                 <div className='chat-stat-row'>
-                    <span>{isLoadingGame ? '...' : activeStats.p1Assists}</span>
+                    <span>{formatCell(activeStats.p1Assists, activeStats.p1DidNotPlay)}</span>
                     <strong>AST</strong>
-                    <span>{isLoadingGame ? '...' : activeStats.p2Assists}</span>
+                    <span>{formatCell(activeStats.p2Assists, activeStats.p2DidNotPlay)}</span>
                 </div>
                 <div className='chat-stat-row'>
-                    <span>{isLoadingGame ? '...' : activeStats.p1Steals}</span>
+                    <span>{formatCell(activeStats.p1Steals, activeStats.p1DidNotPlay)}</span>
                     <strong>STL</strong>
-                    <span>{isLoadingGame ? '...' : activeStats.p2Steals}</span>
+                    <span>{formatCell(activeStats.p2Steals, activeStats.p2DidNotPlay)}</span>
                 </div>
             </div>
 

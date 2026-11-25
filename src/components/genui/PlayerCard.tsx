@@ -1,31 +1,59 @@
+import {useState} from 'react'
 import type {PlayerCardData} from '../../types/chat'
 import './PlayerCard.css'
 
 interface ExtendedPlayerCardData extends PlayerCardData {
+    id?: string
     teamBadgeUrl?: string
     photoUrl?: string
+    number?: number
 }
 
 interface PlayerCardProps {
     data: ExtendedPlayerCardData
+    onNavigateToPlayer?: (playerId: string) => void
 }
 
-export const PlayerCard = ({data}: PlayerCardProps) => {
+const getInitials = (name: string): string =>
+    name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() || '')
+        .join('') || '?'
+
+export const PlayerCard = ({data, onNavigateToPlayer}: PlayerCardProps) => {
+    const [photoError, setPhotoError] = useState(false)
+    const [badgeError, setBadgeError] = useState(false)
+
     return (
         <div className='chat-player-card'>
             <div className='chat-player-header'>
-                {data.photoUrl ? (
-                    <img src={data.photoUrl} alt={data.name} className='chat-player-badge' />
+                {data.photoUrl && !photoError ? (
+                    <img
+                        src={data.photoUrl}
+                        alt={data.name}
+                        className='chat-player-badge'
+                        onError={() => setPhotoError(true)}
+                    />
                 ) : (
                     <div className='chat-player-badge-placeholder'>
-                        {data.name.charAt(0)}
+                        {getInitials(data.name)}
                     </div>
                 )}
                 <div className='chat-player-info'>
-                    <h4 className='chat-player-name'>{data.name}</h4>
+                    <h4 className='chat-player-name'>
+                        {data.name}
+                        {data.number !== undefined ? ` · #${data.number}` : ''}
+                    </h4>
                     <div className='chat-player-team-row'>
-                        {data.teamBadgeUrl && (
-                            <img src={data.teamBadgeUrl} alt={data.team} className='chat-team-badge' />
+                        {data.teamBadgeUrl && !badgeError && (
+                            <img
+                                src={data.teamBadgeUrl}
+                                alt={data.team}
+                                className='chat-team-badge'
+                                onError={() => setBadgeError(true)}
+                            />
                         )}
                         <span className='chat-player-team-text'>{data.team || 'Unknown team'}</span>
                     </div>
@@ -50,6 +78,18 @@ export const PlayerCard = ({data}: PlayerCardProps) => {
                     <strong className='chat-player-stat-value'>{data.steals}</strong>
                 </div>
             </div>
+
+            {data.id && onNavigateToPlayer && (
+                <div className='chat-match-actions'>
+                    <button
+                        type='button'
+                        className='chat-match-analytics-btn'
+                        onClick={() => onNavigateToPlayer(data.id!)}
+                    >
+                        Ver perfil completo 👤
+                    </button>
+                </div>
+            )}
         </div>
     )
 }

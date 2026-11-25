@@ -31,6 +31,9 @@ interface ComputedPlayerMetrics {
     playerId: string
     displayName: string
     teamName: string
+    photoUrl?: string | null
+    jerseyNumber?: number
+    didNotPlayGame?: boolean
     gamesPlayed: number
     avgPoints: number
     avgRebounds: number
@@ -79,7 +82,66 @@ const findMatchingPlayerId = (players: Player[], query: string): string => {
 const formatPlayerFullName = (player: Player): string =>
     `${player.last_name} ${player.first_name}`.trim()
 
+const getInitials = (name: string): string =>
+    name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() || '')
+        .join('') || '?'
+
 const round1 = (n: number): number => Number(n.toFixed(1))
+
+const PlayerAvatar = ({
+                          name,
+                          photoUrl,
+                          size = 'md',
+                      }: {
+    name: string
+    photoUrl?: string | null
+    size?: 'sm' | 'md'
+}) => {
+    const [imgError, setImgError] = useState(false)
+
+    if (photoUrl && !imgError) {
+        return (
+            <img
+                src={photoUrl}
+                alt={name}
+                className={`compare-avatar compare-avatar--${size}`}
+                onError={() => setImgError(true)}
+            />
+        )
+    }
+
+    return (
+        <span className={`compare-avatar compare-avatar--fallback compare-avatar--${size}`} aria-hidden='true'>
+            {getInitials(name)}
+        </span>
+    )
+}
+
+const TeamBadge = ({team}: {team?: Team}) => {
+    const [imgError, setImgError] = useState(false)
+    const label = team?.short_name || getInitials(team?.name || 'TM')
+
+    if (team?.logo_url && !imgError) {
+        return (
+            <img
+                src={team.logo_url}
+                alt={team.name}
+                className='compare-team-logo'
+                onError={() => setImgError(true)}
+            />
+        )
+    }
+
+    return (
+        <span className='compare-team-logo compare-team-logo--fallback' aria-hidden='true'>
+            {label}
+        </span>
+    )
+}
 
 const ComparePage = () => {
     const navigate = useNavigate()
@@ -92,11 +154,9 @@ const ComparePage = () => {
 
     const [mode, setMode] = useState<CompareMode>('teams')
 
-    // Estado de comparación de equipos
     const [teamAId, setTeamAId] = useState('')
     const [teamBId, setTeamBId] = useState('')
 
-    // Estado de comparación multi-jugador
     const [playerSlots, setPlayerSlots] = useState<PlayerSlot[]>([])
     const [selectedGameFilterId, setSelectedGameFilterId] = useState<string>('')
     const [playerMetricsMap, setPlayerMetricsMap] = useState<Record<string, ComputedPlayerMetrics>>({})
@@ -121,7 +181,6 @@ const ComparePage = () => {
                 const queryTeam2 = searchParams.get('team2')
                 const queryGameId = searchParams.get('gameId') || ''
 
-                // Configurar equipos por defecto o desde URL
                 const matchedA = findMatchingTeamId(teamsData, queryTeam1)
                 const matchedB = findMatchingTeamId(teamsData, queryTeam2)
 
@@ -134,7 +193,6 @@ const ComparePage = () => {
                 setTeamAId(resolvedTeamA)
                 setTeamBId(resolvedTeamB)
 
-                // Configurar slots de jugadores desde URL o por defecto
                 const requestedPlayerNames = queryPlayersRaw
                     ? queryPlayersRaw.split(',').map((s) => s.trim()).filter(Boolean)
                     : []
@@ -194,7 +252,6 @@ const ComparePage = () => {
         [playerSlots]
     )
 
-    // Cargar métricas de los jugadores seleccionados (promedios de temporada o partido específico)
     useEffect(() => {
         if (mode !== 'players' || activePlayerIds.length === 0 || players.length === 0) {
             return
@@ -227,6 +284,9 @@ const ComparePage = () => {
                             playerId: pid,
                             displayName: fullName,
                             teamName: teamNameById[playerObj.team_id] || 'No Team',
+                            photoUrl: playerObj.photo_url,
+                            jerseyNumber: playerObj.number,
+                            didNotPlayGame: !statRow,
                             gamesPlayed: statRow ? 1 : 0,
                             avgPoints: statRow ? Number(statRow.points || 0) : 0,
                             avgRebounds: statRow ? Number(statRow.rebounds || 0) : 0,
@@ -252,7 +312,7 @@ const ComparePage = () => {
                                 ])
                             )
 
-                            let summary: PlayerSummary | null = null
+                            let summary: PlayerSummary | undefined
                             for (const candidate of candidates) {
                                 try {
                                     const res = (await getPlayerSummaryByName(candidate)) as PlayerSummary
@@ -269,6 +329,9 @@ const ComparePage = () => {
                                 playerId: pid,
                                 displayName: summary?.player_name || fullName,
                                 teamName: summary?.team_name || teamNameById[playerObj.team_id] || 'No Team',
+                                photoUrl: playerObj.photo_url,
+                                jerseyNumber: playerObj.number,
+                                didNotPlayGame: false,
                                 gamesPlayed: Number(summary?.games_played || 0),
                                 avgPoints: round1(Number(summary?.average_points || 0)),
                                 avgRebounds: round1(Number(summary?.average_rebounds || 0)),
@@ -403,8 +466,10 @@ const ComparePage = () => {
 
     const teamASummary = getTeamSummary(teamAId)
     const teamBSummary = getTeamSummary(teamBId)
-    const teamAName = teams.find((team) => team.id === teamAId)?.name || 'Team A'
-    const teamBName = teams.find((team) => team.id === teamBId)?.name || 'Team B'
+    const teamAObj = teams.find((team) => team.id === teamAId)
+    const teamBObj = teams.find((team) => team.id === teamBId)
+    const teamAName = teamAObj?.name || 'Team A'
+    const teamBName = teamBObj?.name || 'Team B'
 
     const formatPointDifferential = (value: number) => (value > 0 ? `+${value}` : String(value))
 
@@ -513,22 +578,28 @@ const ComparePage = () => {
                                 <tr>
                                     <th>Metric</th>
                                     <th>
-                                        <button
-                                            type='button'
-                                            className='compare-team-link'
-                                            onClick={() => navigate(`/teams/${teamAId}`)}
-                                        >
-                                            {teamAName}
-                                        </button>
+                                        <div className='compare-entity-header'>
+                                            <TeamBadge team={teamAObj} />
+                                            <button
+                                                type='button'
+                                                className='compare-team-link'
+                                                onClick={() => navigate(`/teams/${teamAId}`)}
+                                            >
+                                                {teamAName}
+                                            </button>
+                                        </div>
                                     </th>
                                     <th>
-                                        <button
-                                            type='button'
-                                            className='compare-team-link'
-                                            onClick={() => navigate(`/teams/${teamBId}`)}
-                                        >
-                                            {teamBName}
-                                        </button>
+                                        <div className='compare-entity-header'>
+                                            <TeamBadge team={teamBObj} />
+                                            <button
+                                                type='button'
+                                                className='compare-team-link'
+                                                onClick={() => navigate(`/teams/${teamBId}`)}
+                                            >
+                                                {teamBName}
+                                            </button>
+                                        </div>
                                     </th>
                                 </tr>
                                 </thead>
@@ -658,11 +729,24 @@ const ComparePage = () => {
                             const availablePlayers = slot.teamFilterId
                                 ? players.filter((p) => p.team_id === slot.teamFilterId)
                                 : players
+                            const selectedPlayerObj = players.find((p) => p.id === slot.playerId)
 
                             return (
                                 <div key={slot.slotId} className='compare-player-slot-card'>
                                     <div className='compare-slot-header'>
-                                        <span>Player {index + 1}</span>
+                                        <div className='compare-slot-identity'>
+                                            {selectedPlayerObj && (
+                                                <PlayerAvatar
+                                                    name={formatPlayerFullName(selectedPlayerObj)}
+                                                    photoUrl={selectedPlayerObj.photo_url}
+                                                    size='sm'
+                                                />
+                                            )}
+                                            <span>
+                                                Player {index + 1}
+                                                {selectedPlayerObj?.number !== undefined ? ` · #${selectedPlayerObj.number}` : ''}
+                                            </span>
+                                        </div>
                                         {playerSlots.length > 2 && (
                                             <button
                                                 type='button'
@@ -729,31 +813,54 @@ const ComparePage = () => {
                                     <th>Metric</th>
                                     {comparedPlayersMetrics.map((m) => (
                                         <th key={m.playerId}>
-                                            <button
-                                                type='button'
-                                                className='compare-team-link'
-                                                onClick={() => navigate(`/players/${m.playerId}`)}
-                                            >
-                                                {m.displayName}
-                                            </button>
-                                            <div className='compare-th-sub'>{m.teamName}</div>
+                                            <div className='compare-entity-header'>
+                                                <PlayerAvatar
+                                                    name={m.displayName}
+                                                    photoUrl={m.photoUrl}
+                                                    size='md'
+                                                />
+                                                <div>
+                                                    <button
+                                                        type='button'
+                                                        className='compare-team-link'
+                                                        onClick={() => navigate(`/players/${m.playerId}`)}
+                                                    >
+                                                        {m.displayName}
+                                                    </button>
+                                                    <div className='compare-th-sub'>
+                                                        {m.teamName}
+                                                        {m.jerseyNumber !== undefined ? ` · #${m.jerseyNumber}` : ''}
+                                                    </div>
+                                                    {m.didNotPlayGame && (
+                                                        <span className='compare-dnp-badge'>DNP · No jugó</span>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </th>
                                     ))}
                                 </tr>
                                 </thead>
                                 <tbody>
                                 {playerMetricRows.map((row) => {
-                                    const values = comparedPlayersMetrics.map((m) => row.getValue(m))
-                                    const bestValue = row.lowerIsBetter
-                                        ? Math.min(...values)
-                                        : Math.max(...values)
+                                    const activeParticipants = comparedPlayersMetrics.filter((m) => !m.didNotPlayGame)
+                                    const values = activeParticipants.map((m) => row.getValue(m))
+                                    const bestValue = values.length > 0
+                                        ? (row.lowerIsBetter ? Math.min(...values) : Math.max(...values))
+                                        : null
 
                                     return (
                                         <tr key={row.label}>
                                             <td>{row.label}</td>
                                             {comparedPlayersMetrics.map((m) => {
+                                                if (m.didNotPlayGame) {
+                                                    return (
+                                                        <td key={m.playerId} className='compare-dnp-cell'>
+                                                            —
+                                                        </td>
+                                                    )
+                                                }
                                                 const val = row.getValue(m)
-                                                const isBest = comparedPlayersMetrics.length > 1 && val === bestValue && val > 0
+                                                const isBest = activeParticipants.length > 1 && bestValue !== null && val === bestValue && val > 0
                                                 return (
                                                     <td
                                                         key={m.playerId}

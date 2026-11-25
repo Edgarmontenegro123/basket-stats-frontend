@@ -1,5 +1,6 @@
-import {getGames, getTeams, getTopScorers, getPlayerRankings, getPlayerSummaryByName, getPlayerStatsByGameId} from './api'
+import {getGames, getTeams, getPlayers, getTopScorers, getPlayerRankings, getPlayerSummaryByName, getPlayerStatsByGameId} from './api'
 import type {Team} from '../types/team'
+import type {Player} from '../types/player'
 import type {TeamGame, TopScorer, GamePlayerStat, PlayerSummary} from '../types/ai'
 import type {CompareGameOption} from '../types/compare'
 import {normaliseText} from '../components/helpers/normaliseText'
@@ -11,9 +12,129 @@ const getRawDate = (game: TeamGame): unknown => {
     return g.date ?? g.game_date ?? g.match_date ?? g.created_at ?? ''
 }
 
+const findTeamBadgeUrl = (teamName: string, teamsList: Team[], teamId?: string): string => {
+    if (teamId) {
+        const byId = teamsList.find((t) => t.id === teamId)
+        if (byId?.logo_url) return byId.logo_url
+    }
+    const norm = normaliseText(teamName)
+    if (!norm) return ''
+    const byName = teamsList.find((t) => {
+        const tName = normaliseText(t.name)
+        return tName === norm || tName.includes(norm) || norm.includes(tName)
+    })
+    return byName?.logo_url || ''
+}
+
+const enrichPlayerVisuals = (
+    resolvedName: string,
+    resolvedTeamName: string,
+    playersList: Player[],
+    teamsList: Team[]
+): {id?: string; photoUrl: string; teamBadgeUrl: string; number?: number} => {
+    const normName = normaliseText(resolvedName)
+    const nameTokens = normName.split(' ').filter((t) => t.length > 1)
+
+    const matchedPlayer = playersList.find((p) => {
+        const f1 = normaliseText(`${p.first_name} ${p.last_name}`)
+        const f2 = normaliseText(`${p.last_name} ${p.first_name}`)
+        if (f1 === normName || f2 === normName) return true
+        return nameTokens.length > 0 && nameTokens.every((t) => f1.includes(t))
+    })
+
+    const teamBadgeUrl = findTeamBadgeUrl(resolvedTeamName, teamsList, matchedPlayer?.team_id)
+
+    return {
+        id: matchedPlayer?.id,
+        photoUrl: matchedPlayer?.photo_url || '',
+        teamBadgeUrl,
+        number: matchedPlayer?.number
+    }
+}
+
+const levenshteinDistance = (a: string, b: string): number => {
+    if (a === b) return 0
+    if (a.length === 0) return b.length
+    if (b.length === 0) return a.length
+
+    const matrix: number[][] = Array.from({length: a.length + 1}, (_, i) => [i])
+    for (let j = 0; j <= b.length; j++) {
+        matrix[0][j] = j
+    }
+
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1
+            matrix[i][j] = Math.min(
+                matrix[i - 1][j] + 1,
+                matrix[i][j - 1] + 1,
+                matrix[i - 1][j - 1] + cost
+            )
+        }
+    }
+
+    return matrix[a.length][b.length]
+}
+
+const findClosestPlayerSuggestions = (
+    rawQuery: string,
+    playersList: TopScorer[],
+    maxSuggestions = 3
+): Array<{name: string; team: string}> => {
+    const queryNorm = normaliseText(rawQuery)
+    const queryTokens = queryNorm.split(' ').filter((t) => t.length > 1)
+    if (queryTokens.length === 0) return []
+
+    const scored = new Map<string, {name: string; team: string; score: number}>()
+
+    for (const item of playersList) {
+        const displayName = (item.player_name || item.name || '').trim()
+        if (!displayName) continue
+
+        const normFull = normaliseText(displayName)
+        const nameTokens = normFull.split(' ').filter((t) => t.length > 1)
+        if (nameTokens.length === 0) continue
+
+        let totalBestDistance = 0
+        for (const qToken of queryTokens) {
+            let bestTokenDist = Infinity
+            for (const nToken of nameTokens) {
+                const dist = levenshteinDistance(qToken, nToken)
+                if (dist < bestTokenDist) {
+                    bestTokenDist = dist
+                }
+            }
+            totalBestDistance += bestTokenDist
+        }
+
+        const maxAllowedDist = queryTokens.reduce(
+            (acc, t) => acc + (t.length <= 4 ? 1 : 2),
+            0
+        )
+
+        if (totalBestDistance <= maxAllowedDist) {
+            const existing = scored.get(displayName)
+            if (!existing || totalBestDistance < existing.score) {
+                scored.set(displayName, {
+                    name: displayName,
+                    team: item.team_name || 'Sin equipo',
+                    score: totalBestDistance
+                })
+            }
+        }
+    }
+
+    return Array.from(scored.values())
+        .sort((a, b) => a.score - b.score)
+        .slice(0, maxSuggestions)
+        .map(({name, team}) => ({name, team}))
+}
+
 interface ResolvedPlayerResult {
     player: PlayerSummary | null
     ambiguousMatches?: Array<{name: string; team: string}>
+    didYouMean?: Array<{name: string; team: string}>
+    lookupFailed?: boolean
 }
 
 const resolvePlayerWithDisambiguation = async(rawName: string): Promise<ResolvedPlayerResult> => {
@@ -25,7 +146,6 @@ const resolvePlayerWithDisambiguation = async(rawName: string): Promise<Resolved
         }
     }
 
-    // Fallback: buscar por coincidencia de todos los tokens en la lista completa de jugadores
     const tokens = normaliseText(rawName).split(' ').filter((t) => t.length > 1)
     if (tokens.length === 0) return {player: null}
 
@@ -62,11 +182,17 @@ const resolvePlayerWithDisambiguation = async(rawName: string): Promise<Resolved
             )
             return {player: null, ambiguousMatches: uniqueMatches}
         }
-    } catch {
-        // Ignorar error de fallback y retornar null
-    }
 
-    return {player: null}
+        const suggestions = findClosestPlayerSuggestions(rawName, list)
+        if (suggestions.length > 0) {
+            return {player: null, didYouMean: suggestions}
+        }
+
+        return {player: null}
+    } catch (fallbackError) {
+        console.warn(`Fallback player lookup failed for "${rawName}":`, fallbackError)
+        return {player: null, lookupFailed: true}
+    }
 }
 
 export const aiFunctionDeclarations = [
@@ -185,6 +311,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     getTeams(),
                     getTopScorers(10)
                 ])
+                const teamsList = (Array.isArray(teams) ? teams : []) as Team[]
 
                 const sortedGames = [...(games || [])].sort(
                     (a, b) => parseGameTimestamp(getRawDate(b)) - parseGameTimestamp(getRawDate(a))
@@ -194,6 +321,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
 
                 if (latestGame) {
                     const resolvedDate = String(getRawDate(latestGame) || '')
+                    const homeTeamName = latestGame.home_team_name || latestGame.home_team || 'Local'
+                    const awayTeamName = latestGame.away_team_name || latestGame.away_team || 'Visitante'
                     let formattedTopPlayers: Array<{name: string; points: number}> = []
                     try {
                         const gamePlayers = (await getPlayerStatsByGameId(latestGame.id)) as GamePlayerStat[]
@@ -204,7 +333,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 name: p.player_name || p.name || 'Jugador',
                                 points: Number(p.points ?? p.pts ?? 0)
                             }))
-                    } catch {
+                    } catch (statsError) {
+                        console.warn(`Could not load boxscore for game ${latestGame.id}, falling back to season top scorers:`, statsError)
                         formattedTopPlayers = (scorers || []).slice(0, 5).map((s: TopScorer) => ({
                             name: s.player_name || s.name || 'Jugador',
                             points: s.average_points ?? s.total_points ?? s.points ?? 0
@@ -214,8 +344,10 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         type: 'match-card' as const,
                         data: {
                             gameId: latestGame.id,
-                            homeTeam: latestGame.home_team_name || latestGame.home_team || 'Local',
-                            awayTeam: latestGame.away_team_name || latestGame.away_team || 'Visitante',
+                            homeTeam: homeTeamName,
+                            awayTeam: awayTeamName,
+                            homeBadgeUrl: findTeamBadgeUrl(homeTeamName, teamsList, latestGame.home_team_id),
+                            awayBadgeUrl: findTeamBadgeUrl(awayTeamName, teamsList, latestGame.away_team_id),
                             homeScore: latestGame.home_score ?? 0,
                             awayScore: latestGame.away_score ?? 0,
                             date: formatDateToDDMMYYYY(resolvedDate),
@@ -314,7 +446,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 name: p.player_name || p.name || 'Jugador',
                                 points: Number(p.points ?? p.pts ?? 0)
                             }))
-                    } catch {
+                    } catch (statsError) {
+                        console.warn(`Could not load player stats for game ${selectedGame.id}, falling back to top scorers:`, statsError)
                         formattedTopPlayers = (scorers || []).slice(0, 5).map((s) => ({
                             name: s.player_name || s.name || 'Jugador',
                             points: s.average_points ?? s.total_points ?? s.points ?? 0
@@ -328,6 +461,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                             gameId: selectedGame.id,
                             homeTeam: homeName,
                             awayTeam: awayName,
+                            homeBadgeUrl: findTeamBadgeUrl(homeName, teams, selectedGame.home_team_id),
+                            awayBadgeUrl: findTeamBadgeUrl(awayName, teams, selectedGame.away_team_id),
                             homeScore,
                             awayScore,
                             date: formattedDate,
@@ -356,11 +491,34 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
             }
             case 'getPlayerSummary': {
                 const rawName = typeof args?.playerName === 'string' ? args.playerName : ''
-                const resolved = await resolvePlayerWithDisambiguation(rawName)
+                const [resolved, playersList, teamsList] = await Promise.all([
+                    resolvePlayerWithDisambiguation(rawName),
+                    getPlayers().catch((err) => {
+                        console.warn('Could not load players list for visual enrichment:', err)
+                        return [] as Player[]
+                    }),
+                    getTeams().catch((err) => {
+                        console.warn('Could not load teams list for visual enrichment:', err)
+                        return [] as Team[]
+                    })
+                ])
                 if (resolved.ambiguousMatches && resolved.ambiguousMatches.length > 1) {
                     const optionsList = resolved.ambiguousMatches.map((m) => `${m.name} (${m.team})`).join(', ')
                     return {
                         result: `Se encontraron varios jugadores llamados "${rawName}": ${optionsList}. Pregunta al usuario cuál de ellos desea consultar indicando nombre completo y equipo.`,
+                        genUiData: null
+                    }
+                }
+                if (resolved.didYouMean && resolved.didYouMean.length > 0) {
+                    const suggestionsList = resolved.didYouMean.map((m) => `**${m.name}** (${m.team})`).join(', ')
+                    return {
+                        result: `No se encontró exactamente "${rawName}", pero existen nombres similares: ${suggestionsList}. Pregunta amablemente al usuario si quiso decir alguno de ellos.`,
+                        genUiData: null
+                    }
+                }
+                if (resolved.lookupFailed) {
+                    return {
+                        result: `Hubo un inconveniente temporal al buscar a "${rawName}" en los registros. Pide al usuario que intente nuevamente en unos segundos.`,
                         genUiData: null
                     }
                 }
@@ -370,6 +528,7 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 }
                 const name = player.player_name
                 const team = player.team_name || ''
+                const visuals = enrichPlayerVisuals(name, team, playersList, teamsList)
                 const points = player.average_points ?? player.total_points ?? 0
                 const rebounds = player.average_rebounds ?? player.total_rebounds ?? 0
                 const assists = player.average_assists ?? player.total_assists ?? 0
@@ -379,14 +538,16 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     genUiData: {
                         type: 'player-card',
                         data: {
+                            id: visuals.id,
                             name,
                             team,
+                            number: visuals.number,
                             points,
                             rebounds,
                             assists,
                             steals,
-                            photoUrl: player.photo_url || '',
-                            teamBadgeUrl: player.team_badge_url || ''
+                            photoUrl: player.photo_url || visuals.photoUrl,
+                            teamBadgeUrl: player.team_badge_url || visuals.teamBadgeUrl
                         }
                     }
                 }
@@ -401,10 +562,18 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                 }
 
                 try {
-                    const [p1Res, p2Res, rawAllGames] = await Promise.all([
+                    const [p1Res, p2Res, rawAllGames, playersList, teamsList] = await Promise.all([
                         resolvePlayerWithDisambiguation(rawP1),
                         resolvePlayerWithDisambiguation(rawP2),
-                        getGames()
+                        getGames(),
+                        getPlayers().catch((err) => {
+                            console.warn('Could not load players list for comparison visuals:', err)
+                            return [] as Player[]
+                        }),
+                        getTeams().catch((err) => {
+                            console.warn('Could not load teams list for comparison visuals:', err)
+                            return [] as Team[]
+                        })
                     ])
 
                     if (p1Res.ambiguousMatches && p1Res.ambiguousMatches.length > 1) {
@@ -419,6 +588,29 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                         const options = p2Res.ambiguousMatches.map((m) => `**${m.name}** (${m.team})`).join(', ')
                         return {
                             result: `Se encontraron múltiples coincidencias para "${rawP2}": ${options}. Pide al usuario que aclare con cuál de ellos (y de qué equipo) desea comparar.`,
+                            genUiData: null
+                        }
+                    }
+
+                    if (p1Res.didYouMean && p1Res.didYouMean.length > 0) {
+                        const suggestions = p1Res.didYouMean.map((m) => `**${m.name}** (${m.team})`).join(', ')
+                        return {
+                            result: `No se encontró exactamente "${rawP1}". ¿Quisiste decir ${suggestions}? Pregunta al usuario para confirmar antes de comparar.`,
+                            genUiData: null
+                        }
+                    }
+
+                    if (p2Res.didYouMean && p2Res.didYouMean.length > 0) {
+                        const suggestions = p2Res.didYouMean.map((m) => `**${m.name}** (${m.team})`).join(', ')
+                        return {
+                            result: `No se encontró exactamente "${rawP2}". ¿Quisiste decir ${suggestions}? Pregunta al usuario para confirmar antes de comparar.`,
+                            genUiData: null
+                        }
+                    }
+
+                    if (p1Res.lookupFailed || p2Res.lookupFailed) {
+                        return {
+                            result: 'Hubo un inconveniente temporal al consultar la base de datos de jugadores. Pide al usuario que intente nuevamente.',
                             genUiData: null
                         }
                     }
@@ -441,6 +633,9 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                     const resolvedP2Name = p2Summary?.player_name || rawP2
                     const resolvedP1Team = p1Summary?.team_name || 'Sin equipo'
                     const resolvedP2Team = p2Summary?.team_name || 'Sin equipo'
+
+                    const p1Visuals = enrichPlayerVisuals(resolvedP1Name, resolvedP1Team, playersList, teamsList)
+                    const p2Visuals = enrichPlayerVisuals(resolvedP2Name, resolvedP2Team, playersList, teamsList)
 
                     const allGames = (Array.isArray(rawAllGames) ? rawAllGames : []) as TeamGame[]
                     const normTeam1 = normaliseText(resolvedP1Team)
@@ -505,7 +700,8 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 const pName = normaliseText(p.player_name || p.name || '')
                                 return p2Tokens.some((token) => pName.includes(token))
                             })
-                        } catch {
+                        } catch (gameStatsError) {
+                            console.warn(`Could not load single-game comparison stats for game ${chosenGame.id}, falling back to season averages:`, gameStatsError)
                             preselectedGameId = undefined
                         }
                     }
@@ -551,23 +747,25 @@ export const executeAITool = async(functionName: string, args?: Record<string, u
                                 id: useSingleMatchStats && singleMatchP1?.id ? String(singleMatchP1.id) : undefined,
                                 name: resolvedP1Name,
                                 team: resolvedP1Team,
+                                number: p1Visuals.number,
                                 points: finalP1Points,
                                 rebounds: finalP1Rebounds,
                                 assists: finalP1Assists,
                                 steals: finalP1Steals,
-                                photoUrl: p1Summary?.photo_url || '',
-                                teamBadgeUrl: p1Summary?.team_badge_url || ''
+                                photoUrl: p1Summary?.photo_url || p1Visuals.photoUrl,
+                                teamBadgeUrl: p1Summary?.team_badge_url || p1Visuals.teamBadgeUrl
                             },
                             player2: {
                                 id: useSingleMatchStats && singleMatchP2?.id ? String(singleMatchP2.id) : undefined,
                                 name: resolvedP2Name,
                                 team: resolvedP2Team,
+                                number: p2Visuals.number,
                                 points: finalP2Points,
                                 rebounds: finalP2Rebounds,
                                 assists: finalP2Assists,
                                 steals: finalP2Steals,
-                                photoUrl: p2Summary?.photo_url || '',
-                                teamBadgeUrl: p2Summary?.team_badge_url || ''
+                                photoUrl: p2Summary?.photo_url || p2Visuals.photoUrl,
+                                teamBadgeUrl: p2Summary?.team_badge_url || p2Visuals.teamBadgeUrl
                             },
                             comparisonId: `comp-${Date.now()}`,
                             gameId: useSingleMatchStats ? preselectedGameId : undefined,

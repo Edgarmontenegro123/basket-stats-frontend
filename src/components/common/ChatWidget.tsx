@@ -107,10 +107,20 @@ export const ChatWidget = () => {
         navigate(`/analytics?${searchParams.toString()}`)
     }
 
+    const handleNavigateToPlayer = (playerId: string) => {
+        setIsOpen(false)
+        navigate(`/players/${playerId}`)
+    }
+
     const renderGenUiComponent = (genUiData: GenUiPayload) => {
         switch (genUiData.type) {
             case 'player-card':
-                return <PlayerCard data={genUiData.data as PlayerCardData & {teamBadgeUrl?: string; photoUrl?: string}} />
+                return (
+                    <PlayerCard
+                        data={genUiData.data as PlayerCardData & {id?: string; teamBadgeUrl?: string; photoUrl?: string; number?: number}}
+                        onNavigateToPlayer={handleNavigateToPlayer}
+                    />
+                )
             case 'match-card':
                 return (
                     <MatchCard

@@ -2,6 +2,7 @@ export interface ComparePlayerStats {
     id?: string
     name: string
     team: string
+    number?: number
     points: number
     rebounds?: number
     assists?: number
