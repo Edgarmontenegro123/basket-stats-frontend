@@ -4,6 +4,8 @@
     background: var(--card);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
+    min-width: 0;
+    max-width: 100%;
 }
 
 .section-card__header {
@@ -42,4 +44,6 @@
     gap: 8px;
     color: var(--text-soft);
     font-size: 0.9rem;
+    min-width: 0;
+    max-width: 100%;
 }

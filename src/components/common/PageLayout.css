@@ -2,6 +2,8 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+    min-width: 0;
+    max-width: 100%;
 }
 
 /*
@@ -12,6 +14,7 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    min-width: 0;
 }
 
 .form-group label {
@@ -24,6 +27,7 @@
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    min-width: 0;
 }
 
 /*
@@ -38,7 +42,8 @@
     background: var(--input-bg);
     color: var(--text);
     font-size: 0.95rem;
-    min-width: 220px;
+    width: 100%;
+    min-width: 0;
     outline: none;
     transition:
             background 0.25s ease,
@@ -125,6 +130,7 @@
 
 .table-wrapper {
     width: 100%;
+    max-width: 100%;
     overflow-x: auto;
     border-radius: 14px;
     border: 1px solid var(--border);
