@@ -16,33 +16,13 @@ import {
 import type {Game} from '../../../types/game.ts'
 import type {Team} from '../../../types/team.ts'
 import type {Player, PlayerSummary, PlayerStats} from '../../../types/player.ts'
+import type {
+    CompareMode,
+    ComputedPlayerMetrics,
+    PlayerSlot,
+} from '../../../types/compare.ts'
 import '../../common/PageLayout.css'
 import './ComparePage.css'
-
-type CompareMode = 'teams' | 'players'
-
-interface PlayerSlot {
-    slotId: string
-    teamFilterId: string
-    playerId: string
-}
-
-interface ComputedPlayerMetrics {
-    playerId: string
-    displayName: string
-    teamName: string
-    photoUrl?: string | null
-    jerseyNumber?: number
-    didNotPlayGame?: boolean
-    gamesPlayed: number
-    avgPoints: number
-    avgRebounds: number
-    avgAssists: number
-    avgSteals: number
-    avgBlocks: number
-    avgTurnovers: number
-    totalPoints: number
-}
 
 const findMatchingTeamId = (teams: Team[], query: string | null): string => {
     if (!query) return ''
@@ -163,7 +143,7 @@ const ComparePage = () => {
     const [isLoadingPlayerStats, setIsLoadingPlayerStats] = useState(false)
 
     useEffect(() => {
-        const loadInitialData = async () => {
+        const loadInitialData = async() => {
             try {
                 const [teamsData, gamesData, playersData]: [Team[], Game[], Player[]] = await Promise.all([
                     getTeams(),
@@ -259,7 +239,7 @@ const ComparePage = () => {
 
         let isMounted = true
 
-        const fetchMetrics = async () => {
+        const fetchMetrics = async() => {
             setIsLoadingPlayerStats(true)
             try {
                 const nextMap: Record<string, ComputedPlayerMetrics> = {}
@@ -299,7 +279,7 @@ const ComparePage = () => {
                     }
                 } else {
                     await Promise.all(
-                        activePlayerIds.map(async (pid) => {
+                        activePlayerIds.map(async(pid) => {
                             const playerObj = players.find((p) => p.id === pid)
                             if (!playerObj) return
 
@@ -320,8 +300,8 @@ const ComparePage = () => {
                                         summary = res
                                         break
                                     }
-                                } catch {
-                                    // Probar siguiente candidato
+                                } catch (err) {
+                                    console.warn(`Player summary candidate lookup failed for '${candidate}':`, err)
                                 }
                             }
 
@@ -806,7 +786,7 @@ const ComparePage = () => {
                             <p>Loading player stats...</p>
                         </div>
                     ) : (
-                        <div className='table-wrapper compare-table-wrapper'>
+                        <div className='table-wrapper compare-table-wrapper compare-players-table-wrapper'>
                             <table className='data-table'>
                                 <thead>
                                 <tr>

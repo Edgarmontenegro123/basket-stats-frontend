@@ -44,3 +44,28 @@ export interface ActiveComparisonStats {
     p2Assists: number
     p2Steals: number
 }
+
+export type CompareMode = 'teams' | 'players'
+
+export interface PlayerSlot {
+    slotId: string
+    teamFilterId: string
+    playerId: string
+}
+
+export interface ComputedPlayerMetrics {
+    playerId: string
+    displayName: string
+    teamName: string
+    photoUrl?: string | null
+    jerseyNumber?: number
+    didNotPlayGame?: boolean
+    gamesPlayed: number
+    avgPoints: number
+    avgRebounds: number
+    avgAssists: number
+    avgSteals: number
+    avgBlocks: number
+    avgTurnovers: number
+    totalPoints: number
+}

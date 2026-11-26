@@ -259,8 +259,26 @@
 }
 
 @media (max-width: 768px) {
-    .compare-table-wrapper {
+    .compare-table-wrapper:not(.compare-players-table-wrapper) {
         display: none;
+    }
+
+    .compare-players-table-wrapper {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .compare-players-table-wrapper .data-table {
+        min-width: 520px;
+    }
+
+    .compare-players-table-wrapper .data-table th:first-child,
+    .compare-players-table-wrapper .data-table td:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--card);
+        z-index: 1;
     }
 
     .compare-mobile-list {
