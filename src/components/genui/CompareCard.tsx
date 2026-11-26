@@ -1,24 +1,9 @@
 import {useState} from 'react'
 import {getPlayerStatsByGameId} from '../../services/api'
 import {normaliseText} from '../helpers/normaliseText'
-import type {CompareCardData, CompareCardProps} from '../../types/compare'
+import type {CompareCardData, CompareCardProps, ActiveComparisonStats} from '../../types/compare'
 import type {GamePlayerStat} from '../../types/ai'
 import './CompareCard.css'
-
-interface ActiveComparisonStats {
-    p1Id?: string
-    p2Id?: string
-    p1DidNotPlay?: boolean
-    p2DidNotPlay?: boolean
-    p1Points: number
-    p1Rebounds: number
-    p1Assists: number
-    p1Steals: number
-    p2Points: number
-    p2Rebounds: number
-    p2Assists: number
-    p2Steals: number
-}
 
 const roundStat = (value: number): number => Number(value.toFixed(1))
 

@@ -131,7 +131,14 @@
     font-size: 0.85rem;
     font-weight: 700;
     color: #f8fafc;
-    line-height: 1.2;
+    line-height: 1.25;
+    min-height: 34px;
+    max-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .chat-compare-team-row {
@@ -139,7 +146,8 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    margin-top: 4px;
+    margin-top: 6px;
+    height: 24px;
     max-width: 100%;
 }
 
