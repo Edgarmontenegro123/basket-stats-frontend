@@ -786,76 +786,139 @@ const ComparePage = () => {
                             <p>Loading player stats...</p>
                         </div>
                     ) : (
-                        <div className='table-wrapper compare-table-wrapper compare-players-table-wrapper'>
-                            <table className='data-table'>
-                                <thead>
-                                <tr>
-                                    <th>Metric</th>
-                                    {comparedPlayersMetrics.map((m) => (
-                                        <th key={m.playerId}>
-                                            <div className='compare-entity-header'>
-                                                <PlayerAvatar
-                                                    name={m.displayName}
-                                                    photoUrl={m.photoUrl}
-                                                    size='md'
-                                                />
-                                                <div>
-                                                    <button
-                                                        type='button'
-                                                        className='compare-team-link'
-                                                        onClick={() => navigate(`/players/${m.playerId}`)}
-                                                    >
-                                                        {m.displayName}
-                                                    </button>
-                                                    <div className='compare-th-sub'>
-                                                        {m.teamName}
-                                                        {m.jerseyNumber !== undefined ? ` · #${m.jerseyNumber}` : ''}
+                        <>
+                            <div className='table-wrapper compare-table-wrapper'>
+                                <table className='data-table'>
+                                    <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        {comparedPlayersMetrics.map((m) => (
+                                            <th key={m.playerId}>
+                                                <div className='compare-entity-header'>
+                                                    <PlayerAvatar
+                                                        name={m.displayName}
+                                                        photoUrl={m.photoUrl}
+                                                        size='md'
+                                                    />
+                                                    <div>
+                                                        <button
+                                                            type='button'
+                                                            className='compare-team-link'
+                                                            onClick={() => navigate(`/players/${m.playerId}`)}
+                                                        >
+                                                            {m.displayName}
+                                                        </button>
+                                                        <div className='compare-th-sub'>
+                                                            {m.teamName}
+                                                            {m.jerseyNumber !== undefined ? ` · #${m.jerseyNumber}` : ''}
+                                                        </div>
+                                                        {m.didNotPlayGame && (
+                                                            <span className='compare-dnp-badge'>DNP · No jugó</span>
+                                                        )}
                                                     </div>
-                                                    {m.didNotPlayGame && (
-                                                        <span className='compare-dnp-badge'>DNP · No jugó</span>
-                                                    )}
                                                 </div>
-                                            </div>
-                                        </th>
-                                    ))}
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {playerMetricRows.map((row) => {
-                                    const activeParticipants = comparedPlayersMetrics.filter((m) => !m.didNotPlayGame)
-                                    const values = activeParticipants.map((m) => row.getValue(m))
-                                    const bestValue = values.length > 0
-                                        ? (row.lowerIsBetter ? Math.min(...values) : Math.max(...values))
-                                        : null
+                                            </th>
+                                        ))}
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {playerMetricRows.map((row) => {
+                                        const activeParticipants = comparedPlayersMetrics.filter((m) => !m.didNotPlayGame)
+                                        const values = activeParticipants.map((m) => row.getValue(m))
+                                        const bestValue = values.length > 0
+                                            ? (row.lowerIsBetter ? Math.min(...values) : Math.max(...values))
+                                            : null
 
-                                    return (
-                                        <tr key={row.label}>
-                                            <td>{row.label}</td>
-                                            {comparedPlayersMetrics.map((m) => {
-                                                if (m.didNotPlayGame) {
+                                        return (
+                                            <tr key={row.label}>
+                                                <td>{row.label}</td>
+                                                {comparedPlayersMetrics.map((m) => {
+                                                    if (m.didNotPlayGame) {
+                                                        return (
+                                                            <td key={m.playerId} className='compare-dnp-cell'>
+                                                                —
+                                                            </td>
+                                                        )
+                                                    }
+                                                    const val = row.getValue(m)
+                                                    const isBest = activeParticipants.length > 1 && bestValue !== null && val === bestValue && val > 0
                                                     return (
-                                                        <td key={m.playerId} className='compare-dnp-cell'>
-                                                            —
+                                                        <td
+                                                            key={m.playerId}
+                                                            className={isBest ? 'compare-best-stat' : ''}
+                                                        >
+                                                            {val}
                                                         </td>
                                                     )
+                                                })}
+                                            </tr>
+                                        )
+                                    })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div className='compare-mobile-list'>
+                                {comparedPlayersMetrics.map((m) => {
+                                    const activeParticipants = comparedPlayersMetrics.filter((p) => !p.didNotPlayGame)
+
+                                    return (
+                                        <div key={m.playerId} className='compare-mobile-card'>
+                                            <div className='compare-mobile-card-header'>
+                                                <div className='compare-entity-header'>
+                                                    <PlayerAvatar
+                                                        name={m.displayName}
+                                                        photoUrl={m.photoUrl}
+                                                        size='md'
+                                                    />
+                                                    <div>
+                                                        <button
+                                                            type='button'
+                                                            className='compare-team-link'
+                                                            onClick={() => navigate(`/players/${m.playerId}`)}
+                                                        >
+                                                            {m.displayName}
+                                                        </button>
+                                                        <div className='compare-th-sub'>
+                                                            {m.teamName}
+                                                            {m.jerseyNumber !== undefined ? ` · #${m.jerseyNumber}` : ''}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {m.didNotPlayGame && (
+                                                    <span className='compare-dnp-badge'>DNP · No jugó</span>
+                                                )}
+                                            </div>
+
+                                            {playerMetricRows.map((row) => {
+                                                if (m.didNotPlayGame) {
+                                                    return (
+                                                        <p key={row.label}>
+                                                            <span>{row.label}</span>
+                                                            <strong className='compare-dnp-cell'>—</strong>
+                                                        </p>
+                                                    )
                                                 }
+
+                                                const values = activeParticipants.map((p) => row.getValue(p))
+                                                const bestValue = values.length > 0
+                                                    ? (row.lowerIsBetter ? Math.min(...values) : Math.max(...values))
+                                                    : null
                                                 const val = row.getValue(m)
                                                 const isBest = activeParticipants.length > 1 && bestValue !== null && val === bestValue && val > 0
+
                                                 return (
-                                                    <td
-                                                        key={m.playerId}
-                                                        className={isBest ? 'compare-best-stat' : ''}
-                                                    >
-                                                        {val}
-                                                    </td>
+                                                    <p key={row.label}>
+                                                        <span>{row.label}</span>
+                                                        <strong className={isBest ? 'compare-best-stat' : ''}>{val}</strong>
+                                                    </p>
                                                 )
                                             })}
-                                        </tr>
+                                        </div>
                                     )
                                 })}
-                                </tbody>
-                            </table>
-                        </div>
+                            </div>
+                        </>
                     )}
                 </SectionCard>
             )}
